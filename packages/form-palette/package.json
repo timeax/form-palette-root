@@ -24,8 +24,7 @@
     "license": "MIT",
     "author": "David Okpako",
     "type": "module",
-    "main": "index.cjs",
-    "module": "index.mjs",
+    "main": "index.js",
     "types": "dist/index.d.ts",
     "sideEffects": false,
     "scripts": {
