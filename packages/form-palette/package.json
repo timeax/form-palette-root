@@ -20,6 +20,7 @@
         "type": "git",
         "url": "git+https://github.com/timeax/form-palette-root.git"
     },
+    "files": ["dist"],
     "license": "MIT",
     "author": "David Okpako",
     "type": "module",
