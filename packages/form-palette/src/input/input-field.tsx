@@ -29,6 +29,7 @@ import {
     type HelperSlot,
 } from "@/input/input-layout-graph";
 import { cn } from "@/lib/utils";
+import { useOptionalField } from "@/core";
 
 /**
  * Normalise a ValidateResult into an array of error messages.
@@ -340,7 +341,7 @@ export function InputField<K extends VariantKey = VariantKey>(
     );
 
     // Hook into the core: register field, track value/error/loading
-    const field = useField<TValue>({
+    const field = useOptionalField<TValue>({
         name,
         bind,
         shared,
