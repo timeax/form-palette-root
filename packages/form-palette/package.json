@@ -29,7 +29,8 @@
     "sideEffects": false,
     "scripts": {
         "build": "tsc -p tsconfig.json",
-        "dev": "tsc -p tsconfig.json --watch"
+        "dev": "tsc -p tsconfig.json --watch",
+        "postpublish": "npm version patch --no-git-tag-version"
     },
     "peerDependencies": {
         "react": "^18.0.0",
