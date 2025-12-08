@@ -1,0 +1,12 @@
+{
+    "extends": "../tsconfig.base.json",
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@timeax/form-palette": ["../packages/form-palette/src"],
+            "@timeax/form-palette/*": ["../packages/form-palette/src/*"],
+            "@app/*": ["src/*"]
+        }
+    },
+    "include": ["src", "vite.config.ts", "../packages/form-palette/src" ]
+}

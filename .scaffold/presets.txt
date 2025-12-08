@@ -1,0 +1,25 @@
+presets/
+  index.ts
+  shadcn-preset.ts
+
+  ui/
+    custom.tsx
+  shadcn-variants/
+    text.tsx
+    number.tsx
+    select.tsx
+    checkbox.tsx
+    toggle.tsx
+    radio.tsx
+    date.tsx
+    file.tsx
+    color.tsx
+    password.tsx
+    keyvalue.tsx
+    custom.tsx
+    textarea.tsx
+    multiselect.tsx
+    chips.tsx
+    treeselect.tsx
+    phone.tsx
+    slider.tsx

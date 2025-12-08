@@ -1,0 +1,537 @@
+{
+  "version": 1,
+  "entries": {
+    "src-test/index.ts": {
+      "path": "src-test/index.ts",
+      "createdAt": "2025-11-28T04:51:29.901Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/schema/index.ts": {
+      "path": "src-test/schema/index.ts",
+      "createdAt": "2025-11-28T04:51:29.906Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/schema/adapter.ts": {
+      "path": "src-test/schema/adapter.ts",
+      "createdAt": "2025-11-28T04:51:29.907Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/schema/field.ts": {
+      "path": "src-test/schema/field.ts",
+      "createdAt": "2025-11-28T04:51:29.909Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/schema/field-map.ts": {
+      "path": "src-test/schema/field-map.ts",
+      "createdAt": "2025-11-28T04:51:29.910Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/schema/form.ts": {
+      "path": "src-test/schema/form.ts",
+      "createdAt": "2025-11-28T04:51:29.911Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/schema/input-field.ts": {
+      "path": "src-test/schema/input-field.ts",
+      "createdAt": "2025-11-28T04:51:29.912Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/schema/presets.ts": {
+      "path": "src-test/schema/presets.ts",
+      "createdAt": "2025-11-28T04:51:29.914Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/schema/variant.ts": {
+      "path": "src-test/schema/variant.ts",
+      "createdAt": "2025-11-28T04:51:29.916Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/runtime/index.ts": {
+      "path": "src-test/runtime/index.ts",
+      "createdAt": "2025-11-28T04:51:29.918Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/runtime/context.ts": {
+      "path": "src-test/runtime/context.ts",
+      "createdAt": "2025-11-28T04:51:29.919Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/runtime/FormProvider.tsx": {
+      "path": "src-test/runtime/FormProvider.tsx",
+      "createdAt": "2025-11-28T04:51:29.920Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/runtime/FormRoot.tsx": {
+      "path": "src-test/runtime/FormRoot.tsx",
+      "createdAt": "2025-11-28T04:51:29.921Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/runtime/Form.tsx": {
+      "path": "src-test/runtime/Form.tsx",
+      "createdAt": "2025-11-28T04:51:29.922Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/runtime/registry/field-registry.ts": {
+      "path": "src-test/runtime/registry/field-registry.ts",
+      "createdAt": "2025-11-28T04:51:29.924Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/runtime/registry/binder-registry.ts": {
+      "path": "src-test/runtime/registry/binder-registry.ts",
+      "createdAt": "2025-11-28T04:51:29.926Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/runtime/bound/observe-bound-field.ts": {
+      "path": "src-test/runtime/bound/observe-bound-field.ts",
+      "createdAt": "2025-11-28T04:51:29.928Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/runtime/bound/wait-for-bound-field.ts": {
+      "path": "src-test/runtime/bound/wait-for-bound-field.ts",
+      "createdAt": "2025-11-28T04:51:29.929Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/runtime/hooks/useForm.ts": {
+      "path": "src-test/runtime/hooks/useForm.ts",
+      "createdAt": "2025-11-28T04:51:29.931Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/runtime/hooks/useFormContext.ts": {
+      "path": "src-test/runtime/hooks/useFormContext.ts",
+      "createdAt": "2025-11-28T04:51:29.932Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/runtime/hooks/useField.ts": {
+      "path": "src-test/runtime/hooks/useField.ts",
+      "createdAt": "2025-11-28T04:51:29.934Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/runtime/hooks/useOptionalField.ts": {
+      "path": "src-test/runtime/hooks/useOptionalField.ts",
+      "createdAt": "2025-11-28T04:51:29.934Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/runtime/hooks/useButton.ts": {
+      "path": "src-test/runtime/hooks/useButton.ts",
+      "createdAt": "2025-11-28T04:51:29.936Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/runtime/hooks/useFormUtility.ts": {
+      "path": "src-test/runtime/hooks/useFormUtility.ts",
+      "createdAt": "2025-11-28T04:51:29.937Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/runtime/errors/map-zod.ts": {
+      "path": "src-test/runtime/errors/map-zod.ts",
+      "createdAt": "2025-11-28T04:51:29.938Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/runtime/errors/map-error-bag.ts": {
+      "path": "src-test/runtime/errors/map-error-bag.ts",
+      "createdAt": "2025-11-28T04:51:29.939Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/adapters/index.ts": {
+      "path": "src-test/adapters/index.ts",
+      "createdAt": "2025-11-28T04:51:29.941Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/adapters/axios.ts": {
+      "path": "src-test/adapters/axios.ts",
+      "createdAt": "2025-11-28T04:51:29.943Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/variants/index.ts": {
+      "path": "src-test/variants/index.ts",
+      "createdAt": "2025-11-28T04:51:29.944Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/variants/shared.ts": {
+      "path": "src-test/variants/shared.ts",
+      "createdAt": "2025-11-28T04:51:29.945Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/variants/select-shared.ts": {
+      "path": "src-test/variants/select-shared.ts",
+      "createdAt": "2025-11-28T04:51:29.946Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/variants/registry.ts": {
+      "path": "src-test/variants/registry.ts",
+      "createdAt": "2025-11-28T04:51:29.947Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/variants/core/text.tsx": {
+      "path": "src-test/variants/core/text.tsx",
+      "createdAt": "2025-11-28T04:51:29.949Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/variants/core/textarea.tsx": {
+      "path": "src-test/variants/core/textarea.tsx",
+      "createdAt": "2025-11-28T04:51:29.950Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/variants/core/number.tsx": {
+      "path": "src-test/variants/core/number.tsx",
+      "createdAt": "2025-11-28T04:51:29.951Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/variants/core/select.tsx": {
+      "path": "src-test/variants/core/select.tsx",
+      "createdAt": "2025-11-28T04:51:29.952Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/variants/core/multiselect.tsx": {
+      "path": "src-test/variants/core/multiselect.tsx",
+      "createdAt": "2025-11-28T04:51:29.953Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/variants/core/checkbox.tsx": {
+      "path": "src-test/variants/core/checkbox.tsx",
+      "createdAt": "2025-11-28T04:51:29.954Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/variants/core/toggle.tsx": {
+      "path": "src-test/variants/core/toggle.tsx",
+      "createdAt": "2025-11-28T04:51:29.955Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/variants/core/radio.tsx": {
+      "path": "src-test/variants/core/radio.tsx",
+      "createdAt": "2025-11-28T04:51:29.958Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/variants/core/chips.tsx": {
+      "path": "src-test/variants/core/chips.tsx",
+      "createdAt": "2025-11-28T04:51:29.960Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/variants/core/treeselect.tsx": {
+      "path": "src-test/variants/core/treeselect.tsx",
+      "createdAt": "2025-11-28T04:51:29.961Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/variants/core/date.tsx": {
+      "path": "src-test/variants/core/date.tsx",
+      "createdAt": "2025-11-28T04:51:29.963Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/variants/core/file.tsx": {
+      "path": "src-test/variants/core/file.tsx",
+      "createdAt": "2025-11-28T04:51:29.964Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/variants/core/color.tsx": {
+      "path": "src-test/variants/core/color.tsx",
+      "createdAt": "2025-11-28T04:51:29.966Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/variants/core/phone.tsx": {
+      "path": "src-test/variants/core/phone.tsx",
+      "createdAt": "2025-11-28T04:51:29.967Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/variants/core/password.tsx": {
+      "path": "src-test/variants/core/password.tsx",
+      "createdAt": "2025-11-28T04:51:29.969Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/variants/core/keyvalue.tsx": {
+      "path": "src-test/variants/core/keyvalue.tsx",
+      "createdAt": "2025-11-28T04:51:29.970Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/variants/core/custom.tsx": {
+      "path": "src-test/variants/core/custom.tsx",
+      "createdAt": "2025-11-28T04:51:29.971Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/input/index.ts": {
+      "path": "src-test/input/index.ts",
+      "createdAt": "2025-11-28T04:51:29.974Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/input/InputField.tsx": {
+      "path": "src-test/input/InputField.tsx",
+      "createdAt": "2025-11-28T04:51:29.975Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/input/input-props.ts": {
+      "path": "src-test/input/input-props.ts",
+      "createdAt": "2025-11-28T04:51:29.976Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/presets/index.ts": {
+      "path": "src-test/presets/index.ts",
+      "createdAt": "2025-11-28T04:51:29.978Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/presets/shadcn-preset.ts": {
+      "path": "src-test/presets/shadcn-preset.ts",
+      "createdAt": "2025-11-28T04:51:29.980Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/presets/shadcn-variants/index.ts": {
+      "path": "src-test/presets/shadcn-variants/index.ts",
+      "createdAt": "2025-11-28T04:51:29.982Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/presets/shadcn-variants/text.tsx": {
+      "path": "src-test/presets/shadcn-variants/text.tsx",
+      "createdAt": "2025-11-28T04:51:29.984Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/presets/shadcn-variants/textarea.tsx": {
+      "path": "src-test/presets/shadcn-variants/textarea.tsx",
+      "createdAt": "2025-11-28T04:51:29.985Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/presets/shadcn-variants/number.tsx": {
+      "path": "src-test/presets/shadcn-variants/number.tsx",
+      "createdAt": "2025-11-28T04:51:29.986Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/presets/shadcn-variants/select.tsx": {
+      "path": "src-test/presets/shadcn-variants/select.tsx",
+      "createdAt": "2025-11-28T04:51:29.987Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/presets/shadcn-variants/multiselect.tsx": {
+      "path": "src-test/presets/shadcn-variants/multiselect.tsx",
+      "createdAt": "2025-11-28T04:51:29.989Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/presets/shadcn-variants/checkbox.tsx": {
+      "path": "src-test/presets/shadcn-variants/checkbox.tsx",
+      "createdAt": "2025-11-28T04:51:29.991Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/presets/shadcn-variants/toggle.tsx": {
+      "path": "src-test/presets/shadcn-variants/toggle.tsx",
+      "createdAt": "2025-11-28T04:51:29.992Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/presets/shadcn-variants/radio.tsx": {
+      "path": "src-test/presets/shadcn-variants/radio.tsx",
+      "createdAt": "2025-11-28T04:51:29.993Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/presets/shadcn-variants/chips.tsx": {
+      "path": "src-test/presets/shadcn-variants/chips.tsx",
+      "createdAt": "2025-11-28T04:51:29.994Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/presets/shadcn-variants/treeselect.tsx": {
+      "path": "src-test/presets/shadcn-variants/treeselect.tsx",
+      "createdAt": "2025-11-28T04:51:29.995Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/presets/shadcn-variants/date.tsx": {
+      "path": "src-test/presets/shadcn-variants/date.tsx",
+      "createdAt": "2025-11-28T04:51:29.996Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/presets/shadcn-variants/file.tsx": {
+      "path": "src-test/presets/shadcn-variants/file.tsx",
+      "createdAt": "2025-11-28T04:51:29.997Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/presets/shadcn-variants/color.tsx": {
+      "path": "src-test/presets/shadcn-variants/color.tsx",
+      "createdAt": "2025-11-28T04:51:29.998Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/presets/shadcn-variants/phone.tsx": {
+      "path": "src-test/presets/shadcn-variants/phone.tsx",
+      "createdAt": "2025-11-28T04:51:29.999Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/presets/shadcn-variants/password.tsx": {
+      "path": "src-test/presets/shadcn-variants/password.tsx",
+      "createdAt": "2025-11-28T04:51:30.000Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/presets/shadcn-variants/keyvalue.tsx": {
+      "path": "src-test/presets/shadcn-variants/keyvalue.tsx",
+      "createdAt": "2025-11-28T04:51:30.001Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/presets/shadcn-variants/custom.tsx": {
+      "path": "src-test/presets/shadcn-variants/custom.tsx",
+      "createdAt": "2025-11-28T04:51:30.002Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/utils/index.ts": {
+      "path": "src-test/utils/index.ts",
+      "createdAt": "2025-11-28T04:51:30.004Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/utils/controllable.ts": {
+      "path": "src-test/utils/controllable.ts",
+      "createdAt": "2025-11-28T04:51:30.006Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/utils/merge-refs.ts": {
+      "path": "src-test/utils/merge-refs.ts",
+      "createdAt": "2025-11-28T04:51:30.007Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    },
+    "src-test/utils/classnames.ts": {
+      "path": "src-test/utils/classnames.ts",
+      "createdAt": "2025-11-28T04:51:30.008Z",
+      "sizeAtCreate": 0,
+      "groupName": "default",
+      "groupRoot": "."
+    }
+  }
+}

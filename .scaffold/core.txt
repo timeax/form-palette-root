@@ -1,0 +1,31 @@
+core/
+  index.ts # exports core runtime (provider, root, hooks, etc.)
+  context.ts # React context wiring (CoreContext)
+
+  core-provider.tsx
+  core-root.tsx
+  core-shell.tsx
+  adapter-registry.ts
+
+  registry/
+    field-registry.ts
+    binder-registry.ts
+
+  bound/
+    observe-bound-field.ts
+    wait-for-bound-field.ts # already good
+    bind-host.ts
+
+  hooks/
+    use-core.ts
+    use-core-context.ts
+    use-field.ts
+    use-optional-field.ts
+    use-button.ts
+    use-core-utility.ts
+
+  errors/
+    map-zod.ts
+    map-error-bag.ts
+    error-strip.tsx
+    index.ts

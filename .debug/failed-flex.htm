@@ -1,0 +1,81 @@
+<div
+    role="group"
+    data-slot="field"
+    data-orientation="vertical"
+    class="group/field flex w-full data-[invalid=true]:text-destructive flex-col [&amp;&gt;*]:w-full [&amp;&gt;.sr-only]:w-auto gap-1"
+    data-variant="toggle"
+    data-label-placement="right"
+    data-inline="true"
+    data-fullwidth="false"
+>
+    <div class="flex items-center gap-2" data-slot="inline-row">
+        <div class="flex-none">
+            <div
+                data-slot="field-group"
+                class="group/field-group @container/field-group flex w-full flex-col gap-7 data-[slot=checkbox-group]:gap-3 [&amp;&gt;[data-slot=field-group]]:gap-4"
+            >
+                <div
+                    data-slot="field-content"
+                    class="group/field-content flex flex-1 flex-col gap-1.5 leading-snug w-full"
+                >
+                    <div data-slot="toggle-field" class="w-full">
+                        <div class="flex w-full items-center gap-3 py-2">
+                            <button
+                                type="button"
+                                role="switch"
+                                aria-checked="false"
+                                data-state="unchecked"
+                                value="on"
+                                data-slot="switch"
+                                class="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-[1.15rem] w-8"
+                            >
+                                <span
+                                    data-state="unchecked"
+                                    data-slot="switch-thumb"
+                                    class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0 size-4"
+                                ></span></button
+                            ><input
+                                type="checkbox"
+                                aria-hidden="true"
+                                tabindex="-1"
+                                value="on"
+                                style="
+                                    transform: translateX(-100%);
+                                    position: absolute;
+                                    pointer-events: none;
+                                    opacity: 0;
+                                    margin: 0px;
+                                    width: 32px;
+                                    height: 18.3906px;
+                                "
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex flex-col gap-1 flex-1 min-w-0">
+            <div
+                class="flex items-baseline justify-between gap-1"
+                data-slot="label-row"
+            >
+                <label
+                    data-slot="field-label"
+                    class="items-center select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 group/field-label peer/field-label flex w-fit gap-2 group-data-[disabled=true]/field:opacity-50 has-[&gt;[data-slot=field]]:w-full has-[&gt;[data-slot=field]]:flex-col has-[&gt;[data-slot=field]]:rounded-md has-[&gt;[data-slot=field]]:border [&amp;&gt;*]:data-[slot=field]:p-4 has-data-[state=checked]:bg-primary/5 has-data-[state=checked]:border-primary dark:has-data-[state=checked]:bg-primary/10 text-sm font-medium text-foreground"
+                    ><div
+                        data-slot="field-label"
+                        class="flex w-fit items-center gap-2 text-sm leading-snug font-medium group-data-[disabled=true]/field:opacity-50"
+                    >
+                        Subscribe to newsletter
+                    </div></label
+                >
+            </div>
+            <p
+                data-slot="helptext-below"
+                class="font-normal group-has-[[data-orientation=horizontal]]/field:text-balance last:mt-0 nth-last-2:-mt-1 [[data-variant=legend]+&amp;]:-mt-1.5 [&amp;&gt;a:hover]:text-primary [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 text-xs text-muted-foreground"
+            >
+                <span>You agree to our <a href="#">terms of service</a></span>
+            </p>
+        </div>
+    </div>
+</div>

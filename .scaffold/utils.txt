@@ -1,0 +1,3 @@
+# utils.txt
+# Structure file for @timeax/scaffold
+# Define your desired folders/files here.

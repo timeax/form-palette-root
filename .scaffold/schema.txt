@@ -1,0 +1,9 @@
+schema/
+  index.ts # re-exports everything
+  adapter.ts # Method, AdapterResult, etc.
+  field.ts # Field, ButtonRef, use-field option/return types
+  field-map.ts # FieldMap / CoreFieldMap generics
+  core.ts # (was form.ts) CoreContext, CoreProps, ValuesResult...
+  input-field.ts # InputField prop schemas / overloads
+  presets.ts # VariantDescriptor, PresetDescriptor, etc.
+  variant.ts # VariantModule, VariantName, FieldSize, etc.

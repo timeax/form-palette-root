@@ -1,0 +1,25 @@
+{
+  "files.exclude": {
+    "packages\\form-palette\\dist": true,
+    "node_modules": true,
+    ".vscode": true,
+    ".idea": true,
+    "playground\\node_modules": true,
+    ".prettierrc": true,
+    "components.json": true,
+    "package-lock.json": true,
+    "tsconfig.base.json": true,
+    "tsconfig.json": true,
+    ".gitattributes": true,
+    "playground\\vite.config.ts": true,
+    "playground\\tsconfig.json": true,
+    "playground\\index.html": true,
+    ".gitignore": true,
+    ".hintrc": true,
+    "**/.scaffold-cache": true,
+    "**/.scaffold-cache.*": true,
+    "packages\\form-palette\\src\\.scaffold-cache.json": true,
+    "**/tsconfig": true,
+    "**/tsconfig.*": true
+  }
+}

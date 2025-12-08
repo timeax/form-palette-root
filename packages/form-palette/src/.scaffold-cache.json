@@ -1,0 +1,544 @@
+{
+  "version": 1,
+  "entries": {
+    "schema/index.ts": {
+      "path": "schema/index.ts",
+      "createdAt": "2025-11-28T17:28:01.941Z",
+      "sizeAtCreate": 0,
+      "groupName": "schema",
+      "groupRoot": "./"
+    },
+    "schema/adapter.ts": {
+      "path": "schema/adapter.ts",
+      "createdAt": "2025-11-28T17:28:01.957Z",
+      "sizeAtCreate": 0,
+      "groupName": "schema",
+      "groupRoot": "./"
+    },
+    "schema/field.ts": {
+      "path": "schema/field.ts",
+      "createdAt": "2025-11-28T17:28:01.960Z",
+      "sizeAtCreate": 0,
+      "groupName": "schema",
+      "groupRoot": "./"
+    },
+    "schema/field-map.ts": {
+      "path": "schema/field-map.ts",
+      "createdAt": "2025-11-28T17:28:01.964Z",
+      "sizeAtCreate": 0,
+      "groupName": "schema",
+      "groupRoot": "./"
+    },
+    "schema/core.ts": {
+      "path": "schema/core.ts",
+      "createdAt": "2025-11-28T17:28:01.967Z",
+      "sizeAtCreate": 0,
+      "groupName": "schema",
+      "groupRoot": "./"
+    },
+    "schema/input-field.ts": {
+      "path": "schema/input-field.ts",
+      "createdAt": "2025-11-28T17:28:01.970Z",
+      "sizeAtCreate": 0,
+      "groupName": "schema",
+      "groupRoot": "./"
+    },
+    "schema/presets.ts": {
+      "path": "schema/presets.ts",
+      "createdAt": "2025-11-28T17:28:01.974Z",
+      "sizeAtCreate": 0,
+      "groupName": "schema",
+      "groupRoot": "./"
+    },
+    "schema/variant.ts": {
+      "path": "schema/variant.ts",
+      "createdAt": "2025-11-28T17:28:01.981Z",
+      "sizeAtCreate": 0,
+      "groupName": "schema",
+      "groupRoot": "./"
+    },
+    "core/index.ts": {
+      "path": "core/index.ts",
+      "createdAt": "2025-11-28T17:28:01.988Z",
+      "sizeAtCreate": 0,
+      "groupName": "core",
+      "groupRoot": "./"
+    },
+    "core/context.ts": {
+      "path": "core/context.ts",
+      "createdAt": "2025-11-28T17:28:01.996Z",
+      "sizeAtCreate": 0,
+      "groupName": "core",
+      "groupRoot": "./"
+    },
+    "core/core-provider.tsx": {
+      "path": "core/core-provider.tsx",
+      "createdAt": "2025-11-28T17:28:02.000Z",
+      "sizeAtCreate": 0,
+      "groupName": "core",
+      "groupRoot": "./"
+    },
+    "core/core-root.tsx": {
+      "path": "core/core-root.tsx",
+      "createdAt": "2025-11-28T17:28:02.004Z",
+      "sizeAtCreate": 0,
+      "groupName": "core",
+      "groupRoot": "./"
+    },
+    "core/core-shell.tsx": {
+      "path": "core/core-shell.tsx",
+      "createdAt": "2025-11-28T17:28:02.007Z",
+      "sizeAtCreate": 0,
+      "groupName": "core",
+      "groupRoot": "./"
+    },
+    "core/registry/field-registry.ts": {
+      "path": "core/registry/field-registry.ts",
+      "createdAt": "2025-11-28T17:28:02.011Z",
+      "sizeAtCreate": 0,
+      "groupName": "core",
+      "groupRoot": "./"
+    },
+    "core/registry/binder-registry.ts": {
+      "path": "core/registry/binder-registry.ts",
+      "createdAt": "2025-11-28T17:28:02.015Z",
+      "sizeAtCreate": 0,
+      "groupName": "core",
+      "groupRoot": "./"
+    },
+    "core/bound/observe-bound-field.ts": {
+      "path": "core/bound/observe-bound-field.ts",
+      "createdAt": "2025-11-28T17:28:02.018Z",
+      "sizeAtCreate": 0,
+      "groupName": "core",
+      "groupRoot": "./"
+    },
+    "core/bound/wait-for-bound-field.ts": {
+      "path": "core/bound/wait-for-bound-field.ts",
+      "createdAt": "2025-11-28T17:28:02.021Z",
+      "sizeAtCreate": 0,
+      "groupName": "core",
+      "groupRoot": "./"
+    },
+    "core/hooks/use-core.ts": {
+      "path": "core/hooks/use-core.ts",
+      "createdAt": "2025-11-28T17:28:02.024Z",
+      "sizeAtCreate": 0,
+      "groupName": "core",
+      "groupRoot": "./"
+    },
+    "core/hooks/use-core-context.ts": {
+      "path": "core/hooks/use-core-context.ts",
+      "createdAt": "2025-11-28T17:28:02.034Z",
+      "sizeAtCreate": 0,
+      "groupName": "core",
+      "groupRoot": "./"
+    },
+    "core/hooks/use-field.ts": {
+      "path": "core/hooks/use-field.ts",
+      "createdAt": "2025-11-28T17:28:02.038Z",
+      "sizeAtCreate": 0,
+      "groupName": "core",
+      "groupRoot": "./"
+    },
+    "core/hooks/use-optional-field.ts": {
+      "path": "core/hooks/use-optional-field.ts",
+      "createdAt": "2025-11-28T17:28:02.042Z",
+      "sizeAtCreate": 0,
+      "groupName": "core",
+      "groupRoot": "./"
+    },
+    "core/hooks/use-button.ts": {
+      "path": "core/hooks/use-button.ts",
+      "createdAt": "2025-11-28T17:28:02.046Z",
+      "sizeAtCreate": 0,
+      "groupName": "core",
+      "groupRoot": "./"
+    },
+    "core/hooks/use-core-utility.ts": {
+      "path": "core/hooks/use-core-utility.ts",
+      "createdAt": "2025-11-28T17:28:02.049Z",
+      "sizeAtCreate": 0,
+      "groupName": "core",
+      "groupRoot": "./"
+    },
+    "core/errors/map-zod.ts": {
+      "path": "core/errors/map-zod.ts",
+      "createdAt": "2025-11-28T17:28:02.052Z",
+      "sizeAtCreate": 0,
+      "groupName": "core",
+      "groupRoot": "./"
+    },
+    "core/errors/map-error-bag.ts": {
+      "path": "core/errors/map-error-bag.ts",
+      "createdAt": "2025-11-28T17:28:02.056Z",
+      "sizeAtCreate": 0,
+      "groupName": "core",
+      "groupRoot": "./"
+    },
+    "adapters/index.ts": {
+      "path": "adapters/index.ts",
+      "createdAt": "2025-11-28T17:28:02.063Z",
+      "sizeAtCreate": 0,
+      "groupName": "adapters",
+      "groupRoot": "./"
+    },
+    "adapters/axios.ts": {
+      "path": "adapters/axios.ts",
+      "createdAt": "2025-11-28T17:28:02.066Z",
+      "sizeAtCreate": 0,
+      "groupName": "adapters",
+      "groupRoot": "./"
+    },
+    "input/index.ts": {
+      "path": "input/index.ts",
+      "createdAt": "2025-11-28T17:28:02.074Z",
+      "sizeAtCreate": 0,
+      "groupName": "input",
+      "groupRoot": "./"
+    },
+    "input/input-field.tsx": {
+      "path": "input/input-field.tsx",
+      "createdAt": "2025-11-28T17:28:02.077Z",
+      "sizeAtCreate": 0,
+      "groupName": "input",
+      "groupRoot": "./"
+    },
+    "input/input-props.ts": {
+      "path": "input/input-props.ts",
+      "createdAt": "2025-11-28T17:28:02.081Z",
+      "sizeAtCreate": 0,
+      "groupName": "input",
+      "groupRoot": "./"
+    },
+    "variants/index.ts": {
+      "path": "variants/index.ts",
+      "createdAt": "2025-11-28T17:28:02.088Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/shared.ts": {
+      "path": "variants/shared.ts",
+      "createdAt": "2025-11-28T17:28:02.092Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/select-shared.ts": {
+      "path": "variants/select-shared.ts",
+      "createdAt": "2025-11-28T17:28:02.096Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/registry.ts": {
+      "path": "variants/registry.ts",
+      "createdAt": "2025-11-28T17:28:02.099Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/core/text.tsx": {
+      "path": "variants/core/text.tsx",
+      "createdAt": "2025-11-28T17:28:02.105Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/core/textarea.tsx": {
+      "path": "variants/core/textarea.tsx",
+      "createdAt": "2025-11-28T17:28:02.108Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/core/number.tsx": {
+      "path": "variants/core/number.tsx",
+      "createdAt": "2025-11-28T17:28:02.112Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/core/select.tsx": {
+      "path": "variants/core/select.tsx",
+      "createdAt": "2025-11-28T17:28:02.116Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/core/multiselect.tsx": {
+      "path": "variants/core/multiselect.tsx",
+      "createdAt": "2025-11-28T17:28:02.119Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/core/checkbox.tsx": {
+      "path": "variants/core/checkbox.tsx",
+      "createdAt": "2025-11-28T17:28:02.123Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/core/toggle.tsx": {
+      "path": "variants/core/toggle.tsx",
+      "createdAt": "2025-11-28T17:28:02.126Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/core/radio.tsx": {
+      "path": "variants/core/radio.tsx",
+      "createdAt": "2025-11-28T17:28:02.129Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/core/chips.tsx": {
+      "path": "variants/core/chips.tsx",
+      "createdAt": "2025-11-28T17:28:02.142Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/core/treeselect.tsx": {
+      "path": "variants/core/treeselect.tsx",
+      "createdAt": "2025-11-28T17:28:02.146Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/core/date.tsx": {
+      "path": "variants/core/date.tsx",
+      "createdAt": "2025-11-28T17:28:02.152Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/core/file.tsx": {
+      "path": "variants/core/file.tsx",
+      "createdAt": "2025-11-28T17:28:02.155Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/core/color.tsx": {
+      "path": "variants/core/color.tsx",
+      "createdAt": "2025-11-28T17:28:02.158Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/core/phone.tsx": {
+      "path": "variants/core/phone.tsx",
+      "createdAt": "2025-11-28T17:28:02.161Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/core/password.tsx": {
+      "path": "variants/core/password.tsx",
+      "createdAt": "2025-11-28T17:28:02.165Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/core/keyvalue.tsx": {
+      "path": "variants/core/keyvalue.tsx",
+      "createdAt": "2025-11-28T17:28:02.170Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/core/custom.tsx": {
+      "path": "variants/core/custom.tsx",
+      "createdAt": "2025-11-28T17:28:02.174Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "presets/index.ts": {
+      "path": "presets/index.ts",
+      "createdAt": "2025-11-28T17:28:02.179Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-preset.ts": {
+      "path": "presets/shadcn-preset.ts",
+      "createdAt": "2025-11-28T17:28:02.184Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/ui/custom.tsx": {
+      "path": "presets/ui/custom.tsx",
+      "createdAt": "2025-11-28T17:28:02.187Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "core/adapter-registry.ts": {
+      "path": "core/adapter-registry.ts",
+      "createdAt": "2025-11-28T18:57:00.080Z",
+      "sizeAtCreate": 0,
+      "groupName": "core",
+      "groupRoot": "./"
+    },
+    "core/errors/index.ts": {
+      "path": "core/errors/index.ts",
+      "createdAt": "2025-11-28T19:14:17.971Z",
+      "sizeAtCreate": 0,
+      "groupName": "core",
+      "groupRoot": "./"
+    },
+    "core/bound/bind-host.ts": {
+      "path": "core/bound/bind-host.ts",
+      "createdAt": "2025-11-29T07:21:41.695Z",
+      "sizeAtCreate": 0,
+      "groupName": "core",
+      "groupRoot": "./"
+    },
+    "core/errors/error-strip.tsx": {
+      "path": "core/errors/error-strip.tsx",
+      "createdAt": "2025-11-29T07:30:21.798Z",
+      "sizeAtCreate": 0,
+      "groupName": "core",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/text.tsx": {
+      "path": "presets/shadcn-variants/text.tsx",
+      "createdAt": "2025-11-29T08:33:53.367Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/select.tsx": {
+      "path": "presets/shadcn-variants/select.tsx",
+      "createdAt": "2025-12-02T04:12:47.804Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/checkbox.tsx": {
+      "path": "presets/shadcn-variants/checkbox.tsx",
+      "createdAt": "2025-12-02T04:12:47.806Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/toggle.tsx": {
+      "path": "presets/shadcn-variants/toggle.tsx",
+      "createdAt": "2025-12-02T04:12:47.807Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/radio.tsx": {
+      "path": "presets/shadcn-variants/radio.tsx",
+      "createdAt": "2025-12-02T04:12:47.808Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/date.tsx": {
+      "path": "presets/shadcn-variants/date.tsx",
+      "createdAt": "2025-12-02T04:12:47.814Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/file.tsx": {
+      "path": "presets/shadcn-variants/file.tsx",
+      "createdAt": "2025-12-02T04:12:47.815Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/color.tsx": {
+      "path": "presets/shadcn-variants/color.tsx",
+      "createdAt": "2025-12-02T04:12:47.817Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/password.tsx": {
+      "path": "presets/shadcn-variants/password.tsx",
+      "createdAt": "2025-12-02T04:12:47.818Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/keyvalue.tsx": {
+      "path": "presets/shadcn-variants/keyvalue.tsx",
+      "createdAt": "2025-12-02T04:12:47.820Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/custom.tsx": {
+      "path": "presets/shadcn-variants/custom.tsx",
+      "createdAt": "2025-12-02T04:12:47.821Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/textarea.tsx": {
+      "path": "presets/shadcn-variants/textarea.tsx",
+      "createdAt": "2025-12-02T04:12:47.822Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/multiselect.tsx": {
+      "path": "presets/shadcn-variants/multiselect.tsx",
+      "createdAt": "2025-12-02T04:12:47.823Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/chips.tsx": {
+      "path": "presets/shadcn-variants/chips.tsx",
+      "createdAt": "2025-12-02T04:12:47.824Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/treeselect.tsx": {
+      "path": "presets/shadcn-variants/treeselect.tsx",
+      "createdAt": "2025-12-02T04:12:47.825Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/phone.tsx": {
+      "path": "presets/shadcn-variants/phone.tsx",
+      "createdAt": "2025-12-02T04:12:47.826Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/slider.tsx": {
+      "path": "presets/shadcn-variants/slider.tsx",
+      "createdAt": "2025-12-02T04:12:47.828Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "variants/helpers/selection-summary.tsx": {
+      "path": "variants/helpers/selection-summary.tsx",
+      "createdAt": "2025-12-05T10:58:43.283Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/core/slider.tsx": {
+      "path": "variants/core/slider.tsx",
+      "createdAt": "2025-12-05T12:04:13.785Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+    "name": "@timeax/form-palette",
+    "private": false,
+    "version": "1.0.0",
+    "description": "This package extracts and standardizes the **form + input + variant system** from an existing Laravel/Inertia/React project into a **reusable, framework-friendly** library",
+    "keywords": [
+        "Form",
+        "react-form",
+        "react-forms",
+        "form-palette",
+        "inputfields",
+        "inputs",
+        "input"
+    ],
+    "homepage": "https://github.com/timeax/form-palette-root#readme",
+    "bugs": {
+        "url": "https://github.com/timeax/form-palette-root/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/timeax/form-palette-root.git"
+    },
+    "license": "MIT",
+    "author": "David Okpako",
+    "type": "module",
+    "main": "index.cjs",
+    "module": "index.mjs",
+    "types": "dist/index.d.ts",
+    "sideEffects": false,
+    "scripts": {
+        "build": "tsc -p tsconfig.json",
+        "dev": "tsc -p tsconfig.json --watch"
+    },
+    "peerDependencies": {
+        "react": "^18.0.0",
+        "react-dom": "^18.0.0"
+    },
+    "devDependencies": {
+        "typescript": "^5.1.6"
+    }
+}

@@ -1,0 +1,81 @@
+@timeax/form-palette — Project Instructions
+
+1) Overview
+- Package: @timeax/form-palette
+- Purpose: Reusable, headless React/TS form engine extracted from an existing Laravel/Inertia/React app.
+- Provides:
+  - Form runtime (context + helpers) for values, errors, submit state.
+  - InputField component that delegates to named variants.
+  - Variant system (text, number, select, checkbox, etc.) with a registry.
+  - Optional Shadcn-based presets on top of the core.
+- Legacy file: legacy-form-palette-trace_251127-0123.md
+  - Old bundled implementation.
+  - Use only as a conceptual/behavioral guide.
+  - We are **enhancing and optimising** the legacy ideas, not copying the legacy code. The hooks, provider and utils should be watched closely.
+- UI note:
+  - We will make good use of **Shadcn’s form/field components** (FormField-like patterns) and Shadcn input components (Input, Textarea, Select, Checkbox, etc.) on top of the headless core.
+  - Shadcn-style components are placed **inside the package** under:
+    - `src/presets/` and `src/presets/ui/` (e.g. `src/presets/ui/input.tsx`, `src/presets/ui/form.tsx`).
+
+2) Variant contract (summary)
+- Shared types (variants/shared.ts):
+  - FieldSize, FieldDensity, ChangeSource, ChangeDetail<T>.
+  - VariantBaseProps<T> with: value, onValue, disabled/readOnly/required, size/density, etc.
+- InputVariantProps<TVariantProps, TValue> = VariantBaseProps<TValue> & TVariantProps.
+- VariantModule<Name, TVariantProps, TValue>:
+  - variant: string key
+  - Variant: React component
+  - Optional Component alias + meta { label, description, tags }.
+
+- Registry API (variants/registry.ts):
+  - registerVariant(module)
+  - getVariant(name)
+  - listVariants()
+
+3) InputField (summary)
+- Connects to form via useForm.
+- Looks up field by name.
+- Resolves variant via registry.
+- Renders label, **sublabel**, description, help, error.
+- Renders the variant component with variantProps.
+- Props (input/input-types.ts):
+  - name: string
+  - label?: ReactNode
+  - sublabel?: ReactNode
+  - description?: ReactNode
+  - helpText?: ReactNode
+  - variant: string
+  - variantProps?: unknown (generic per variant)
+  - layout options (inline, fullWidth, etc.)
+
+4) Built-in variants (behavior guided by legacy file, reimplemented cleanly)
+- text, number, select, multiselect, checkbox, toggle, radio, chips, treeselect, date, file, color, keyvalue, custom.
+- For edge cases and detailed behavior:
+  - Read legacy-form-palette-trace_251127-0123.md, then define final rules in new code + README.
+  - Goal: **improve, simplify, and optimise** compared to legacy, without losing important behavior.
+
+5) Presets (Shadcn)
+- Implement Shadcn-based variants under a `presets/shadcn` or `presets/ui` namespace inside the package.
+- Wrap Shadcn components (Field/FormField pattern + Input, Select, Switch, etc.) in VariantModule.
+- Provide helper to:
+  - Register all Shadcn variants into the core registry, or
+  - Export a preset registry for the host to use.
+
+6) Implementation roadmap (very high-level)
+1. Set up TS + bundler (ESM + CJS + d.ts).
+2. Implement core form runtime + types.
+3. Implement variant contract + registry.
+4. Implement InputField (with label + sublabel + Shadcn-friendly layout).
+5. Implement built-in variants (using legacy file as behavior reference, but optimised).
+6. Add Shadcn preset + optional adapters.
+7. Write README and basic docs.
+
+7) Collaboration rule (VERY IMPORTANT)
+- Before writing or refactoring any in-depth code for @timeax/form-palette:
+  1) The assistant must first explain clearly what will be done
+     (files, logic, behavior/side effects).
+  2) The assistant must wait for your explicit confirmation before outputting code.
+- Only when you explicitly give a green light for a specific task may the assistant skip the confirmation step for that task.
+- If there is any doubt, the assistant must stop at explanation and ask for confirmation before coding.
+
+END.
