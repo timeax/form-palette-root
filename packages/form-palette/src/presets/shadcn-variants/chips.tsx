@@ -698,6 +698,7 @@ export const ShadcnChipsVariant = React.forwardRef<
       <div className={className} data-slot="chips-field">
          {textareaMode ? (
             <>
+               {/* @ts-ignore */}
                <Textarea
                   ref={ref as any}
                   {...restTextProps}

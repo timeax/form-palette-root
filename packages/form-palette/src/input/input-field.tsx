@@ -493,6 +493,39 @@ export function InputField<K extends VariantKey = VariantKey>(
         [layout, sublabel, description, helpText, visualError, tagsContent]
     );
 
+    // Detect whether there are any label-root slots so we don't render empty rows/spacing
+    const hasLabelSlotsAt = (placement: SlotPlacement): boolean => {
+        let found = false;
+
+        graph
+            .getSlotsFor("label", placement)
+            .render((slots: HelperSlot[]) => {
+                if (slots.length > 0) {
+                    found = true;
+                }
+                return null;
+            });
+
+        return found;
+    };
+
+    const hasLabelLeftSlots = hasLabelSlotsAt("left");
+    const hasLabelRightSlots = hasLabelSlotsAt("right");
+    const hasLabelAboveSlots = hasLabelSlotsAt("above");
+    const hasLabelBelowSlots = hasLabelSlotsAt("below");
+
+    // Any content that belongs to the label *block* at all
+    const hasAnyLabelBlockContent =
+        !!label ||
+        hasLabelLeftSlots ||
+        hasLabelRightSlots ||
+        hasLabelAboveSlots ||
+        hasLabelBelowSlots;
+
+    // Content that specifically lives inside the label "row"
+    const hasLabelRowContent =
+        !!label || hasLabelLeftSlots || hasLabelRightSlots;
+
     // ─────────────────────────────────────────────────────
     // INLINE LAYOUT
     // ─────────────────────────────────────────────────────
@@ -579,7 +612,7 @@ export function InputField<K extends VariantKey = VariantKey>(
     );
 
     const inlineLabelColumn =
-        inlineLabelSide === "hidden" ? null : (
+        inlineLabelSide === "hidden" || !hasAnyLabelBlockContent ? null : (
             <div
                 className={["flex flex-col gap-0", inlineLabelColClass]
                     .filter(Boolean)
@@ -594,59 +627,75 @@ export function InputField<K extends VariantKey = VariantKey>(
                         )
                     )}
 
-                <div
-                    className={[
-                        "flex items-baseline justify-between gap-1",
-                        classes?.labelRow,
-                    ]
-                        .filter(Boolean)
-                        .join(" ")}
-                    data-slot="label-row"
-                >
-                    {/* Left-of-label helpers (label root) */}
-                    {graph
-                        .getSlotsFor("label", "left")
-                        .render((slots) => (
-                            <div className="flex items-baseline gap-1">
-                                {slots.map((slot) =>
-                                    renderHelperSlot(
-                                        "label",
-                                        slot,
-                                        classes
-                                    )
-                                )}
-                            </div>
-                        ))}
+                {hasLabelRowContent && (
+                    <div
+                        className={[
+                            "flex items-baseline justify-between gap-1",
+                            classes?.labelRow,
+                        ]
+                            .filter(Boolean)
+                            .join(" ")}
+                        data-slot="label-row"
+                    >
+                        {/* Left-of-label helpers (label root) */}
+                        {graph
+                            .getSlotsFor("label", "left")
+                            .render((slots) => (
+                                <div className="flex items-baseline gap-1">
+                                    {slots.map((slot) =>
+                                        renderHelperSlot(
+                                            "label",
+                                            slot,
+                                            classes
+                                        )
+                                    )}
+                                </div>
+                            ))}
 
-                    {label && (
-                        <FieldLabel
-                            htmlFor={key}
-                            className={[
-                                "text-sm font-medium text-foreground",
-                                classes?.label,
-                            ]
-                                .filter(Boolean)
-                                .join(" ")}
-                        >
-                            <FieldTitle>{label} {required ? <span className={cn("text-destructive", classes?.required)}>*</span> : ''}</FieldTitle>
-                        </FieldLabel>
-                    )}
+                        {label && (
+                            <FieldLabel
+                                htmlFor={key}
+                                className={[
+                                    "text-sm font-medium text-foreground",
+                                    classes?.label,
+                                ]
+                                    .filter(Boolean)
+                                    .join(" ")}
+                            >
+                                <FieldTitle>
+                                    {label}{" "}
+                                    {required ? (
+                                        <span
+                                            className={cn(
+                                                "text-destructive",
+                                                classes?.required
+                                            )}
+                                        >
+                                            *
+                                        </span>
+                                    ) : (
+                                        ""
+                                    )}
+                                </FieldTitle>
+                            </FieldLabel>
+                        )}
 
-                    {/* Right-of-label helpers (label root) */}
-                    {graph
-                        .getSlotsFor("label", "right")
-                        .render((slots) => (
-                            <div className="flex items-baseline gap-1">
-                                {slots.map((slot) =>
-                                    renderHelperSlot(
-                                        "label",
-                                        slot,
-                                        classes
-                                    )
-                                )}
-                            </div>
-                        ))}
-                </div>
+                        {/* Right-of-label helpers (label root) */}
+                        {graph
+                            .getSlotsFor("label", "right")
+                            .render((slots) => (
+                                <div className="flex items-baseline gap-1">
+                                    {slots.map((slot) =>
+                                        renderHelperSlot(
+                                            "label",
+                                            slot,
+                                            classes
+                                        )
+                                    )}
+                                </div>
+                            ))}
+                    </div>
+                )}
 
                 {/* Below label (label root) */}
                 {graph
@@ -670,17 +719,24 @@ export function InputField<K extends VariantKey = VariantKey>(
     // STACKED LAYOUT
     // ─────────────────────────────────────────────────────
 
-    const stackedGroupClassName = ["mt-1", classes?.group]
+    const hasStackedLabelBlock =
+        lp !== "hidden" && hasAnyLabelBlockContent;
+
+    const stackedGroupClassName = [
+        hasStackedLabelBlock && hasLabelRowContent ? "mt-1" : null,
+        classes?.group,
+    ]
         .filter(Boolean)
         .join(" ");
 
-    const Element = contain ? 'div' : React.Fragment;
-    const attrs = (a: 'l' | 'i' = 'l') =>
+    const Element = contain ? "div" : React.Fragment;
+    const attrs = (a: "l" | "i" = "l") =>
         contain
-            ? a === 'l'
+            ? a === "l"
                 ? { className: "p-4 border-b border-input" }
                 : { className: "px-4 pt-2 pb-4" }
             : {};
+
     return (
         <UiField
             className={rootClassName}
@@ -718,7 +774,7 @@ export function InputField<K extends VariantKey = VariantKey>(
             ) : (
                 // STACKED MODE
                 <>
-                    {lp !== "hidden" && (
+                    {hasStackedLabelBlock && (
                         <Element {...attrs()}>
                             {/* Above label (label root) */}
                             {graph
@@ -733,59 +789,75 @@ export function InputField<K extends VariantKey = VariantKey>(
                                     )
                                 )}
 
-                            <div
-                                className={[
-                                    "flex items-baseline justify-between gap-1",
-                                    classes?.labelRow,
-                                ]
-                                    .filter(Boolean)
-                                    .join(" ")}
-                                data-slot="label-row"
-                            >
-                                {/* Left-of-label helpers (label root) */}
-                                {graph
-                                    .getSlotsFor("label", "left")
-                                    .render((slots) => (
-                                        <div className="flex items-baseline gap-1">
-                                            {slots.map((slot) =>
-                                                renderHelperSlot(
-                                                    "label",
-                                                    slot,
-                                                    classes
-                                                )
-                                            )}
-                                        </div>
-                                    ))}
+                            {hasLabelRowContent && (
+                                <div
+                                    className={[
+                                        "flex items-baseline justify-between gap-1",
+                                        classes?.labelRow,
+                                    ]
+                                        .filter(Boolean)
+                                        .join(" ")}
+                                    data-slot="label-row"
+                                >
+                                    {/* Left-of-label helpers (label root) */}
+                                    {graph
+                                        .getSlotsFor("label", "left")
+                                        .render((slots) => (
+                                            <div className="flex items-baseline gap-1">
+                                                {slots.map((slot) =>
+                                                    renderHelperSlot(
+                                                        "label",
+                                                        slot,
+                                                        classes
+                                                    )
+                                                )}
+                                            </div>
+                                        ))}
 
-                                {label && (
-                                    <FieldLabel
-                                        htmlFor={key}
-                                        className={[
-                                            "text-sm font-medium text-foreground",
-                                            classes?.label,
-                                        ]
-                                            .filter(Boolean)
-                                            .join(" ")}
-                                    >
-                                        <FieldTitle>{label} {required ? <span className={cn("text-destructive", classes?.required)}>*</span> : ''}</FieldTitle>
-                                    </FieldLabel>
-                                )}
+                                    {label && (
+                                        <FieldLabel
+                                            htmlFor={key}
+                                            className={[
+                                                "text-sm font-medium text-foreground",
+                                                classes?.label,
+                                            ]
+                                                .filter(Boolean)
+                                                .join(" ")}
+                                        >
+                                            <FieldTitle>
+                                                {label}{" "}
+                                                {required ? (
+                                                    <span
+                                                        className={cn(
+                                                            "text-destructive",
+                                                            classes?.required
+                                                        )}
+                                                    >
+                                                        *
+                                                    </span>
+                                                ) : (
+                                                    ""
+                                                )}
+                                            </FieldTitle>
+                                        </FieldLabel>
+                                    )}
 
-                                {/* Right-of-label helpers (label root) */}
-                                {graph
-                                    .getSlotsFor("label", "right")
-                                    .render((slots) => (
-                                        <div className="flex items-baseline gap-1">
-                                            {slots.map((slot) =>
-                                                renderHelperSlot(
-                                                    "label",
-                                                    slot,
-                                                    classes
-                                                )
-                                            )}
-                                        </div>
-                                    ))}
-                            </div>
+                                    {/* Right-of-label helpers (label root) */}
+                                    {graph
+                                        .getSlotsFor("label", "right")
+                                        .render((slots) => (
+                                            <div className="flex items-baseline gap-1">
+                                                {slots.map((slot) =>
+                                                    renderHelperSlot(
+                                                        "label",
+                                                        slot,
+                                                        classes
+                                                    )
+                                                )}
+                                            </div>
+                                        ))}
+                                </div>
+                            )}
 
                             {/* Below label (label root) */}
                             {graph
@@ -802,7 +874,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                         </Element>
                     )}
 
-                    <Element {...attrs('i')}>
+                    <Element {...attrs("i")}>
                         {/* Above input (input root) */}
                         {graph
                             .getSlotsFor("input", "above")
