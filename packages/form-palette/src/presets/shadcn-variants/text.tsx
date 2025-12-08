@@ -134,7 +134,7 @@ export type ShadcnTextVariantProps = ExtraFieldProps<
      * (true) or controls are visually separate (false).
      */
     extendBoxToControls?: boolean;
-};
+} & ShadcnTextUiProps;
 
 export const ShadcnTextVariant = React.forwardRef<
     HTMLInputElement,
