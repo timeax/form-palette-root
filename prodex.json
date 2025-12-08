@@ -1,0 +1,45 @@
+{
+    "version": 3.1,
+    "$schema": "https://raw.githubusercontent.com/emxhive/prodex/main/schema/prodex.schema.json",
+    "output": {
+        "dir": "prodex",
+        "versioned": true,
+        "prefix": "combined",
+        "format": "md"
+    },
+    "entry": {
+        "files": [],
+        "ui": {
+            "roots": [
+                "app",
+                "routes",
+                "resources/js/**"
+            ],
+            "scanDepth": 2,
+            "priority": [
+                "**/routes/web.php",
+                "**/app.*"
+            ]
+        }
+    },
+    "resolve": {
+        "include": [
+            "**/*.d.ts"
+        ],
+        "aliases": {
+            "@": "./packages/form-palette/src"
+        },
+        "exclude": [
+            "node_modules/**",
+            "@shadcn/**",
+            "**/components/ui/**"
+        ],
+        "depth": 10,
+        "limit": 200
+    },
+    "shortcuts": {
+       "core-provider": {
+            "files": ["./packages/form-palette/src/core/core-provider.tsx"]
+       }
+    }
+}

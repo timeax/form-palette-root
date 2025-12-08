@@ -482,7 +482,7 @@ export const ShadcnFileVariant = React.forwardRef<HTMLDivElement, ShadcnFileVari
                      className={cn(
                         "relative flex w-full cursor-pointer items-center gap-2 px-3 transition-all",
                         heightCls,
-                        (!joinControls || !hasExternalControls) && "rounded-md border border-input bg-background shadow-xs ring-offset-background hover:bg-accent/5 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+                        (!joinControls || !hasExternalControls) && "rounded-md border border-input bg-[var(--surfaces-input,_transparent)] shadow-xs ring-offset-background hover:bg-accent/5 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
                         dragOver && "border-primary ring-2 ring-primary/20",
                         isDisabled && "cursor-not-allowed opacity-50",
                         error && "border-destructive text-destructive",
@@ -716,7 +716,7 @@ export const ShadcnFileVariant = React.forwardRef<HTMLDivElement, ShadcnFileVari
             <div className={cn(
                "flex w-full",
                joinControls && extendBoxToControls && !showDropArea
-                  ? "items-stretch rounded-md border border-input bg-background shadow-xs ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
+                  ? "items-stretch rounded-md border border-input bg-[var(--surfaces-input,_transparent)] shadow-xs ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
                   : "items-start gap-2"
             )}>
                {leadingControl && (

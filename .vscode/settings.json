@@ -13,7 +13,7 @@
     "**/.project": true,
     "**/.settings": true,
     "**/.factorypath": true,
-    "packages\\form-palette\\dist": true,
+    "packages\\form-palette\\dist": false,
     "node_modules": true,
     ".vscode": true,
     ".idea": true,

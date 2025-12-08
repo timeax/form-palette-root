@@ -1,4 +1,7 @@
 // src/schema/adapter.ts
+import { Page } from './../../../../node_modules/@inertiajs/core/types/types.d';
+
+import { AxiosRequestConfig, AxiosResponse } from "axios";
 
 /**
  * HTTP methods supported by the core adapter layer.
@@ -96,19 +99,6 @@ export interface AdapterResult<Ok = unknown> {
  */
 export interface AdapterConfig<Body = unknown, Ok = unknown, Err = unknown> {
     /**
-     * HTTP method / intent used by the adapter.
-     */
-    method: Method;
-
-    /**
-     * Fully-resolved URL or route string.
-     *
-     * The core is responsible for resolving named routes, base URLs, etc.,
-     * before handing control to the adapter.
-     */
-    url: string;
-
-    /**
      * Request body payload built by the core.
      *
      * Typically something like:
@@ -166,8 +156,84 @@ export interface Adapters {
          */
         err: unknown;
     };
+
+    axios: {
+        /**
+         * What adapter.send() resolves with for Axios.
+         */
+        ok: AxiosResponse<unknown>;
+
+        /**
+         * What callbacks.onError receives for Axios.
+         *
+         * We pass the *payload* (e.g. response.data), not the raw AxiosError,
+         * so Form Palette's autoErr branch can see `.errors`.
+         */
+        err: unknown;
+
+        /**
+         * Extra public props exposed on CoreProps when adapter="axios".
+         *
+         * These are set on the Core shell and then used by createAxiosAdapter.
+         */
+        props: {
+            /**
+             * Request URL for this form.
+             * Required when using the axios adapter.
+             */
+            url: string;
+
+            /**
+             * HTTP method to use for this form.
+             * Optional: the adapter/Core can still default to "post".
+             */
+            method?: Method;
+
+            /**
+             * Base Axios request config merged into every request.
+             *
+             * Useful for baseURL, headers, withCredentials, params,
+             * timeout, etc. Per-call overrides still go through the
+             * `options` parameter of submit/send/run.
+             */
+            config?: AxiosRequestConfig<any>;
+        };
+    };
+
+    inertia: {
+        /**
+         * What adapter.send() resolves with for Inertia.
+         * This is the Page object passed to onSuccess.
+         */
+        ok: Page<any>;
+
+        /**
+         * What callbacks.onError receives for Inertia.
+         *
+         * We shape this as `{ errors: ErrorBag }` so Form Palette's
+         * autoErr branch can see `.errors`.
+         */
+        err: { errors: Record<string, string | string[]> } | unknown;
+
+        /**
+         * Extra public props exposed on CoreProps when adapter="inertia".
+         */
+        props: {
+            /**
+             * Target URL / route for the Inertia visit.
+             */
+            url: string;
+
+            /**
+             * HTTP method to use for the visit.
+             */
+            method?: Method;
+        };
+    };
 }
 
+export type AdapterProps<K extends AdapterKey> =
+    Adapters[K] extends { props: infer P } ? P : {};
 /**
  * Union of all adapter keys known to the core.
  *
@@ -203,7 +269,7 @@ export type AdapterSubmit<K extends AdapterKey> = AdapterOk<K>;
 export type NamedAdapterConfig<
     K extends AdapterKey,
     Body = unknown,
-> = AdapterConfig<Body, AdapterOk<K>, AdapterError<K>>;
+> = AdapterConfig<Body, AdapterOk<K>, AdapterError<K>> & AdapterProps<K>;
 
 /**
  * AdapterFactory specialised for a named adapter key K.

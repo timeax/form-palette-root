@@ -17,11 +17,11 @@ import type { CoreProps, Dict } from "@/schema/core";
  *     {...fields + buttons...}
  *   </CoreShell>
  */
-export interface CoreShellProps<
+export type CoreShellProps<
     V extends Dict = Dict,
     S extends z.ZodType | undefined = z.ZodType | undefined,
     K extends AdapterKey = "local",
-> extends CoreProps<V, S, K> {
+> = CoreProps<V, S, K> & {
     /**
      * Props passed directly to the underlying <form> element via CoreRoot.
      */

@@ -10,7 +10,12 @@ import { getAdapter, localAdapter } from "@/core/adapter-registry";
 import { FieldRegistry } from "@/core/registry/field-registry";
 
 import type { z } from "zod";
-import type { AdapterKey, AdapterResult, Method } from "@/schema/adapter";
+import type {
+    AdapterKey,
+    AdapterResult,
+    Method,
+    AdapterProps,
+} from "@/schema/adapter";
 import type {
     CoreContext,
     CoreProps,
@@ -28,6 +33,27 @@ type Props<
 > = CoreProps<V, S, K> & {
     children?: React.ReactNode;
 };
+
+// Core-level props that are NOT part of AdapterProps<K>
+const CORE_PROP_KEYS = new Set<string>([
+    "adapter",
+    "schema",
+    "exceptions",
+    "persist",
+    "name",
+    "activateButtonOnChange",
+    "onChange",
+    "onUpdate",
+    "changeBefore",
+    "formRef",
+    "valueBag",
+    "valueFeed",
+    "onFinish",
+    "init",
+    "onSubmit",
+    "onSubmitted",
+    "children",
+]);
 
 // ─────────────────────────────────────────────────────────────
 // Internal helpers (generic utils)
@@ -278,19 +304,30 @@ export function CoreProvider<
         return valid;
     }
 
+    function getAdapterPropsFrom(
+        current: Props<V, S, K>
+    ): AdapterProps<K> {
+        const result: any = {};
+        for (const key in current) {
+            if (!CORE_PROP_KEYS.has(key)) {
+                result[key] = (current as any)[key];
+            }
+        }
+        return result as AdapterProps<K>;
+    }
+
     // ─────────────────────────────────────────────────────────
     // Submission
     // ─────────────────────────────────────────────────────────
 
     async function submitWithAdapter(
-        method: Method,
-        route: string,
+        adapterOverride?: Partial<AdapterProps<K>>,
         extra?: Partial<Values>,
         ignoreForm?: boolean,
         autoErr: boolean = true,
         autoRun: boolean = true
     ): Promise<AdapterResult<any> | undefined> {
-        const currentProps = propsRef.current;
+        const currentProps = propsRef.current as Props<V, S, K>;
 
         // active button + loading
         const btn = buttonRef.current as any;
@@ -329,7 +366,13 @@ export function CoreProvider<
             ...(extra ?? {}),
         };
 
-        const event: SubmitEvent<Values> = {
+        // Base adapter config from props + override from caller
+        let adapterConfig: AdapterProps<K> = {
+            ...getAdapterPropsFrom(currentProps) as any,
+            ...(adapterOverride as Partial<AdapterProps<K>> | undefined),
+        };
+
+        const event: SubmitEvent<Values, K> = {
             preventDefault() {
                 this.continue = false;
             },
@@ -339,11 +382,17 @@ export function CoreProvider<
                     submissionValues = result;
                 }
             },
-            setRoute(newRoute: string) {
-                route = newRoute;
-            },
-            setMethod(newMethod: Method) {
-                method = newMethod;
+            setConfig(arg1: any, arg2?: any) {
+                if (typeof arg1 === "string") {
+                    // key, value
+                    (adapterConfig as any)[arg1] = arg2;
+                } else if (arg1 && typeof arg1 === "object") {
+                    // partial props
+                    adapterConfig = {
+                        ...adapterConfig as any,
+                        ...arg1,
+                    };
+                }
             },
 
             button: buttonRef.current ?? undefined,
@@ -375,8 +424,10 @@ export function CoreProvider<
             (localAdapter as unknown as (cfg: any) => AdapterResult<any>);
 
         const adapter = factory({
-            method,
-            url: route,
+            // adapter-specific config (url, method, config, etc.)
+            ...(adapterConfig as any),
+
+            // core config
             data: submissionValues,
             callbacks: {
                 onSuccess(ok: unknown) {
@@ -595,9 +646,13 @@ export function CoreProvider<
             ignoreForm?: boolean,
             autoErr?: boolean
         ): Promise<AdapterResult<any> | undefined> {
+            // Bridge old (method, route) API into adapter config overrides.
+            const override: any = {
+                method: type,
+                url: route,
+            };
             return submitWithAdapter(
-                type,
-                route,
+                override as Partial<AdapterProps<K>>,
                 extra,
                 ignoreForm,
                 autoErr,
@@ -741,7 +796,13 @@ export function CoreProvider<
         },
 
         go(data?: Partial<Values>, ignoreForm?: boolean): void {
-            void submitWithAdapter("post", "", data, ignoreForm, true, true);
+            void submitWithAdapter(
+                undefined,
+                data,
+                ignoreForm,
+                true,
+                true
+            );
         },
 
         reset(inputs: string[]): void {
@@ -768,7 +829,13 @@ export function CoreProvider<
         },
 
         async forceSubmit(): Promise<void> {
-            await submitWithAdapter("post", "", undefined, false, true, true);
+            await submitWithAdapter(
+                undefined,
+                undefined,
+                false,
+                true,
+                true
+            );
         },
 
         get fields(): Field[] {

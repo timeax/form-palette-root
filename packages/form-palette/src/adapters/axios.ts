@@ -94,24 +94,3 @@ export const createAxiosAdapter: NamedAdapterFactory<"axios"> = (config): Adapte
       run,
    };
 };
-
-// src/adapters/axios.ts
-
-declare module "@/schema/adapter" {
-   interface Adapters {
-      axios: {
-         /**
-          * What adapter.send() resolves with for Axios.
-          */
-         ok: AxiosResponse<unknown>;
-
-         /**
-          * What callbacks.onError receives for Axios.
-          *
-          * We pass the *payload* (e.g. response.data), not the raw AxiosError,
-          * so Form Palette's autoErr branch can see `.errors`.
-          */
-         err: unknown;
-      };
-   }
-}

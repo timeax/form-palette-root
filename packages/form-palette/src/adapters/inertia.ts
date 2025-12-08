@@ -63,7 +63,7 @@ function normalizeInertiaError(
 export const createInertiaAdapter: NamedAdapterFactory<"inertia"> = (
    config: NamedAdapterConfig<"inertia">
 ): AdapterResult<AdapterOk<"inertia">> => {
-   const { method, url, data, callbacks } = config;
+   const { method = 'post', url, data, callbacks } = config;
 
    const upperMethod = method.toUpperCase() as VisitOptions["method"];
 
@@ -165,23 +165,3 @@ export const createInertiaAdapter: NamedAdapterFactory<"inertia"> = (
       run,
    };
 };
-
-declare module "@/schema/adapter" {
-   interface Adapters {
-      inertia: {
-         /**
-          * What adapter.send() resolves with for Inertia.
-          * This is the Page object passed to onSuccess.
-          */
-         ok: Page<any>;
-
-         /**
-          * What callbacks.onError receives for Inertia.
-          *
-          * We shape this as `{ errors: ErrorBag }` so Form Palette's
-          * autoErr branch can see `.errors`.
-          */
-         err: { errors: Record<string, string | string[]> } | unknown;
-      };
-   }
-}

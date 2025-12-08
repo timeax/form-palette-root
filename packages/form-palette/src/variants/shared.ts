@@ -76,7 +76,7 @@ export interface VariantBaseProps<TValue> {
      * State flags.
      */
     disabled?: boolean;
-    defaultValue?: TValue;
+    defaultValue?: any;
     readOnly?: boolean;
     required?: boolean;
 

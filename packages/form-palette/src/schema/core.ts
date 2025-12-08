@@ -9,6 +9,7 @@ import type {
     AdapterResult,
     AdapterKey,
     AdapterSubmit,
+    AdapterProps,
 } from "./adapter";
 import type { ButtonRef, Field } from "./field";
 import { FieldRegistry } from "@/core/registry/field-registry";
@@ -36,7 +37,7 @@ export type InferFromSchema<S, V extends Dict> = S extends z.ZodType
  *
  * @template TValues Shape of the outbound data for this submit event.
  */
-export type SubmitEvent<TValues extends Dict> = {
+export type SubmitEvent<TValues extends Dict, K extends AdapterKey> = {
     /**
      * Prevent the default submit behavior.
      *
@@ -53,17 +54,13 @@ export type SubmitEvent<TValues extends Dict> = {
     editData(cb: (data: TValues) => TValues | void): void;
 
     /**
-     * Override the route/URL for this submission only.
+     * Override the config for this adapter submission only.
      *
      * The core itself does not enforce any semantics here; the host
      * is expected to interpret this when wiring submissions.
      */
-    setRoute(route: string): void;
-
-    /**
-     * Override the HTTP method for this submission only.
-     */
-    setMethod(method: Method): void;
+    setConfig(props: Partial<AdapterProps<K>>): void;
+    setConfig(key: keyof AdapterProps<K>, value: any): void;
 
     /**
      * The button that triggered this submit, if any.
@@ -94,7 +91,7 @@ export type SubmitEvent<TValues extends Dict> = {
  * @template V Shape of the underlying value map (pre-schema).
  * @template S Optional Zod schema type.
  */
-export type BaseProps<V extends Dict, S extends z.ZodType | undefined> = {
+export type BaseProps<V extends Dict, S extends z.ZodType | undefined, K extends AdapterKey> = {
     /**
      * Field names that should be ignored when building diffs or snapshots.
      * Useful for excluding secrets like passwords from logs.
@@ -180,7 +177,7 @@ export type BaseProps<V extends Dict, S extends z.ZodType | undefined> = {
      * - abort by setting e.continue = false.
      */
     onSubmit?<T extends Dict = InferFromSchema<S, V>>(
-        e: SubmitEvent<T>
+        e: SubmitEvent<T, K>
     ): Promise<void> | void;
 
     /**
@@ -202,11 +199,11 @@ export type BaseProps<V extends Dict, S extends z.ZodType | undefined> = {
  * @template S Optional Zod schema type.
  * @template K Adapter key; defaults to 'local'.
  */
-export interface CoreProps<
+export type CoreProps<
     V extends Dict,
     S extends z.ZodType | undefined,
     K extends AdapterKey = "local",
-> extends BaseProps<V, S> {
+> = BaseProps<V, S, K> & AdapterProps<K> & {
     /**
      * Which adapter flavour this core instance should use.
      *
@@ -330,6 +327,7 @@ export interface CoreContext<V extends Dict> {
      * Re-run button control logic (which button is active/disabled etc.).
      */
     controlButton(): void;
+
 
     /**
      * Prepare an adapter-backed request.
