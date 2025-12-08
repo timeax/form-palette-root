@@ -1,5 +1,18 @@
 {
   "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/flutter/ephemeral": true,
+    "**/Flutter/ephemeral": true,
+    "**/.symlinks": true,
+    "**/.plugin_symlinks": true,
+    "**/.classpath": true,
+    "**/.project": true,
+    "**/.settings": true,
+    "**/.factorypath": true,
     "packages\\form-palette\\dist": true,
     "node_modules": true,
     ".vscode": true,
@@ -8,18 +21,19 @@
     ".prettierrc": true,
     "components.json": true,
     "package-lock.json": true,
-    "tsconfig.base.json": true,
-    "tsconfig.json": true,
+    "tsconfig.base.json": false,
+    "tsconfig.json": false,
     ".gitattributes": true,
     "playground\\vite.config.ts": true,
-    "playground\\tsconfig.json": true,
+    "playground\\tsconfig.json": false,
     "playground\\index.html": true,
     ".gitignore": true,
     ".hintrc": true,
     "**/.scaffold-cache": true,
     "**/.scaffold-cache.*": true,
     "packages\\form-palette\\src\\.scaffold-cache.json": true,
-    "**/tsconfig": true,
-    "**/tsconfig.*": true
-  }
+    "**/tsconfig": false,
+    "**/tsconfig.*": false
+  },
+  "explorerExclude.backup": {}
 }

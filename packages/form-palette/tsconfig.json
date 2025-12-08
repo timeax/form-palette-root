@@ -6,7 +6,10 @@
       "declarationMap": true,
       "sourceMap": true,
       "rootDir": "src",
-      "jsx": "react-jsx"
+      "jsx": "react-jsx",
+      "paths": {
+         "@/*": ["./src/*"]
+      }
    },
    "include": [
       "src"

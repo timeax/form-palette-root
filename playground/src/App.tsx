@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Form, InputField } from "@timeax/form-palette";
+import { Form, Input, InputField } from "@timeax/form-palette";
 import { Check, Globe2, Hash, Info, MapPin, SearchIcon, Volume2, VolumeX } from "lucide-react";
 import { Textarea } from "@timeax/form-palette";
 import { cn } from "@timeax/form-palette/lib/utils";
@@ -93,6 +93,7 @@ export const App: React.FC = () => {
                 page.
             </p>
 
+            <InputField variant='text' />
             <Form onSubmit={handleSubmit}>
                 <InputField
                     contain

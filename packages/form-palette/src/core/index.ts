@@ -1,7 +1,7 @@
 export * from './adapter-registry';
 
 export { CoreProvider } from './core-provider'
-export { CoreShell as Form, CoreShellProps } from './core-shell'
+export { CoreShell as Form, type CoreShellProps } from './core-shell'
 export { CoreRoot as FormRoot } from './core-root'
 
 export * from './hooks/use-button';

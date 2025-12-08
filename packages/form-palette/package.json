@@ -1,7 +1,7 @@
 {
     "name": "@timeax/form-palette",
     "private": false,
-    "version": "0.0.4",
+    "version": "0.0.6",
     "description": "This package extracts and standardizes the **form + input + variant system** from an existing Laravel/Inertia/React project into a **reusable, framework-friendly** library",
     "keywords": [
         "Form",
@@ -20,17 +20,31 @@
         "type": "git",
         "url": "git+https://github.com/timeax/form-palette-root.git"
     },
-    "files": ["dist"],
+    "files": [
+        "dist"
+    ],
     "license": "MIT",
     "author": "David Okpako",
-    "type": "module",
-    "main": "index.js",
+    "main": "dist/index.cjs",
+    "module": "dist/index.mjs",
     "types": "dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.mjs",
+            "require": "./dist/index.cjs"
+        },
+        "./adapters": {
+            "types": "./dist/adapters.d.ts",
+            "import": "./dist/adapters.mjs",
+            "require": "./dist/adapters.cjs"
+        }
+    },
     "sideEffects": false,
     "scripts": {
-        "build": "tsc -p tsconfig.json",
+        "build": "tsup",
         "dev": "tsc -p tsconfig.json --watch",
-        "prepublishOnly": "rm -rf dist && npm run build && git commit -am \"Build\"",
+        "prepublishOnly": "npm run build",
         "postpublish": "npm version patch --no-git-tag-version"
     },
     "peerDependencies": {
@@ -38,6 +52,7 @@
         "react-dom": "^18.0.0"
     },
     "devDependencies": {
-        "typescript": "^5.1.6"
+        "typescript": "^5.1.6",
+        "tsup": "^8.0.0"
     }
 }
