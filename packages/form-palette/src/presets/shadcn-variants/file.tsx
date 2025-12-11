@@ -21,7 +21,8 @@ import {
    Loader2,
    ChevronDown,
    Plus,
-   FolderUp
+   FolderUp,
+   Eye
 } from "lucide-react";
 
 // ─────────────────────────────────────────────
@@ -407,29 +408,87 @@ export const ShadcnFileVariant = React.forwardRef<HTMLDivElement, ShadcnFileVari
       };
 
       // ─────────────────────────────────────────────
-      // UI Pieces
+      // UI Pieces: Interactive File Chip
       // ─────────────────────────────────────────────
 
       const FileChip = ({ item, condensed = false }: { item: FileItem, condensed?: boolean }) => {
          const name = formatFileName ? formatFileName(item) : item.name;
+         const [preview, setPreview] = React.useState<string | null>(null);
+         const [isOpen, setIsOpen] = React.useState(false);
+
+         React.useEffect(() => {
+            const isImage = item.type?.startsWith("image/") || item.name.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+            if (!isImage) {
+               setPreview(null);
+               return;
+            }
+
+            if (item.file) {
+               const url = URL.createObjectURL(item.file);
+               setPreview(url);
+               return () => URL.revokeObjectURL(url);
+            }
+            if (item.url || item.path) {
+               setPreview(item.url || item.path || null);
+            }
+         }, [item]);
+
          return (
-            <div
-               className={cn(
-                  "flex items-center gap-1.5 overflow-hidden rounded-sm border bg-muted/60 px-1.5 py-0.5 text-xs transition-colors hover:bg-muted",
-                  condensed ? "max-w-[120px]" : "max-w-[200px]"
-               )}
-               onClick={(e) => e.stopPropagation()}
-            >
-               <FileIcon className="h-3 w-3 text-muted-foreground shrink-0" />
-               <span className="truncate font-medium">{name}</span>
-               <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); handleRemove(item.id); }}
-                  className="ml-auto rounded-full text-muted-foreground/70 hover:text-destructive"
-               >
-                  <X className="h-3 w-3" />
-               </button>
-            </div>
+            <Popover open={isOpen} onOpenChange={setIsOpen}>
+               <PopoverTrigger asChild>
+                  <div
+                     role="button"
+                     tabIndex={0}
+                     className={cn(
+                        "flex items-center gap-1.5 overflow-hidden rounded-sm border bg-muted/60 px-1.5 py-0.5 text-xs transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none cursor-pointer",
+                        condensed ? "max-w-[120px]" : "max-w-[200px]"
+                     )}
+                     onClick={(e) => {
+                        e.stopPropagation();
+                        setIsOpen(true);
+                     }}
+                     onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                           e.stopPropagation();
+                           setIsOpen(true);
+                        }
+                     }}
+                  >
+                     <FileIcon className="h-3 w-3 text-muted-foreground shrink-0" />
+                     <span className="truncate font-medium">{name}</span>
+                     <button
+                        type="button"
+                        onClick={(e) => {
+                           e.stopPropagation();
+                           handleRemove(item.id);
+                        }}
+                        className="ml-auto flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-muted-foreground/70 hover:bg-destructive/20 hover:text-destructive focus:outline-none"
+                        aria-label="Remove file"
+                     >
+                        <X className="h-3 w-3" />
+                     </button>
+                  </div>
+               </PopoverTrigger>
+               <PopoverContent className="w-64 p-0" align="start" side="bottom">
+                  <div className="relative aspect-video w-full flex items-center justify-center bg-muted/30 border-b">
+                     {preview ? (
+                        <img src={preview} alt={item.name} className="h-full w-full object-contain" />
+                     ) : (
+                        <div className="flex flex-col items-center gap-2 text-muted-foreground/50">
+                           <FileIcon className="h-10 w-10" />
+                           <span className="text-[10px] uppercase">No Preview</span>
+                        </div>
+                     )}
+                  </div>
+                  <div className="p-3">
+                     <div className="font-medium text-sm truncate" title={item.name}>{name}</div>
+                     <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground">
+                        <span>{formatFileSize(item.size)}</span>
+                        {item.type && <span className="uppercase opacity-70">{item.type.split('/').pop()}</span>}
+                     </div>
+                  </div>
+               </PopoverContent>
+            </Popover>
          );
       };
 
@@ -457,7 +516,7 @@ export const ShadcnFileVariant = React.forwardRef<HTMLDivElement, ShadcnFileVari
                      dropAreaClassName
                   )}
                >
-                  <div className="rounded-full bg-background p-3 shadow-sm">
+                  <div className="rounded-full bg-surfaces-input p-3 shadow-sm">
                      {dropIcon ?? <UploadCloud className="h-5 w-5 text-muted-foreground" />}
                   </div>
                   <div className="space-y-1">
@@ -482,7 +541,7 @@ export const ShadcnFileVariant = React.forwardRef<HTMLDivElement, ShadcnFileVari
                      className={cn(
                         "relative flex w-full cursor-pointer items-center gap-2 px-3 transition-all",
                         heightCls,
-                        (!joinControls || !hasExternalControls) && "rounded-md border border-input bg-[var(--surfaces-input,_transparent)] shadow-xs ring-offset-background hover:bg-accent/5 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+                        (!joinControls || !hasExternalControls) && "rounded-md border border-input bg-surfaces-input ring-offset-background hover:bg-accent/5 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
                         dragOver && "border-primary ring-2 ring-primary/20",
                         isDisabled && "cursor-not-allowed opacity-50",
                         error && "border-destructive text-destructive",
@@ -541,7 +600,7 @@ export const ShadcnFileVariant = React.forwardRef<HTMLDivElement, ShadcnFileVari
 
                {/* Popover Content (Full Width) */}
                <PopoverContent
-                  className="w-[--radix-popover-trigger-width] p-0"
+                  className="w-(--radix-popover-trigger-width) p-0"
                   align="start"
                >
                   <div className="flex flex-col">
@@ -624,7 +683,7 @@ export const ShadcnFileVariant = React.forwardRef<HTMLDivElement, ShadcnFileVari
                            onClick={() => { setPopoverOpen(false); openPicker(); }}
                         >
                            <Plus className="mr-2 h-3 w-3" />
-                           Add files...
+                           {multiple ? "Add files..." : items.length ? "Replace file" : "Add file"}
                         </Button>
                      </div>
                   </div>
@@ -716,7 +775,7 @@ export const ShadcnFileVariant = React.forwardRef<HTMLDivElement, ShadcnFileVari
             <div className={cn(
                "flex w-full",
                joinControls && extendBoxToControls && !showDropArea
-                  ? "items-stretch rounded-md border border-input bg-[var(--surfaces-input,_transparent)] shadow-xs ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
+                  ? "items-stretch rounded-md border border-input bg-surfaces-input shadow-xs ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
                   : "items-start gap-2"
             )}>
                {leadingControl && (

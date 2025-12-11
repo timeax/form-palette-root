@@ -774,7 +774,7 @@ export function InputField<K extends VariantKey = VariantKey>(
         lp !== "hidden" && hasAnyLabelBlockContent;
 
     const stackedGroupClassName = [
-        hasStackedLabelBlock && hasLabelRowContent ? "mt-1" : null,
+        hasStackedLabelBlock && hasLabelRowContent ? "mt-0.5" : null,
         classes?.group,
     ]
         .filter(Boolean)

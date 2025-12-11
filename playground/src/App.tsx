@@ -544,7 +544,7 @@ export const App: React.FC = () => {
 
                 <InputField
                     variant='file'
-                    multiple
+                    multiple={false}
                     placeholder='Load file'
                     onChange={e => console.log(e)}
                 />

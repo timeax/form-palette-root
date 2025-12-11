@@ -8,6 +8,7 @@ import { CoreRoot, type CoreRootProps } from "@/core/core-root";
 import type { z } from "zod";
 import type { AdapterKey } from "@/schema/adapter";
 import type { CoreProps, Dict } from "@/schema/core";
+import { cn } from "@/lib/utils";
 
 /**
  * Shared base props for CoreShell, independent of wrapping behaviour.
@@ -97,7 +98,7 @@ export function CoreShell<
 
         const content = (
             <div
-                className={contentClassName}
+                className={cn('flex flex-col', contentClassName)}
                 style={gap !== undefined ? { gap } : undefined}
             >
                 {children}
