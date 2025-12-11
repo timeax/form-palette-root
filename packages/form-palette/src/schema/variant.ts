@@ -10,21 +10,18 @@ import type {
     ValidateResult,
 } from "@/schema/input-field";
 import type { VariantBaseProps } from "@/variants/shared";
-import { TextVariantProps } from "@/variants/core/text";
 import { ShadcnNumberVariantProps } from "@/presets/shadcn-variants/number";
 import { ShadcnPhoneVariantProps } from "@/presets/shadcn-variants/phone";
 import { ShadcnColorVariantProps } from "@/presets/shadcn-variants/color";
 import { ShadcnPasswordVariantProps } from "@/presets/shadcn-variants/password";
 import {
-    DateVariantProps,
     ShadcnDateVariantProps,
 } from "@/presets/shadcn-variants/date";
 import { ShadcnChipsVariantProps } from "@/presets/shadcn-variants/chips";
 import { ShadcnTextareaVariantProps } from "@/presets/shadcn-variants/textarea";
 import { ShadcnToggleVariantProps } from "@/presets/shadcn-variants/toggle";
 import { RadioItem, ShadcnRadioVariantProps } from "@/presets/shadcn-variants/radio";
-import { CheckboxVariantPublicValue, ShadcnCheckboxUiProps, ShadcnCheckboxVariantProps, ShadcnCheckboxVariantPublicProps } from "@/presets/shadcn-variants/checkbox";
-import { ShadcnSelectVariantProps } from "@/presets/shadcn-variants/select";
+import { CheckboxVariantPublicValue, ShadcnCheckboxVariantPublicProps } from "@/presets/shadcn-variants/checkbox";
 import { ShadcnMultiSelectVariantProps } from "@/presets/shadcn-variants/multiselect";
 import { SliderValue } from "@/variants/core/slider";
 import { ShadcnSliderVariantProps } from "@/presets/shadcn-variants/slider";
@@ -34,6 +31,7 @@ import { ShadcnTreeSelectVariantProps } from "@/presets/shadcn-variants/treesele
 import { FileLike, ShadcnFileVariantProps } from "@/presets/shadcn-variants/file";
 import { ShadcnTextVariantProps } from "@/presets/shadcn-variants/text";
 import { SelectVariantProps } from "@/variants/core/select";
+import { ShadcnToggleVariantProps as ShadcnToggleGroupVariantProps } from "@/presets/shadcn-variants/toggle-group";
 
 /**
  * Helper type for a single variant registry entry.
@@ -85,8 +83,9 @@ export interface Variants<H = unknown> {
     chips: VariantEntry<string[] | undefined, ShadcnChipsVariantProps>;
     textarea: VariantEntry<string | undefined, ShadcnTextareaVariantProps>;
     toggle: VariantEntry<boolean | undefined, ShadcnToggleVariantProps>;
+    'toggle-group': VariantEntry<any | undefined, ShadcnToggleGroupVariantProps>
 
-    radio: VariantEntry<unknown | undefined, ShadcnRadioVariantProps<unknown, RadioItem<unknown>>>
+    radio: VariantEntry<unknown | undefined, ShadcnRadioVariantProps<unknown, H>>
     checkbox: VariantEntry<CheckboxVariantPublicValue, ShadcnCheckboxVariantPublicProps>
     select: VariantEntry<string | number | undefined, SelectVariantProps>
     'multi-select': VariantEntry<Array<string | number> | undefined, ShadcnMultiSelectVariantProps>,

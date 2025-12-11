@@ -25,3 +25,4 @@ variants/
     keyvalue.tsx
     custom.tsx
     slider.tsx
+    toggle-group.tsx

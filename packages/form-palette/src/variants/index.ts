@@ -29,6 +29,7 @@ import { keyValueModule } from "./core/keyvalue";
 import customVariant from "./core/custom";
 import treeselectModule from "./core/treeselect";
 import { fileManagerModule } from "./core/file";
+import { toggleGroupModule } from "./core/toggle-group";
 
 export type { VariantKey, VariantModule, VariantValueFor, VariantPropsFor };
 export {
@@ -57,7 +58,8 @@ const variants = [
     keyValueModule,
     customVariant,
     treeselectModule,
-    fileManagerModule
+    fileManagerModule,
+    toggleGroupModule
 ]
 
 /**

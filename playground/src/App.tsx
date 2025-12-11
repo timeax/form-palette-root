@@ -549,6 +549,15 @@ export const App: React.FC = () => {
                     onChange={e => console.log(e)}
                 />
 
+                <InputField
+                    variant='toggle-group'
+                    options={['light', 'dark']}
+                    autoCap
+                    itemClassName='bg-amber-600'
+                    activeClassName='data-[state=on]:bg-[red]'
+                    fillWidth
+                />
+
                 <AppSamples />
 
                 <button type="submit">Submit</button>

@@ -539,6 +539,20 @@
       "sizeAtCreate": 0,
       "groupName": "variants",
       "groupRoot": "./"
+    },
+    "presets/shadcn-variants/toggle-group.tsx": {
+      "path": "presets/shadcn-variants/toggle-group.tsx",
+      "createdAt": "2025-12-11T06:33:50.007Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "variants/core/toggle-group.tsx": {
+      "path": "variants/core/toggle-group.tsx",
+      "createdAt": "2025-12-11T06:34:22.071Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
     }
   }
 }
