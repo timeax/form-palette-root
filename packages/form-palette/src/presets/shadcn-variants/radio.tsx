@@ -89,6 +89,7 @@ export interface ShadcnRadioUiProps<TItem, TValue> {
     * - `RadioItem<TValue>[]`, or
     * - any custom TItem[] when used with mapping functions
     *   or optionValue/optionLabel keys.
+    * - primitive arrays such as `string[]` or `number[]` (fallback).
     */
    items: readonly TItem[];
 
@@ -156,6 +157,12 @@ export interface ShadcnRadioUiProps<TItem, TValue> {
     * Default: "comfortable".
     */
    density?: RadioDensity;
+
+   /**
+    * When true, capitalizes the **first letter** of the label
+    * (only applied when the label is a string).
+    */
+   autoCap?: boolean;
 
    /**
     * ARIA overrides for the group.
@@ -256,11 +263,17 @@ function descriptionTextSize(size: RadioSize): string {
    }
 }
 
+function capitalizeFirst(label: string): string {
+   if (!label) return label;
+   return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
 /**
  * Normalise TItem[] into RadioItem<TValue>[] using one of:
  * - explicit mappers
  * - optionValue/optionLabel keys
  * - native RadioItem fields
+ * - primitive arrays (string[] / number[] / boolean[])
  */
 function normalizeItems<TItem, TValue>(
    items: readonly TItem[],
@@ -314,8 +327,29 @@ function normalizeItems<TItem, TValue>(
       });
    }
 
-   // 3) Fallback: assume TItem already matches RadioItem<TValue>
-   return items as unknown as RadioItem<TValue>[];
+   // 3) Fallbacks:
+   //    - primitive arrays (string[] / number[] / boolean[])
+   //    - already-shaped RadioItem<TValue>[]
+   return items.map((item, index) => {
+      // Primitive → use as both value and label
+      if (
+         typeof item === "string" ||
+         typeof item === "number" ||
+         typeof item === "boolean"
+      ) {
+         const v = item as unknown as TValue;
+         return {
+            value: v,
+            label: String(item),
+            description: undefined,
+            disabled: false,
+            key: index,
+         } satisfies RadioItem<TValue>;
+      }
+
+      // Assume it's already a RadioItem<TValue>-like object
+      return item as unknown as RadioItem<TValue>;
+   });
 }
 
 /**
@@ -355,6 +389,7 @@ const InnerShadcnRadioVariant = <
       itemGapPx,
       size = "md",
       density = "comfortable",
+      autoCap = false,
       "aria-label": ariaLabel,
       "aria-labelledby": ariaLabelledBy,
       "aria-describedby": ariaDescribedBy,
@@ -493,6 +528,15 @@ const InnerShadcnRadioVariant = <
             const optionKey = item.key ?? index;
             const optionId = id ? `${id}-option-${optionKey}` : undefined;
 
+            // Apply autoCap to string labels for display
+            let displayItem: RadioItem<TValue> = item;
+            if (autoCap && typeof item.label === "string") {
+               displayItem = {
+                  ...item,
+                  label: capitalizeFirst(item.label),
+               };
+            }
+
             const radioNode = (
                <RadioGroupItem
                   id={optionId}
@@ -513,7 +557,7 @@ const InnerShadcnRadioVariant = <
                      className={baseOptionClass}
                   >
                      {renderOption({
-                        item,
+                        item: displayItem,
                         index,
                         selected,
                         disabled: optionDisabled,
@@ -543,11 +587,11 @@ const InnerShadcnRadioVariant = <
 
                      <div className="flex flex-col min-w-0">
                         <span className={labelClassesBase}>
-                           {item.label}
+                           {displayItem.label}
                         </span>
-                        {item.description != null && (
+                        {displayItem.description != null && (
                            <span className={descriptionClassesBase}>
-                              {item.description}
+                              {displayItem.description}
                            </span>
                         )}
                      </div>
@@ -573,6 +617,5 @@ export const ShadcnRadioVariant =
          ref?: React.Ref<HTMLDivElement>;
       }
    ) => React.ReactElement | null;
-
 
 export default ShadcnRadioVariant;

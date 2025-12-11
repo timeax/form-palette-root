@@ -64,7 +64,7 @@ export interface CheckboxItem<TValue> {
    tristate?: boolean;
 }
 
-export interface     CheckboxMappers<TItem, TValue> {
+export interface CheckboxMappers<TItem, TValue> {
    getValue: (item: TItem, index: number) => TValue;
    getLabel: (item: TItem, index: number) => React.ReactNode;
    getDescription?: (item: TItem, index: number) => React.ReactNode;
@@ -177,6 +177,12 @@ export interface ShadcnCheckboxUiProps<TItem, TValue> {
    density?: CheckboxDensity;
 
    /**
+    * When true, capitalizes the first letter of the label
+    * (only applied when the label is a string).
+    */
+   autoCap?: boolean;
+
+   /**
     * ARIA attributes for the group wrapper.
     */
    "aria-label"?: string;
@@ -243,7 +249,7 @@ function paddingForDensity(density: CheckboxDensity): string {
       case "compact":
       // return "py-1.5";
       case "loose":
-      return "py-2";
+         return "py-2";
       case "comfortable":
       default:
          return "py-0";
@@ -274,11 +280,17 @@ function descriptionTextSize(size: CheckboxSize): string {
    }
 }
 
+function capitalizeFirst(label: string): string {
+   if (!label) return label;
+   return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
 /**
  * Normalize arbitrary items to CheckboxItem<TValue>[] using:
  * 1) mappers,
  * 2) optionValue/optionLabel,
- * 3) native CheckboxItem fields.
+ * 3) native CheckboxItem fields,
+ * 4) primitive arrays (string[] / number[] / boolean[]).
  */
 function normalizeItems<TItem, TValue>(
    items: readonly TItem[] | undefined,
@@ -339,8 +351,28 @@ function normalizeItems<TItem, TValue>(
       });
    }
 
-   // 3) Assume already CheckboxItem<TValue>
-   return items as unknown as CheckboxItem<TValue>[];
+   // 3 & 4) Fallbacks:
+   //    - primitive arrays (string[] / number[] / boolean[])
+   //    - already-shaped CheckboxItem<TValue>[]
+   return items.map((item, index) => {
+      if (
+         typeof item === "string" ||
+         typeof item === "number" ||
+         typeof item === "boolean"
+      ) {
+         const v = item as unknown as TValue;
+         return {
+            value: v,
+            label: String(item),
+            description: undefined,
+            disabled: false,
+            key: index,
+            tristate: undefined,
+         } satisfies CheckboxItem<TValue>;
+      }
+
+      return item as unknown as CheckboxItem<TValue>;
+   });
 }
 
 function isEqualValue(a: unknown, b: unknown): boolean {
@@ -401,6 +433,7 @@ const InnerShadcnCheckboxVariant = <
       itemGapPx,
       size = "md",
       density = "comfortable",
+      autoCap = false,
 
       "aria-label": ariaLabel,
       "aria-labelledby": ariaLabelledBy,
@@ -460,7 +493,11 @@ const InnerShadcnCheckboxVariant = <
          onValue(nextPublic, detail);
       };
 
-      const labelText = singleLabel ?? undefined;
+      let labelText = singleLabel ?? undefined;
+      if (autoCap && typeof labelText === "string") {
+         labelText = capitalizeFirst(labelText);
+      }
+
       const descriptionText = singleDescription ?? undefined;
 
       const labelCls = cn(
@@ -709,6 +746,15 @@ const InnerShadcnCheckboxVariant = <
                ? `${id}-option-${optionKey}`
                : undefined;
 
+            // Apply autoCap to string labels for display
+            let displayItem: CheckboxItem<TValue> = item;
+            if (autoCap && typeof item.label === "string") {
+               displayItem = {
+                  ...item,
+                  label: capitalizeFirst(item.label),
+               };
+            }
+
             const checkboxNode = (
                <Checkbox
                   id={checkboxId}
@@ -750,7 +796,7 @@ const InnerShadcnCheckboxVariant = <
                      className={baseOptionClass}
                   >
                      {renderOption({
-                        item,
+                        item: displayItem,
                         index,
                         state: internalState,
                         effectiveTristate,
@@ -781,13 +827,13 @@ const InnerShadcnCheckboxVariant = <
 
                      <div className="flex min-w-0 flex-col">
                         <span className={labelClassesBase}>
-                           {item.label}
+                           {displayItem.label}
                         </span>
-                        {item.description != null && (
+                        {displayItem.description != null && (
                            <span
                               className={descriptionClassesBase}
                            >
-                              {item.description}
+                              {displayItem.description}
                            </span>
                         )}
                      </div>
@@ -814,7 +860,6 @@ export const ShadcnCheckboxVariant =
 // ShadcnCheckboxVariant.displayName = "ShadcnCheckboxVariant";
 
 export default ShadcnCheckboxVariant;
-
 
 // ─────────────────────────────────────────────
 // Public aliases for the registry

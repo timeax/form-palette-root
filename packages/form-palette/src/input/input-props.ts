@@ -154,13 +154,40 @@ export type Events<TRaw, TValue, TMeta> = {
  * NOTE: this is a type alias (not an interface) so we can safely intersect
  * unions coming from VariantPropsFor<K> / VariantValueFor<K>.
  */
-export type InputFieldProps<K extends VariantKey = VariantKey, H = unknown> =
-    InputFieldBaseProps<VariantValueFor<K, H>> &
+export type InputFieldProps<
+    K extends VariantKey = VariantKey,
+    H = unknown
+> = InputFieldBaseProps<VariantValueFor<K, H>> &
     VariantPropsFor<K, H> &
-    Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> & {
+    InputFieldClassNameProps &
+    Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | 'defaultValue'> & {
         variant: K;
+
+        /**
+         * @deprecated Use the specific *ClassName props instead
+         * (className, labelClassName, errorClassName, etc.).
+         */
         classes?: Partial<InputFieldClassNames>;
+        defaultValue?: any;
     };
+
+export interface InputFieldClassNameProps {
+    /** Root comes from `className` on HTMLDivElement */
+    labelRowClassName?: string;
+    inlineRowClassName?: string;
+    labelClassName?: string;
+    sublabelClassName?: string;
+    descriptionClassName?: string;
+    helpTextClassName?: string;
+    errorClassName?: string;
+    groupClassName?: string;
+    contentClassName?: string;
+    variantClassName?: string;
+    inlineInputColumnClassName?: string;
+    inlineLabelColumnClassName?: string;
+    requiredClassName?: string;
+    tagClassName?: string;
+}
 
 export interface InputFieldClassNames {
     root?: string;

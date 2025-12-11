@@ -3,7 +3,7 @@
 
 import * as React from "react";
 
-import type { InputFieldProps } from "@/input/input-props";
+import type { InputFieldClassNameProps, InputFieldClassNames, InputFieldProps } from "@/input/input-props";
 import type {
     FieldLayoutConfig,
     LayoutResolveContext,
@@ -166,6 +166,55 @@ function renderHelperSlot(
     }
 }
 
+function mergeClass(
+    legacy?: string,
+    next?: string
+): string | undefined {
+    const value = [legacy, next].filter(Boolean).join(" ");
+    return value || undefined;
+}
+
+export function getClasses(
+    props: InputFieldClassNameProps & {
+        className?: string;
+        classes?: Partial<InputFieldClassNames>;
+    }
+): InputFieldClassNames {
+    const legacy = props.classes ?? {};
+
+    return {
+        root: mergeClass(legacy.root, props.className),
+
+        labelRow: mergeClass(legacy.labelRow, props.labelRowClassName),
+        inlineRow: mergeClass(legacy.inlineRow, props.inlineRowClassName),
+
+        label: mergeClass(legacy.label, props.labelClassName),
+        sublabel: mergeClass(legacy.sublabel, props.sublabelClassName),
+        description: mergeClass(
+            legacy.description,
+            props.descriptionClassName
+        ),
+        helpText: mergeClass(legacy.helpText, props.helpTextClassName),
+        error: mergeClass(legacy.error, props.errorClassName),
+
+        group: mergeClass(legacy.group, props.groupClassName),
+        content: mergeClass(legacy.content, props.contentClassName),
+        variant: mergeClass(legacy.variant, props.variantClassName),
+
+        inlineInputColumn: mergeClass(
+            legacy.inlineInputColumn,
+            props.inlineInputColumnClassName
+        ),
+        inlineLabelColumn: mergeClass(
+            legacy.inlineLabelColumn,
+            props.inlineLabelColumnClassName
+        ),
+
+        required: mergeClass(legacy.required, props.requiredClassName),
+        tag: mergeClass(legacy.tag, props.tagClassName),
+    };
+}
+
 /**
  * Public InputField component.
  *
@@ -224,7 +273,7 @@ export function InputField<K extends VariantKey = VariantKey>(
         // Field wrapper props
         className,
         style,
-        classes,
+        classes: _depreciated,
 
         // Everything else → forwarded to variant
         ...rest
@@ -246,6 +295,8 @@ export function InputField<K extends VariantKey = VariantKey>(
         }
         return null;
     }
+
+    const classes = getClasses(props);
 
     type TValue = VariantValueFor<K>;
 
