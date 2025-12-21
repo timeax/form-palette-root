@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/presets/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/presets/ui/popover";
+import { ScrollArea } from "@/presets/ui/scroll-area";
 
 import { Code2 } from "lucide-react";
 
@@ -119,13 +120,12 @@ export const ShadcnJsonEditorVariant = React.forwardRef<
     const toggle = React.useCallback(() => setOpen(!open), [setOpen, open]);
 
     // ---------------------------------------------------------------------
-    // “Accordion-like” inline expansion (MUST NOT be a hook in a branch)
+    // Inline “accordion-like” expansion (MUST NOT be a hook in a branch)
     // ---------------------------------------------------------------------
 
     const [expanded, setExpanded] = React.useState(true);
 
     React.useEffect(() => {
-        // when switching modes, keep sensible defaults:
         if (mode === "accordion") setExpanded(true);
     }, [mode]);
 
@@ -140,8 +140,10 @@ export const ShadcnJsonEditorVariant = React.forwardRef<
         [doOpen, close, toggle],
     );
 
-    let resolvedViewMode = viewMode ?? defaultViewMode;
-    if (!viewMode && mode === "accordion") resolvedViewMode = "visual";
+    // If accordion and user didn't control viewMode, force default to visual
+    const resolvedDefaultViewMode =
+        defaultViewMode ??
+        (mode === "accordion" && viewMode === undefined ? "visual" : undefined);
 
     const editorNode = (
         <JsonEditorEditor
@@ -160,8 +162,8 @@ export const ShadcnJsonEditorVariant = React.forwardRef<
             schema={schema}
             route={route}
             onRouteChange={onRouteChange}
-            viewMode={resolvedViewMode as any}
-            defaultViewMode={defaultViewMode}
+            viewMode={viewMode as any}
+            defaultViewMode={resolvedDefaultViewMode as any}
             onViewModeChange={onViewModeChange}
             showClose={mode === "popover"}
             onClose={mode === "popover" ? close : undefined}
@@ -175,7 +177,12 @@ export const ShadcnJsonEditorVariant = React.forwardRef<
     if (mode === "accordion") {
         return (
             <div className={cn("w-full", className)}>
-                <div className={cn("rounded-md border", panelClassName)}>
+                <div
+                    className={cn(
+                        "rounded-md border overflow-hidden",
+                        panelClassName,
+                    )}
+                >
                     <div className="flex items-center justify-between gap-3 px-3 py-2">
                         {typeof schema === "string" ? (
                             <div className="min-w-0 flex-1 truncate text-sm">
@@ -204,9 +211,11 @@ export const ShadcnJsonEditorVariant = React.forwardRef<
                     {expanded ? (
                         <div
                             id={id ? `${id}__json_editor_panel` : undefined}
-                            className="h-130 min-h-0"
+                            className="h-130 min-h-0 overflow-hidden"
                         >
-                            {editorNode}
+                            <ScrollArea className="h-full w-full">
+                                <div className="min-h-0">{editorNode}</div>
+                            </ScrollArea>
                         </div>
                     ) : null}
                 </div>
@@ -248,12 +257,27 @@ export const ShadcnJsonEditorVariant = React.forwardRef<
                 </PopoverTrigger>
 
                 <PopoverContent
+                    align="end"
+                    sideOffset={8}
+                    avoidCollisions
+                    collisionPadding={12}
                     className={cn(
-                        "p-0 w-245 max-w-[95vw] h-155 max-h-[85vh] overflow-hidden",
+                        "p-0 overflow-hidden",
+                        // Clamp to real available space Radix calculates
+                        "w-[min(980px,var(--radix-popper-available-width))] max-w-[95dvw]",
+                        "h-[min(85dvh,var(--radix-popper-available-height))] max-h-[min(85dvh,var(--radix-popper-available-height))]",
                         popoverClassName,
                     )}
+                    style={{
+                        maxHeight:
+                            "min(85dvh, var(--radix-popper-available-height))",
+                        maxWidth:
+                            "min(95dvw, var(--radix-popper-available-width))",
+                    }}
                 >
-                    {editorNode}
+                    <ScrollArea className="h-full w-full">
+                        <div className="min-h-0">{editorNode}</div>
+                    </ScrollArea>
                 </PopoverContent>
             </Popover>
         </div>

@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/presets/ui/button";
 import { Separator } from "@/presets/ui/separator";
+import { ScrollArea } from "@/presets/ui/scroll-area";
 
 import { Code2, Eye, SplitSquareVertical, Upload, X } from "lucide-react";
 
@@ -170,7 +171,6 @@ function useControllable<T>(opts: {
         [isControlled, onChange],
     );
 
-    // keep inner synced if controlled flips to uncontrolled later (rare, but safe)
     React.useEffect(() => {
         if (!isControlled) return;
         setInner(value as T);
@@ -192,15 +192,9 @@ function callCallbacks(
     const key = path ? lastSegment(path) : "";
     const parent = path ? parentOf(path) : "";
 
-    const meta = {
-        action,
-        route: ctx.route,
-        path,
-        parent,
-        key,
-    } as const;
+    const meta = { action, route: ctx.route, path, parent, key } as const;
 
-    // For now: everything funnels through onEdit (you can expand later when you wire add/delete in main)
+    // For now: everything funnels through onEdit
     callbacks.onEdit?.(nextRoot, meta as any);
 }
 
@@ -284,6 +278,71 @@ export const JsonEditorEditor = React.forwardRef<
     }, [canViewRaw, setViewMode, viewMode]);
 
     const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+    /* ─────────────────────────────────────────────
+     * Split view: resizable raw sidebar
+     * ───────────────────────────────────────────── */
+
+    const contentRef = React.useRef<HTMLDivElement | null>(null);
+
+    const [rawWidth, setRawWidth] = React.useState<number>(420);
+    const [isResizing, setIsResizing] = React.useState(false);
+
+    const startXRef = React.useRef(0);
+    const startWRef = React.useRef(0);
+
+    const clampRawWidth = React.useCallback((w: number) => {
+        const containerW =
+            contentRef.current?.getBoundingClientRect().width ?? 0;
+
+        const min = 260;
+        const max = containerW
+            ? Math.max(min, Math.min(900, containerW - 240))
+            : 900;
+
+        return Math.max(min, Math.min(max, w));
+    }, []);
+
+    const onResizePointerDown = React.useCallback(
+        (e: React.PointerEvent<HTMLDivElement>) => {
+            if (e.button !== 0 && e.pointerType === "mouse") return;
+
+            setIsResizing(true);
+            startXRef.current = e.clientX;
+            startWRef.current = rawWidth;
+
+            e.currentTarget.setPointerCapture(e.pointerId);
+            e.preventDefault();
+            e.stopPropagation();
+        },
+        [rawWidth],
+    );
+
+    const onResizePointerMove = React.useCallback(
+        (e: React.PointerEvent<HTMLDivElement>) => {
+            if (!isResizing) return;
+
+            const dx = e.clientX - startXRef.current;
+            setRawWidth(clampRawWidth(startWRef.current + dx));
+
+            e.preventDefault();
+        },
+        [clampRawWidth, isResizing],
+    );
+
+    const stopResizing = React.useCallback(
+        (e: React.PointerEvent<HTMLDivElement>) => {
+            if (!isResizing) return;
+            setIsResizing(false);
+
+            try {
+                e.currentTarget.releasePointerCapture(e.pointerId);
+            } catch {
+                // ignore
+            }
+        },
+        [isResizing],
+    );
 
     const loadFile = React.useCallback(() => {
         fileInputRef.current?.click();
@@ -537,9 +596,15 @@ export const JsonEditorEditor = React.forwardRef<
 
     const showRaw = canViewRaw && (viewMode === "split" || viewMode === "raw");
     const showVisual = viewMode !== "raw";
+    const rawOnly = viewMode === "raw";
 
     return (
-        <div className={cn("flex h-full min-h-0 w-full flex-col", className)}>
+        <div
+            className={cn(
+                "flex h-full min-h-0 w-full flex-col overflow-hidden",
+                className,
+            )}
+        >
             <input
                 ref={fileInputRef}
                 type="file"
@@ -548,45 +613,79 @@ export const JsonEditorEditor = React.forwardRef<
                 onChange={onFilePicked}
             />
 
+            {/* Header stays fixed */}
             {header}
             <Separator />
 
-            <div className={cn("flex min-h-0 flex-1", contentClassName)}>
-                {/* Raw panel (LEFT) */}
-                {showRaw ? (
-                    <div
-                        className={cn("w-105 shrink-0 border-r", rawClassName)}
-                    >
-                        <JsonEditorRawPanel
-                            root={root}
-                            onRoot={onRawRoot}
-                            readOnly={!canEditRaw}
-                        />
-                    </div>
-                ) : null}
+            {/* Body is the only scrollable region */}
+            <ScrollArea className={cn("min-h-0 flex-1", contentClassName)}>
+                <div
+                    ref={contentRef}
+                    className={cn(
+                        "flex min-h-0 h-full",
+                        isResizing && "select-none cursor-col-resize",
+                    )}
+                >
+                    {/* Raw panel (LEFT) */}
+                    {showRaw ? (
+                        <div
+                            className={cn(
+                                "shrink-0 relative",
+                                rawOnly ? "flex-1 border-r-0" : "border-r",
+                                rawClassName,
+                            )}
+                            style={{ width: rawOnly ? "100%" : rawWidth }}
+                        >
+                            <JsonEditorRawPanel
+                                root={root}
+                                onRoot={onRawRoot}
+                                readOnly={!canEditRaw}
+                            />
 
-                {/* Main (RIGHT) */}
-                {showVisual ? (
-                    <div className="min-h-0 flex-1 p-4">
-                        <JsonEditorMain
-                            root={root}
-                            onRoot={onVisualRoot}
-                            route={route}
-                            allPaths={allPaths}
-                            fieldMap={fieldMap}
-                            layout={layout}
-                            defaults={defaults}
-                            filters={filters}
-                            disabled={false}
-                            readOnly={false}
-                            breadcrumb={breadcrumb}
-                            title={routeTitle}
-                            onNavigate={(r) => setRoute(r)}
-                            renderField={renderField}
-                        />
-                    </div>
-                ) : null}
-            </div>
+                            {/* Resizer only in split mode */}
+                            {!rawOnly && viewMode === "split" ? (
+                                <div
+                                    role="separator"
+                                    aria-orientation="vertical"
+                                    tabIndex={0}
+                                    className={cn(
+                                        "absolute top-0 right-0 h-full w-3 -mr-1.5",
+                                        "cursor-col-resize touch-none",
+                                        "hover:bg-muted/40",
+                                    )}
+                                    onPointerDown={onResizePointerDown}
+                                    onPointerMove={onResizePointerMove}
+                                    onPointerUp={stopResizing}
+                                    onPointerCancel={stopResizing}
+                                    onDoubleClick={() => setRawWidth(420)}
+                                />
+                            ) : null}
+                        </div>
+                    ) : null}
+
+                    {/* Main (RIGHT) */}
+                    {showVisual ? (
+                        <div className="min-h-0 flex-1 p-4">
+                            <JsonEditorMain
+                                root={root}
+                                onRoot={onVisualRoot}
+                                route={route}
+                                allPaths={allPaths}
+                                fieldMap={fieldMap}
+                                layout={layout}
+                                defaults={defaults}
+                                filters={filters}
+                                disabled={false}
+                                readOnly={false}
+                                breadcrumb={breadcrumb}
+                                title={routeTitle}
+                                onNavigate={(r) => setRoute(r)}
+                                renderField={renderField}
+                            />
+                        </div>
+                    ) : null}
+                </div>
+            </ScrollArea>
         </div>
     );
 });
