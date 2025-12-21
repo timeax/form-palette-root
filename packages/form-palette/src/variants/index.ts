@@ -30,6 +30,8 @@ import customVariant from "./core/custom";
 import treeselectModule from "./core/treeselect";
 import { fileManagerModule } from "./core/file";
 import { toggleGroupModule } from "./core/toggle-group";
+import { shadcnEditorVariant } from "@/variants/core/editor";
+import { jsonEditorVariant } from "./core/json-editor";
 
 export type { VariantKey, VariantModule, VariantValueFor, VariantPropsFor };
 export {
@@ -59,7 +61,9 @@ const variants = [
     customVariant,
     treeselectModule,
     fileManagerModule,
-    toggleGroupModule
+    toggleGroupModule,
+    shadcnEditorVariant,
+    jsonEditorVariant
 ]
 
 /**

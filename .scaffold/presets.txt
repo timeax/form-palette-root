@@ -24,3 +24,10 @@ presets/
     phone.tsx
     slider.tsx
     toggle-group.tsx
+    json-editor/
+      types.ts
+      index.tsx
+      header.tsx
+      raw-panel.tsx
+      main.tsx
+      editor.tsx

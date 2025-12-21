@@ -75,7 +75,6 @@ export function getAdapter<K extends AdapterKey>(
     key: K
 ): NamedAdapterFactory<K, any> | undefined {
     const factory = registry[key];
-
     return factory as NamedAdapterFactory<K, any> | undefined;
 }
 

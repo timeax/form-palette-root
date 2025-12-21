@@ -1,5 +1,5 @@
 // src/core/hooks/use-field.ts
-// noinspection JSUnusedGlobalSymbols
+// noinspection JSUnusedGlobalSymbols,GrazieInspection
 
 import * as React from "react";
 
@@ -9,7 +9,9 @@ import type { Field } from "@/schema/field";
 
 export type UseFieldValidate<T> = (
     value: T,
-    report: boolean
+    field?: Field,
+    form?: CoreContext<any>,
+    report?: boolean
 ) => boolean | string;
 
 export interface UseFieldOptions<T = unknown> {
@@ -236,11 +238,14 @@ export function useField<T = unknown>(
     const id = React.useId();
     // Stable wiring keys
     // @ts-ignore
-    const keyRef = React.useRef<string>((() => {
-        if (rawName && rawName.trim()) return `${rawName.trim()}-${id}`;
-        if (rawBindId && rawBindId.trim()) return `${rawBindId.trim()}-${id}`;
-        return `field-${Math.random().toString(36).slice(2)}-${id}`;
-    })()) as React.MutableRefObject<string>;
+    const keyRef = React.useRef<string>(
+        (() => {
+            if (rawName && rawName.trim()) return `${rawName.trim()}-${id}`;
+            if (rawBindId && rawBindId.trim())
+                return `${rawBindId.trim()}-${id}`;
+            return `field-${Math.random().toString(36).slice(2)}-${id}`;
+        })()
+    ) as React.RefObject<string>;
 
     const bindIdRef = React.useRef<string>(
         (rawBindId && rawBindId.trim()) || keyRef.current
@@ -276,11 +281,16 @@ export function useField<T = unknown>(
                 ok = false;
                 message = "This field is required.";
             } else if (validate) {
-                const result = validate(current, !!report);
+                const result = validate(
+                    current,
+                    fieldRef.current!,
+                    form,
+                    !!report
+                );
                 if (typeof result === "string") {
                     ok = false;
                     message = result;
-                } else if (result === false) {
+                } else if (!result) {
                     ok = false;
                 }
             }
@@ -371,18 +381,18 @@ export function useField<T = unknown>(
 
     // Sync prop-driven flags when they change
     React.useEffect(() => {
-        setRequired(!!requiredProp);
+        setRequired(requiredProp);
         if (field) {
-            field.required = !!requiredProp;
+            field.required = requiredProp;
         }
     }, [requiredProp, field]);
 
     React.useEffect(() => {
-        setDisabled(!!disabledProp);
+        setDisabled(disabledProp);
     }, [disabledProp]);
 
     React.useEffect(() => {
-        setReadOnly(!!readOnlyProp);
+        setReadOnly(readOnlyProp);
     }, [readOnlyProp]);
 
     // Register field with the core
@@ -410,10 +420,10 @@ export function useField<T = unknown>(
             const props: any = form.props ?? {};
             const fn = props.onChange as
                 | ((
-                    form: CoreContext<Dict>,
-                    current: Field,
-                    options: Dict
-                ) => void)
+                      form: CoreContext<Dict>,
+                      current: Field,
+                      options: Dict
+                  ) => void)
                 | undefined;
 
             if (!fn) return;
@@ -459,9 +469,9 @@ export function useField<T = unknown>(
     }
 
     return {
-        ref,
+        ref: ref as React.RefObject<HTMLElement>,
         get key() {
-            return keyRef.current
+            return keyRef.current!;
         },
         value,
         setValue,

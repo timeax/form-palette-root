@@ -3,7 +3,11 @@
 
 import * as React from "react";
 
-import type { InputFieldClassNameProps, InputFieldClassNames, InputFieldProps } from "@/input/input-props";
+import type {
+    InputFieldClassNameProps,
+    InputFieldClassNames,
+    InputFieldProps,
+} from "@/input/input-props";
 import type {
     FieldLayoutConfig,
     LayoutResolveContext,
@@ -23,10 +27,7 @@ import {
     FieldTitle,
 } from "@/presets/ui/field";
 import { ChangeDetail } from "@/variants/shared";
-import {
-    buildLayoutGraph,
-    type HelperSlot,
-} from "@/input/input-layout-graph";
+import { buildLayoutGraph, type HelperSlot } from "@/input/input-layout-graph";
 import { cn } from "@/lib/utils";
 import { useOptionalField } from "@/core";
 
@@ -85,12 +86,10 @@ function renderHelperSlot(
             return (
                 <FieldDescription
                     key={`sublabel-${placement}-${root}`}
-                    className={[
+                    className={cn(
                         "text-xs text-muted-foreground",
-                        classes?.sublabel,
-                    ]
-                        .filter(Boolean)
-                        .join(" ")}
+                        classes?.sublabel
+                    )}
                     data-slot={`sublabel-${placement}`}
                 >
                     {slot.content}
@@ -101,12 +100,10 @@ function renderHelperSlot(
             return (
                 <FieldDescription
                     key={`description-${placement}-${root}`}
-                    className={[
+                    className={cn(
                         "text-xs text-muted-foreground",
-                        classes?.description,
-                    ]
-                        .filter(Boolean)
-                        .join(" ")}
+                        classes?.description
+                    )}
                     data-slot={`description-${placement}`}
                 >
                     {slot.content}
@@ -117,12 +114,10 @@ function renderHelperSlot(
             return (
                 <FieldDescription
                     key={`helpText-${placement}-${root}`}
-                    className={[
+                    className={cn(
                         "text-xs text-muted-foreground",
-                        classes?.helpText,
-                    ]
-                        .filter(Boolean)
-                        .join(" ")}
+                        classes?.helpText
+                    )}
                     data-slot={`helptext-${placement}`}
                 >
                     {slot.content}
@@ -133,12 +128,7 @@ function renderHelperSlot(
             return (
                 <FieldError
                     key={`error-${placement}-${root}`}
-                    className={[
-                        "text-xs text-destructive",
-                        classes?.error,
-                    ]
-                        .filter(Boolean)
-                        .join(" ")}
+                    className={cn("text-xs text-destructive", classes?.error)}
                     data-slot={`error-${placement}`}
                 >
                     {slot.content}
@@ -149,12 +139,7 @@ function renderHelperSlot(
             return (
                 <div
                     key={`tags-${placement}-${root}`}
-                    className={[
-                        "flex items-center gap-1",
-                        classes?.tags,
-                    ]
-                        .filter(Boolean)
-                        .join(" ")}
+                    className={cn("flex items-center gap-1", classes?.tags)}
                     data-slot={`tags-${placement}`}
                 >
                     {slot.content}
@@ -166,14 +151,6 @@ function renderHelperSlot(
     }
 }
 
-function mergeClass(
-    legacy?: string,
-    next?: string
-): string | undefined {
-    const value = [legacy, next].filter(Boolean).join(" ");
-    return value || undefined;
-}
-
 export function getClasses(
     props: InputFieldClassNameProps & {
         className?: string;
@@ -183,35 +160,31 @@ export function getClasses(
     const legacy = props.classes ?? {};
 
     return {
-        root: mergeClass(legacy.root, props.className),
+        root: cn(legacy.root, props.className) || undefined,
 
-        labelRow: mergeClass(legacy.labelRow, props.labelRowClassName),
-        inlineRow: mergeClass(legacy.inlineRow, props.inlineRowClassName),
+        labelRow: cn(legacy.labelRow, props.labelRowClassName) || undefined,
+        inlineRow: cn(legacy.inlineRow, props.inlineRowClassName) || undefined,
 
-        label: mergeClass(legacy.label, props.labelClassName),
-        sublabel: mergeClass(legacy.sublabel, props.sublabelClassName),
-        description: mergeClass(
-            legacy.description,
-            props.descriptionClassName
-        ),
-        helpText: mergeClass(legacy.helpText, props.helpTextClassName),
-        error: mergeClass(legacy.error, props.errorClassName),
+        label: cn(legacy.label, props.labelClassName) || undefined,
+        sublabel: cn(legacy.sublabel, props.sublabelClassName) || undefined,
+        description:
+            cn(legacy.description, props.descriptionClassName) || undefined,
+        helpText: cn(legacy.helpText, props.helpTextClassName) || undefined,
+        error: cn(legacy.error, props.errorClassName) || undefined,
 
-        group: mergeClass(legacy.group, props.groupClassName),
-        content: mergeClass(legacy.content, props.contentClassName),
-        variant: mergeClass(legacy.variant, props.variantClassName),
+        group: cn(legacy.group, props.groupClassName) || undefined,
+        content: cn(legacy.content, props.contentClassName) || undefined,
+        variant: cn(legacy.variant, props.variantClassName) || undefined,
 
-        inlineInputColumn: mergeClass(
-            legacy.inlineInputColumn,
-            props.inlineInputColumnClassName
-        ),
-        inlineLabelColumn: mergeClass(
-            legacy.inlineLabelColumn,
-            props.inlineLabelColumnClassName
-        ),
+        inlineInputColumn:
+            cn(legacy.inlineInputColumn, props.inlineInputColumnClassName) ||
+            undefined,
+        inlineLabelColumn:
+            cn(legacy.inlineLabelColumn, props.inlineLabelColumnClassName) ||
+            undefined,
 
-        required: mergeClass(legacy.required, props.requiredClassName),
-        tag: mergeClass(legacy.tag, props.tagClassName),
+        required: cn(legacy.required, props.requiredClassName) || undefined,
+        tag: cn(legacy.tag, props.tagClassName) || undefined,
     };
 }
 
@@ -362,25 +335,26 @@ export function InputField<K extends VariantKey = VariantKey>(
      * - per-field validation (props.onValidate)
      */
     const validate = React.useCallback(
-        (value: TValue | undefined, _report: boolean): boolean | string => {
+        (
+            value: TValue | undefined,
+            field: any,
+            form: any,
+            _report: boolean
+        ): boolean | string => {
             const messages: string[] = [];
 
             if (module.validate) {
                 const res = module.validate(value, {
                     required: !!required,
                     props: props as any,
-                    field: undefined as any,
-                    form: undefined as any,
+                    field: field as any,
+                    form: form as any,
                 });
                 messages.push(...normalizeValidateResult(res));
             }
 
             if (onValidate) {
-                const res = onValidate(
-                    value as any,
-                    undefined as any,
-                    undefined as any
-                );
+                const res = onValidate(value as any, field as any, form as any);
                 messages.push(...normalizeValidateResult(res));
             }
 
@@ -432,8 +406,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                     get isDefaultPrevented() {
                         return defaultPrevented;
                     },
-                    event:
-                        detail?.nativeEvent as
+                    event: detail?.nativeEvent as
                         | React.SyntheticEvent
                         | undefined,
                     detail: detail as ChangeDetail,
@@ -470,30 +443,23 @@ export function InputField<K extends VariantKey = VariantKey>(
     const isInline = !!layout.inline;
     const isCompactInline = isInline && layout.fullWidth === false;
 
-    const rootClassName = [
+    const rootClassName = cn(
         "gap-1",
-        contain && !inline
-            ? "rounded-xl border border-border bg-background"
-            : null,
+        contain && !inline && "rounded-xl border border-border bg-background",
         classes?.root,
-        className,
-    ]
-        .filter(Boolean)
-        .join(" ");
+        className
+    );
 
     // Variant-level className merge (host + classes.variant)
-    const hostVariantClass =
-        (rest as any).className as string | undefined;
+    const hostVariantClass = (rest as any).className as string | undefined;
 
     const mergedVariantClass =
-        ([
+        cn(
             // In compact inline mode, force the control to size to its content
-            isCompactInline ? "inline-flex w-auto" : null,
+            isCompactInline && "inline-flex w-auto",
             hostVariantClass,
-            classes?.variant,
-        ]
-            .filter(Boolean)
-            .join(" ")) || undefined;
+            classes?.variant
+        ) || undefined;
 
     // Build tags content cluster (individual pills)
     const tagsContent = React.useMemo(() => {
@@ -506,22 +472,18 @@ export function InputField<K extends VariantKey = VariantKey>(
                 {items.map((tag, index) => (
                     <span
                         key={index}
-                        className={[
+                        className={cn(
                             "inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium",
                             tag.className,
-                            classes?.tag,
-                        ]
-                            .filter(Boolean)
-                            .join(" ")}
+                            classes?.tag
+                        )}
                         style={{
                             color: tag.color,
                             backgroundColor: tag.bgColor,
                         }}
                     >
                         {tag.icon && (
-                            <span className="shrink-0">
-                                {tag.icon}
-                            </span>
+                            <span className="shrink-0">{tag.icon}</span>
                         )}
                         <span>{tag.label}</span>
                     </span>
@@ -548,14 +510,12 @@ export function InputField<K extends VariantKey = VariantKey>(
     const hasLabelSlotsAt = (placement: SlotPlacement): boolean => {
         let found = false;
 
-        graph
-            .getSlotsFor("label", placement)
-            .render((slots: HelperSlot[]) => {
-                if (slots.length > 0) {
-                    found = true;
-                }
-                return null;
-            });
+        graph.getSlotsFor("label", placement).render((slots: HelperSlot[]) => {
+            if (slots.length > 0) {
+                found = true;
+            }
+            return null;
+        });
 
         return found;
     };
@@ -588,38 +548,31 @@ export function InputField<K extends VariantKey = VariantKey>(
     // Width semantics for inline:
     // - compact inline (fullWidth === false) → input column is content-sized
     // - normal inline                     → input grows, label minimal
-    const inlineInputColClass = [
+    const inlineInputColClass = cn(
+        "flex flex-col",
         isCompactInline ? "flex-none" : "flex-1 min-w-0",
-        classes?.inlineInputColumn,
-    ]
-        .filter(Boolean)
-        .join(" ");
+        classes?.inlineInputColumn
+    );
 
-    const inlineLabelColClass = [
+    const inlineLabelColClass = cn(
         isCompactInline ? "flex-1 min-w-0" : "min-w-0",
-        classes?.inlineLabelColumn,
-    ]
-        .filter(Boolean)
-        .join(" ");
+        classes?.inlineLabelColumn
+    );
 
     const inlineFieldGroupClass = isCompactInline
-        ? [
-            // compact, content-sized group
-            "inline-flex w-auto",
-            // kill the Shadcn container on this group in compact-inline mode
-            "[container-type:normal]",
-            "[container-name:none]",
-            classes?.group,
-        ]
-            .filter(Boolean)
-            .join(" ")
-        : classes?.group ?? undefined;
+        ? cn(
+              // compact, content-sized group
+              "inline-flex w-auto",
+              // kill the Shadcn container on this group in compact-inline mode
+              "[container-type:normal]",
+              "[container-name:none]",
+              classes?.group
+          )
+        : (classes?.group ?? undefined);
 
     const inlineFieldContentClass = isCompactInline
-        ? ["flex-none w-auto", classes?.content]
-            .filter(Boolean)
-            .join(" ")
-        : ["w-full", classes?.content].filter(Boolean).join(" ");
+        ? cn("flex-none w-auto", classes?.content)
+        : cn("w-full", classes?.content);
 
     const inlineInputColumn = (
         <div className={inlineInputColClass}>
@@ -664,11 +617,7 @@ export function InputField<K extends VariantKey = VariantKey>(
 
     const inlineLabelColumn =
         inlineLabelSide === "hidden" || !hasAnyLabelBlockContent ? null : (
-            <div
-                className={["flex flex-col gap-0", inlineLabelColClass]
-                    .filter(Boolean)
-                    .join(" ")}
-            >
+            <div className={cn("flex flex-col gap-0", inlineLabelColClass)}>
                 {/* Above label (label root) */}
                 {graph
                     .getSlotsFor("label", "above")
@@ -680,38 +629,28 @@ export function InputField<K extends VariantKey = VariantKey>(
 
                 {hasLabelRowContent && (
                     <div
-                        className={[
+                        className={cn(
                             "flex items-baseline justify-between gap-1",
-                            classes?.labelRow,
-                        ]
-                            .filter(Boolean)
-                            .join(" ")}
+                            classes?.labelRow
+                        )}
                         data-slot="label-row"
                     >
                         {/* Left-of-label helpers (label root) */}
-                        {graph
-                            .getSlotsFor("label", "left")
-                            .render((slots) => (
-                                <div className="flex items-baseline gap-1">
-                                    {slots.map((slot) =>
-                                        renderHelperSlot(
-                                            "label",
-                                            slot,
-                                            classes
-                                        )
-                                    )}
-                                </div>
-                            ))}
+                        {graph.getSlotsFor("label", "left").render((slots) => (
+                            <div className="flex items-baseline gap-1">
+                                {slots.map((slot) =>
+                                    renderHelperSlot("label", slot, classes)
+                                )}
+                            </div>
+                        ))}
 
                         {label && (
                             <FieldLabel
                                 htmlFor={key}
-                                className={[
+                                className={cn(
                                     "text-sm font-medium text-foreground",
-                                    classes?.label,
-                                ]
-                                    .filter(Boolean)
-                                    .join(" ")}
+                                    classes?.label
+                                )}
                             >
                                 <FieldTitle>
                                     {label}{" "}
@@ -732,19 +671,13 @@ export function InputField<K extends VariantKey = VariantKey>(
                         )}
 
                         {/* Right-of-label helpers (label root) */}
-                        {graph
-                            .getSlotsFor("label", "right")
-                            .render((slots) => (
-                                <div className="flex items-baseline gap-1">
-                                    {slots.map((slot) =>
-                                        renderHelperSlot(
-                                            "label",
-                                            slot,
-                                            classes
-                                        )
-                                    )}
-                                </div>
-                            ))}
+                        {graph.getSlotsFor("label", "right").render((slots) => (
+                            <div className="flex items-baseline gap-1">
+                                {slots.map((slot) =>
+                                    renderHelperSlot("label", slot, classes)
+                                )}
+                            </div>
+                        ))}
                     </div>
                 )}
 
@@ -759,26 +692,24 @@ export function InputField<K extends VariantKey = VariantKey>(
             </div>
         );
 
-    const inlineRowClassName = [
-        "flex items-start gap-2",
-        classes?.inlineRow,
-    ]
-        .filter(Boolean)
-        .join(" ");
+    const inlineRowClassName = cn(
+        "flex gap-2",
+        hasLabelAboveSlots || hasLabelBelowSlots
+            ? "items-start"
+            : "items-center",
+        classes?.inlineRow
+    );
 
     // ─────────────────────────────────────────────────────
     // STACKED LAYOUT
     // ─────────────────────────────────────────────────────
 
-    const hasStackedLabelBlock =
-        lp !== "hidden" && hasAnyLabelBlockContent;
+    const hasStackedLabelBlock = lp !== "hidden" && hasAnyLabelBlockContent;
 
-    const stackedGroupClassName = [
-        hasStackedLabelBlock && hasLabelRowContent ? "mt-0.5" : null,
-        classes?.group,
-    ]
-        .filter(Boolean)
-        .join(" ");
+    const stackedGroupClassName = cn(
+        hasStackedLabelBlock && hasLabelRowContent && "mt-0.5",
+        classes?.group
+    );
 
     const Element = contain ? "div" : React.Fragment;
     const attrs = (a: "l" | "i" = "l") =>
@@ -804,10 +735,7 @@ export function InputField<K extends VariantKey = VariantKey>(
         >
             {isInline ? (
                 // INLINE MODE: label + control on the same row
-                <div
-                    className={inlineRowClassName}
-                    data-slot="inline-row"
-                >
+                <div className={inlineRowClassName} data-slot="inline-row">
                     {inlineLabelSide === "right" ? (
                         <>
                             {inlineInputColumn}
@@ -832,22 +760,16 @@ export function InputField<K extends VariantKey = VariantKey>(
                                 .getSlotsFor("label", "above")
                                 .render((slots) =>
                                     slots.map((slot) =>
-                                        renderHelperSlot(
-                                            "label",
-                                            slot,
-                                            classes
-                                        )
+                                        renderHelperSlot("label", slot, classes)
                                     )
                                 )}
 
                             {hasLabelRowContent && (
                                 <div
-                                    className={[
+                                    className={cn(
                                         "flex items-baseline justify-between gap-1",
-                                        classes?.labelRow,
-                                    ]
-                                        .filter(Boolean)
-                                        .join(" ")}
+                                        classes?.labelRow
+                                    )}
                                     data-slot="label-row"
                                 >
                                     {/* Left-of-label helpers (label root) */}
@@ -868,12 +790,10 @@ export function InputField<K extends VariantKey = VariantKey>(
                                     {label && (
                                         <FieldLabel
                                             htmlFor={key}
-                                            className={[
+                                            className={cn(
                                                 "text-sm font-medium text-foreground",
-                                                classes?.label,
-                                            ]
-                                                .filter(Boolean)
-                                                .join(" ")}
+                                                classes?.label
+                                            )}
                                         >
                                             <FieldTitle>
                                                 {label}{" "}
@@ -915,11 +835,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                                 .getSlotsFor("label", "below")
                                 .render((slots) =>
                                     slots.map((slot) =>
-                                        renderHelperSlot(
-                                            "label",
-                                            slot,
-                                            classes
-                                        )
+                                        renderHelperSlot("label", slot, classes)
                                     )
                                 )}
                         </Element>
@@ -931,22 +847,17 @@ export function InputField<K extends VariantKey = VariantKey>(
                             .getSlotsFor("input", "above")
                             .render((slots) =>
                                 slots.map((slot) =>
-                                    renderHelperSlot(
-                                        "input",
-                                        slot,
-                                        classes
-                                    )
+                                    renderHelperSlot("input", slot, classes)
                                 )
                             )}
 
                         <FieldGroup className={stackedGroupClassName}>
                             <FieldContent
-                                className={["w-full", classes?.content]
-                                    .filter(Boolean)
-                                    .join(" ")}
+                                className={cn("w-full", classes?.content)}
                             >
                                 <Variant
                                     {...(rest as any)}
+                                    id={key}
                                     ref={ref as any}
                                     value={value}
                                     onValue={handleValueChange}

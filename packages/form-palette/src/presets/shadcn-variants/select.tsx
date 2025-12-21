@@ -1,3 +1,5 @@
+// noinspection DuplicatedCode
+
 import * as React from "react";
 import type { VariantBaseProps, ChangeDetail } from "@/variants/shared";
 import { cn } from "@/lib/utils";
@@ -9,6 +11,7 @@ import {
 } from "@/presets/ui/select";
 import { Input } from "@/presets/ui/input";
 import { Search, X } from "lucide-react";
+import { globalNormalizeOptions } from "@/lib/normalise-options";
 
 type SelectPrimitive = string | number;
 
@@ -33,13 +36,15 @@ type NormalizedSelectItem = {
    description?: React.ReactNode;
    disabled?: boolean;
    icon?: React.ReactNode;
+   /** Option-level renderer (falls back to global renderOption) */
+   render?: (...args: any[]) => React.ReactNode;
    raw: SelectOption;
 };
 
 /**
  * Shadcn-based Select variant.
  */
-export interface ShadcnSelectVariantProps
+export interface SelectBaseProps
    extends Pick<
       VariantBaseProps<SelectPrimitive | undefined>,
       "value" | "onValue" | "error" | "disabled" | "readOnly" | "size" | "density"
@@ -156,6 +161,7 @@ export interface ShadcnSelectVariantProps
       selected: boolean;
       index: number;
       option: React.ReactNode; // prebuilt <SelectItem> you can wrap
+      click(): void
    }) => React.ReactNode;
 
    /**
@@ -170,13 +176,7 @@ export interface ShadcnSelectVariantProps
    // Icons & controls (mirror text variant concepts)
    // ─────────────────────────────────────────────
 
-   /**
-    * One or more icons displayed inside the trigger, on the left.
-    *
-    * If not provided and `icon` is set, that single icon
-    * is treated as `leadingIcons[0]`.
-    */
-   leadingIcons?: React.ReactNode[];
+   // (moved to default-mode props)
 
    /**
     * Icons displayed on the right side of the trigger,
@@ -262,19 +262,78 @@ export interface ShadcnSelectVariantProps
    virtualScrollThreshold?: number;
 }
 
+type SelectDefaultModeProps = {
+   mode?: "default";
+
+   // Icons & controls (default mode only)
+   leadingIcons?: React.ReactNode[];
+   trailingIcons?: React.ReactNode[];
+   icon?: React.ReactNode;
+   iconGap?: number;
+   leadingIconSpacing?: number;
+   trailingIconSpacing?: number;
+
+   leadingControl?: React.ReactNode;
+   trailingControl?: React.ReactNode;
+   leadingControlClassName?: string;
+   trailingControlClassName?: string;
+
+   joinControls?: boolean;
+   extendBoxToControls?: boolean;
+
+   // Not supported in default mode
+   button?: never;
+   children?: never;
+};
+
+type SelectButtonModeButton =
+   | React.ReactNode
+   | ((ctx: {
+        open: boolean;
+        selectedItem: NormalizedSelectItem | null;
+        selectedValue: SelectPrimitive | undefined;
+        placeholder?: React.ReactNode;
+     }) => React.ReactNode);
+
+type SelectButtonModeProps = {
+   mode: "button";
+
+   /**
+    * Used when mode="button". If provided, this is the trigger.
+    * If not provided, `children` is used.
+    */
+   button?: SelectButtonModeButton;
+   children?: SelectButtonModeButton;
+
+   // Icons & controls NOT supported in button mode
+   leadingIcons?: never;
+   trailingIcons?: never;
+   icon?: never;
+   iconGap?: never;
+   leadingIconSpacing?: never;
+   trailingIconSpacing?: never;
+
+   leadingControl?: never;
+   trailingControl?: never;
+   leadingControlClassName?: never;
+   trailingControlClassName?: never;
+
+   joinControls?: never;
+   extendBoxToControls?: never;
+};
+
+export type ShadcnSelectVariantProps =
+   SelectBaseProps & (SelectDefaultModeProps | SelectButtonModeProps);
+
 // ─────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────
 
-function capitalizeFirst(label: string): string {
-   if (!label) return label;
-   return label.charAt(0).toUpperCase() + label.slice(1);
-}
 
 function normalizeOptions(
    opts: readonly SelectOption[] | undefined,
    config: Pick<
-      ShadcnSelectVariantProps,
+      SelectBaseProps,
       | "autoCap"
       | "optionLabel"
       | "optionValue"
@@ -284,81 +343,7 @@ function normalizeOptions(
       | "optionIcon"
    >
 ): NormalizedSelectItem[] {
-   if (!opts || !opts.length) return [];
-
-   return opts.map((raw, index) => {
-      const asObj: any =
-         typeof raw === "string" || typeof raw === "number"
-            ? { label: String(raw), value: raw }
-            : raw;
-
-      const value: SelectPrimitive =
-         typeof config.optionValue === "function"
-            ? config.optionValue(raw)
-            : typeof config.optionValue === "string"
-               ? (asObj[config.optionValue] as SelectPrimitive)
-               : (asObj.value ??
-                  asObj.id ??
-                  asObj.key ??
-                  String(index));
-
-      let labelNode: React.ReactNode =
-         typeof config.optionLabel === "function"
-            ? config.optionLabel(raw)
-            : typeof config.optionLabel === "string"
-               ? asObj[config.optionLabel] ?? asObj.label ?? String(value)
-               : asObj.label ?? String(value);
-
-      if (config.autoCap && typeof labelNode === "string") {
-         labelNode = capitalizeFirst(labelNode);
-      }
-
-      const labelText =
-         typeof labelNode === "string"
-            ? labelNode
-            : typeof labelNode === "number"
-               ? String(labelNode)
-               : asObj.labelText ?? String(value);
-
-      const description: React.ReactNode =
-         typeof config.optionDescription === "function"
-            ? config.optionDescription(raw)
-            : typeof config.optionDescription === "string"
-               ? asObj[config.optionDescription]
-               : asObj.description;
-
-      const disabled: boolean =
-         typeof config.optionDisabled === "function"
-            ? config.optionDisabled(raw)
-            : typeof config.optionDisabled === "string"
-               ? !!asObj[config.optionDisabled]
-               : !!asObj.disabled;
-
-      const icon: React.ReactNode =
-         typeof config.optionIcon === "function"
-            ? config.optionIcon(raw)
-            : typeof config.optionIcon === "string"
-               ? asObj[config.optionIcon]
-               : asObj.icon;
-
-      const key: React.Key =
-         typeof config.optionKey === "function"
-            ? config.optionKey(raw, index)
-            : typeof config.optionKey === "string"
-               ? asObj[config.optionKey] ?? value ?? index
-               : asObj.key ?? value ?? index;
-
-      return {
-         key: String(key),
-         value,
-         labelNode,
-         labelText,
-         description,
-         disabled,
-         icon,
-         raw,
-      };
-   });
+   return globalNormalizeOptions(opts, config)
 }
 
 function triggerHeight(size?: Size) {
@@ -428,6 +413,9 @@ export const ShadcnSelectVariant = React.forwardRef<
       renderOption,
       renderValue,
 
+      // Mode
+      mode = "default",
+
       // Icons & controls
       leadingIcons,
       trailingIcons,
@@ -442,11 +430,17 @@ export const ShadcnSelectVariant = React.forwardRef<
       joinControls = true,
       extendBoxToControls = true,
 
+      // Button mode only
+      button,
+      children,
+
       // Virtual scroll / incremental render
       virtualScroll = false,
       virtualScrollPageSize = 50,
       virtualScrollThreshold = 48,
    } = props;
+
+   const isButtonMode = mode === "button";
 
    const [open, setOpen] = React.useState(false);
    const [query, setQuery] = React.useState("");
@@ -582,12 +576,13 @@ export const ShadcnSelectVariant = React.forwardRef<
    // ─────────────────────────────────────────────
 
    const resolvedLeadingIcons: React.ReactNode[] = (() => {
+      if (isButtonMode) return [];
       if (leadingIcons && leadingIcons.length) return leadingIcons;
       if (icon) return [icon];
       return [];
    })();
 
-   const resolvedTrailingIcons: React.ReactNode[] = trailingIcons ?? [];
+   const resolvedTrailingIcons: React.ReactNode[] = isButtonMode ? [] : (trailingIcons ?? []);
 
    const baseIconGap = iconGap ?? 4;
    const leadingGap = leadingIconSpacing ?? baseIconGap;
@@ -596,8 +591,8 @@ export const ShadcnSelectVariant = React.forwardRef<
    const hasLeadingIcons = resolvedLeadingIcons.length > 0;
    const hasTrailingIcons = resolvedTrailingIcons.length > 0;
 
-   const hasLeadingControl = !!leadingControl;
-   const hasTrailingControl = !!trailingControl;
+   const hasLeadingControl = !isButtonMode && !!leadingControl;
+   const hasTrailingControl = !isButtonMode && !!trailingControl;
    const hasControls = hasLeadingControl || hasTrailingControl;
 
    const triggerInner = renderValue ? (
@@ -627,8 +622,85 @@ export const ShadcnSelectVariant = React.forwardRef<
       "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
    );
 
+   const ButtonModeTrigger = React.useMemo(() => {
+      if (!isButtonMode) return null;
+
+      const selectedValue = value as SelectPrimitive | undefined;
+      const renderable = button ?? children;
+
+      const content: React.ReactNode = (() => {
+         if (typeof renderable === "function") {
+            return renderable({
+               open,
+               selectedItem,
+               selectedValue,
+               placeholder,
+            });
+         }
+
+         if (renderable != null) return renderable;
+
+         // Default fallback:
+         // - if options have icons, show selected icon (or first icon)
+         // - else show simple label
+         const iconNode =
+            selectedItem?.icon ?? items.find((it) => it.icon)?.icon ?? null;
+
+         if (iconNode) {
+            return (
+               <span className="inline-flex items-center justify-center">
+                  {iconNode}
+               </span>
+            );
+         }
+
+         return (
+            <span className="truncate">
+               {selectedItem?.labelNode ?? (placeholder ?? "Select...")}
+            </span>
+         );
+      })();
+
+      // Important: SelectTrigger wants a single element child when asChild.
+      // Use a button by default to keep it accessible.
+      return (
+         <button
+            ref={_ref}
+            type="button"
+            disabled={disabled || readOnly}
+            className={cn(
+               "inline-flex items-center justify-center",
+               "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+               triggerClassName
+            )}
+            aria-label={
+               selectedItem?.labelText
+                  ? `Selected: ${selectedItem.labelText}`
+                  : "Select"
+            }
+         >
+            {content}
+         </button>
+      );
+   }, [
+      isButtonMode,
+      button,
+      children,
+      open,
+      selectedItem,
+      value,
+      placeholder,
+      items,
+      disabled,
+      readOnly,
+      triggerClassName,
+      _ref,
+   ]);
+
    // Trigger content (inner layout: icons + label + clear + trailing icons)
-   const TriggerBody = (
+   const TriggerBody = isButtonMode ? (
+      <SelectTrigger asChild>{ButtonModeTrigger}</SelectTrigger>
+   ) : (
       <SelectTrigger
          onPointerDown={(e) => {
             if (e.target instanceof HTMLButtonElement) {
@@ -731,7 +803,7 @@ export const ShadcnSelectVariant = React.forwardRef<
          {TriggerBody}
 
          <SelectContent
-            className={cn("min-w-[8rem]", contentClassName)}
+            className={cn("min-w-32", contentClassName)}
          >
             {searchable && (
                <div className="p-1">
@@ -792,20 +864,28 @@ export const ShadcnSelectVariant = React.forwardRef<
                               </div>
                            </div>
                         </SelectItem>
-                     );
+                       );
 
-                     if (!renderOption) return optionNode;
+                       // Prefer per-option renderer (normalized) if present; fall back to global renderOption
+                       const renderer = (item as any).render ?? renderOption;
 
-                     return renderOption({
-                        item,
-                        selected:
-                           selectedItem != null &&
-                           String(selectedItem.value) ===
-                           String(item.value),
-                        index,
-                        option: optionNode,
-                     });
-                  })}
+                       if (!renderer) return optionNode;
+
+                       return renderer({
+                          item,
+                          selected:
+                             selectedItem != null &&
+                             String(selectedItem.value) === String(item.value),
+                          index,
+                          option: optionNode,
+                          click() {
+                             if (disabled || readOnly || item.disabled) return;
+                             handleChange(String(item.value));
+                             setOpen(false);
+                             setQuery("");
+                          },
+                       });
+                    })}
 
                   {virtualScroll &&
                      renderedItems.length <
@@ -827,8 +907,8 @@ export const ShadcnSelectVariant = React.forwardRef<
    // - controls, separate boxes
    // ─────────────────────────────────────────────
 
-   // CASE 1: no controls → just the select
-   if (!hasControls) {
+   // CASE 1: button mode OR no controls → just the select
+   if (isButtonMode || !hasControls) {
       return (
          <div
             data-slot="select-field"

@@ -22,13 +22,6 @@
       "groupName": "schema",
       "groupRoot": "./"
     },
-    "schema/field-map.ts": {
-      "path": "schema/field-map.ts",
-      "createdAt": "2025-11-28T17:28:01.964Z",
-      "sizeAtCreate": 0,
-      "groupName": "schema",
-      "groupRoot": "./"
-    },
     "schema/core.ts": {
       "path": "schema/core.ts",
       "createdAt": "2025-11-28T17:28:01.967Z",
@@ -221,13 +214,6 @@
     "variants/shared.ts": {
       "path": "variants/shared.ts",
       "createdAt": "2025-11-28T17:28:02.092Z",
-      "sizeAtCreate": 0,
-      "groupName": "variants",
-      "groupRoot": "./"
-    },
-    "variants/select-shared.ts": {
-      "path": "variants/select-shared.ts",
-      "createdAt": "2025-11-28T17:28:02.096Z",
       "sizeAtCreate": 0,
       "groupName": "variants",
       "groupRoot": "./"
@@ -552,6 +538,104 @@
       "createdAt": "2025-12-11T06:34:22.071Z",
       "sizeAtCreate": 0,
       "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/core/json-editor.tsx": {
+      "path": "variants/core/json-editor.tsx",
+      "createdAt": "2025-12-18T23:40:19.019Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "lib/json-editor/filters.ts": {
+      "path": "lib/json-editor/filters.ts",
+      "createdAt": "2025-12-19T00:32:23.858Z",
+      "sizeAtCreate": 0,
+      "groupName": "utils",
+      "groupRoot": "./"
+    },
+    "lib/json-editor/tree.ts": {
+      "path": "lib/json-editor/tree.ts",
+      "createdAt": "2025-12-19T00:34:19.605Z",
+      "sizeAtCreate": 0,
+      "groupName": "utils",
+      "groupRoot": "./"
+    },
+    "lib/json-editor/utils.ts": {
+      "path": "lib/json-editor/utils.ts",
+      "createdAt": "2025-12-19T00:47:33.918Z",
+      "sizeAtCreate": 0,
+      "groupName": "utils",
+      "groupRoot": "./"
+    },
+    "lib/json-editor/types.ts": {
+      "path": "lib/json-editor/types.ts",
+      "createdAt": "2025-12-19T02:42:54.698Z",
+      "sizeAtCreate": 0,
+      "groupName": "utils",
+      "groupRoot": "./"
+    },
+    "lib/json-editor/routes.ts": {
+      "path": "lib/json-editor/routes.ts",
+      "createdAt": "2025-12-19T02:42:54.704Z",
+      "sizeAtCreate": 0,
+      "groupName": "utils",
+      "groupRoot": "./"
+    },
+    "lib/json-editor/layout.ts": {
+      "path": "lib/json-editor/layout.ts",
+      "createdAt": "2025-12-19T02:42:54.705Z",
+      "sizeAtCreate": 0,
+      "groupName": "utils",
+      "groupRoot": "./"
+    },
+    "lib/json-editor/glob.ts": {
+      "path": "lib/json-editor/glob.ts",
+      "createdAt": "2025-12-19T02:42:54.706Z",
+      "sizeAtCreate": 0,
+      "groupName": "utils",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/json-editor/types.ts": {
+      "path": "presets/shadcn-variants/json-editor/types.ts",
+      "createdAt": "2025-12-20T06:09:49.579Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/json-editor/index.tsx": {
+      "path": "presets/shadcn-variants/json-editor/index.tsx",
+      "createdAt": "2025-12-20T06:09:49.587Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/json-editor/header.tsx": {
+      "path": "presets/shadcn-variants/json-editor/header.tsx",
+      "createdAt": "2025-12-20T06:09:49.589Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/json-editor/raw-panel.tsx": {
+      "path": "presets/shadcn-variants/json-editor/raw-panel.tsx",
+      "createdAt": "2025-12-20T06:09:49.590Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/json-editor/main.tsx": {
+      "path": "presets/shadcn-variants/json-editor/main.tsx",
+      "createdAt": "2025-12-20T06:09:49.593Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/json-editor/editor.tsx": {
+      "path": "presets/shadcn-variants/json-editor/editor.tsx",
+      "createdAt": "2025-12-20T07:30:34.488Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
       "groupRoot": "./"
     }
   }

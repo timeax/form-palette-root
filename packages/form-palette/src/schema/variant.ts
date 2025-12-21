@@ -1,4 +1,5 @@
 // src/schema/variant.ts
+// noinspection GrazieInspection
 
 import type { ComponentType } from "react";
 
@@ -20,7 +21,7 @@ import {
 import { ShadcnChipsVariantProps } from "@/presets/shadcn-variants/chips";
 import { ShadcnTextareaVariantProps } from "@/presets/shadcn-variants/textarea";
 import { ShadcnToggleVariantProps } from "@/presets/shadcn-variants/toggle";
-import { RadioItem, ShadcnRadioVariantProps } from "@/presets/shadcn-variants/radio";
+import { ShadcnRadioVariantProps } from "@/presets/shadcn-variants/radio";
 import { CheckboxVariantPublicValue, ShadcnCheckboxVariantPublicProps } from "@/presets/shadcn-variants/checkbox";
 import { ShadcnMultiSelectVariantProps } from "@/presets/shadcn-variants/multiselect";
 import { SliderValue } from "@/variants/core/slider";
@@ -32,6 +33,9 @@ import { FileLike, ShadcnFileVariantProps } from "@/presets/shadcn-variants/file
 import { ShadcnTextVariantProps } from "@/presets/shadcn-variants/text";
 import { SelectVariantProps } from "@/variants/core/select";
 import { ShadcnToggleVariantProps as ShadcnToggleGroupVariantProps } from "@/presets/shadcn-variants/toggle-group";
+import { ShadcnEditorVariantProps } from "@/presets/shadcn-variants/editor";
+import { JsonObject } from "@/lib/json-editor/utils";
+import { ShadcnJsonEditorProps } from "@/presets/shadcn-variants/json-editor/types";
 
 /**
  * Helper type for a single variant registry entry.
@@ -94,6 +98,8 @@ export interface Variants<H = unknown> {
     custom: VariantEntry<unknown | undefined, ShadcnCustomVariantProps>,
     treeselect: VariantEntry<string | number | undefined, ShadcnTreeSelectVariantProps>,
     file: VariantEntry<FileLike, ShadcnFileVariantProps>
+    editor: VariantEntry<string | undefined, ShadcnEditorVariantProps>
+    'json-editor': VariantEntry<JsonObject | undefined, ShadcnJsonEditorProps>
 }
 
 

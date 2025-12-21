@@ -103,7 +103,7 @@ function deepEqual(a: unknown, b: unknown): boolean {
  *   - named inputs via `name`
  *   - bound inputs via `bindId`
  *   - grouped inputs via `groupId`
- * - Manages errors + uncaught messages
+ * - Manages errors and uncaught messages
  * - Builds values snapshots (including bucket values)
  * - Orchestrates submission via the adapter registry
  */
@@ -116,10 +116,11 @@ export function CoreProvider<
 
     // Single input store: FieldRegistry
     const registryRef = React.useRef<FieldRegistry>(new FieldRegistry());
-
+``
     // bucket, errors, button
     const bucketRef = React.useRef<Dict>({});
     const uncaughtRef = React.useRef<string[]>([]);
+    const errorsRef = React.useRef<Dict<string> | null>(null);
     const buttonRef = React.useRef<ButtonRef | null>(null);
     const activeButtonNameRef = React.useRef<string | null>(null);
 
@@ -137,7 +138,7 @@ export function CoreProvider<
 
     const adapterKey = (props.adapter ?? "local") as AdapterKey;
     const schema = props.schema;
-
+    const errorBagId = props.name ?? undefined;
     let context!: CoreContext<Values>;
 
     // ─────────────────────────────────────────────────────────
@@ -181,6 +182,7 @@ export function CoreProvider<
 
     function setFieldError(name: string, message: string) {
         const field = findFieldForErrorKey(name);
+
         if (field) {
             const anyField = field as any;
             if (typeof anyField.setError === "function") {
@@ -304,9 +306,7 @@ export function CoreProvider<
         return valid;
     }
 
-    function getAdapterPropsFrom(
-        current: Props<V, S, K>
-    ): AdapterProps<K> {
+    function getAdapterPropsFrom(current: Props<V, S, K>): AdapterProps<K> {
         const result: any = {};
         for (const key in current) {
             if (!CORE_PROP_KEYS.has(key)) {
@@ -368,7 +368,7 @@ export function CoreProvider<
 
         // Base adapter config from props + override from caller
         let adapterConfig: AdapterProps<K> = {
-            ...getAdapterPropsFrom(currentProps) as any,
+            ...(getAdapterPropsFrom(currentProps) as any),
             ...(adapterOverride as Partial<AdapterProps<K>> | undefined),
         };
 
@@ -389,7 +389,7 @@ export function CoreProvider<
                 } else if (arg1 && typeof arg1 === "object") {
                     // partial props
                     adapterConfig = {
-                        ...adapterConfig as any,
+                        ...(adapterConfig as any),
                         ...arg1,
                     };
                 }
@@ -429,6 +429,7 @@ export function CoreProvider<
 
             // core config
             data: submissionValues,
+            errorBag: errorBagId,
             callbacks: {
                 onSuccess(ok: unknown) {
                     const maybe = propsRef.current.onSubmitted;
@@ -438,7 +439,7 @@ export function CoreProvider<
                         });
                     }
                 },
-                onError(err: unknown) {
+                onError(err: unknown, updateRef) {
                     if (!autoErr || !err || typeof err !== "object") {
                         return;
                     }
@@ -446,13 +447,17 @@ export function CoreProvider<
                     const anyErr = err as any;
                     if (anyErr.errors && typeof anyErr.errors === "object") {
                         const { fieldErrors, uncaught } = mapErrorBag(
-                            anyErr.errors
+                            anyErr.errors ?? {}
                         );
-                        for (const [name, message] of Object.entries(
-                            fieldErrors
-                        )) {
-                            setFieldError(name, message);
-                        }
+
+                        if (updateRef) {
+                            errorsRef.current = fieldErrors;
+                        } else
+                            for (const [name, message] of Object.entries(
+                                fieldErrors
+                            )) {
+                                setFieldError(name, message);
+                            }
                         if (uncaught.length) {
                             uncaughtRef.current.push(...uncaught);
                         }
@@ -467,11 +472,11 @@ export function CoreProvider<
                 },
             },
         });
-
         if (autoRun) {
             try {
                 await adapter.send();
-            } catch {
+            } catch (e) {
+                console.log("Adapter failed to send.", e);
                 // errors flow via callbacks; adapter may still call onFinish
             }
         }
@@ -532,7 +537,7 @@ export function CoreProvider<
                             return (
                                 rn === trimmed &&
                                 ((f as any).shared as string | undefined) ===
-                                sharedKey
+                                    sharedKey
                             );
                         });
                         const idx = siblings.length;
@@ -671,20 +676,20 @@ export function CoreProvider<
                 feed ||
                 (propsRef.current.valueFeed
                     ? (
-                        name: string,
-                        value: unknown,
-                        original: unknown
-                    ): unknown => {
-                        const vf = propsRef.current.valueFeed!;
-                        const maybe = vf(
-                            name as keyof Values,
-                            value as any,
-                            context as any
-                        );
-                        return typeof maybe === "undefined"
-                            ? original
-                            : maybe;
-                    }
+                          name: string,
+                          value: unknown,
+                          original: unknown
+                      ): unknown => {
+                          const vf = propsRef.current.valueFeed!;
+                          const maybe = vf(
+                              name as keyof Values,
+                              value as any,
+                              context as any
+                          );
+                          return typeof maybe === "undefined"
+                              ? original
+                              : maybe;
+                      }
                     : undefined);
 
             for (const field of fetchAllNamedFields()) {
@@ -796,13 +801,7 @@ export function CoreProvider<
         },
 
         go(data?: Partial<Values>, ignoreForm?: boolean): void {
-            void submitWithAdapter(
-                undefined,
-                data,
-                ignoreForm,
-                true,
-                true
-            );
+            void submitWithAdapter(undefined, data, ignoreForm, true, true);
         },
 
         reset(inputs: string[]): void {
@@ -829,13 +828,7 @@ export function CoreProvider<
         },
 
         async forceSubmit(): Promise<void> {
-            await submitWithAdapter(
-                undefined,
-                undefined,
-                false,
-                true,
-                true
-            );
+            await submitWithAdapter(undefined, undefined, false, true, true);
         },
 
         get fields(): Field[] {

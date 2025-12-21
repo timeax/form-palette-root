@@ -1,5 +1,5 @@
 // src/schema/adapter.ts
-import { Page } from './../../../../node_modules/@inertiajs/core/types/types.d';
+import { Page } from "@inertiajs/core";
 
 import { AxiosRequestConfig, AxiosResponse } from "axios";
 
@@ -27,7 +27,7 @@ export interface AdapterCallbacks<Ok = unknown, Err = unknown> {
      * Called when the underlying request fails.
      * Adapters should pass the most informative error shape they have.
      */
-    onError?(error: Err): void;
+    onError?(error: Err, updateRef?: boolean): void;
 
     /**
      * Called at the end of the adapter lifecycle, whether success or error.
@@ -106,6 +106,8 @@ export interface AdapterConfig<Body = unknown, Ok = unknown, Err = unknown> {
      *   { ...formValues, ...extra }
      */
     data: Body;
+
+    errorBag?: string;
 
     /**
      * Lifecycle callbacks provided by the core.

@@ -91,7 +91,7 @@ export interface UseButtonReturn {
 export function useButton(options: UseButtonOptions): UseButtonReturn {
     const form = useCoreContext<Dict>();
 
-    const { name, submit, disabled: disabledProp = false, onClick } = options;
+    const { name, disabled: disabledProp = false } = options;
 
     const [loading, setLoadingState] = React.useState<boolean>(false);
     const [disabled, setDisabledState] = React.useState<boolean>(
@@ -138,7 +138,7 @@ export function useButton(options: UseButtonOptions): UseButtonReturn {
             get disabled() {
                 return disabled;
             },
-            ref,
+            ref: ref as React.RefObject<HTMLButtonElement>,
         };
 
         // Also expose setLoading for CoreProvider's convenience
@@ -208,10 +208,10 @@ export function useButton(options: UseButtonOptions): UseButtonReturn {
         setLoading,
         disabled,
         setDisabled,
-        ref,
+        ref: ref as React.RefObject<HTMLButtonElement>,
         onClick: handleClick,
         buttonProps: {
-            ref,
+            ref: ref as React.RefObject<HTMLButtonElement>,
             disabled: disabled || loading,
             "data-loading": loading ? "true" : "false",
             onClick: handleClick,

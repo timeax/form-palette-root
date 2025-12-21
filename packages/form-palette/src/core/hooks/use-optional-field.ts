@@ -57,9 +57,9 @@ export function useOptionalField<T = unknown>(
     const [value, setValueState] = React.useState<T | undefined>(defaultValue);
     const [error, setErrorState] = React.useState<string>("");
     const [loading, setLoadingState] = React.useState<boolean>(false);
-    const [required, setRequired] = React.useState<boolean>(!!requiredProp);
-    const [disabled, setDisabled] = React.useState<boolean>(!!disabledProp);
-    const [readOnly, setReadOnly] = React.useState<boolean>(!!readOnlyProp);
+    const [required, setRequired] = React.useState<boolean>(requiredProp);
+    const [disabled, setDisabled] = React.useState<boolean>(disabledProp);
+    const [readOnly, setReadOnly] = React.useState<boolean>(readOnlyProp);
 
     const originalRef = React.useRef<unknown>(
         getOriginalValue
@@ -89,15 +89,15 @@ export function useOptionalField<T = unknown>(
 
     // Keep prop-driven flags in sync
     React.useEffect(() => {
-        setRequired(!!requiredProp);
+        setRequired(requiredProp);
     }, [requiredProp]);
 
     React.useEffect(() => {
-        setDisabled(!!disabledProp);
+        setDisabled(disabledProp);
     }, [disabledProp]);
 
     React.useEffect(() => {
-        setReadOnly(!!readOnlyProp);
+        setReadOnly(readOnlyProp);
     }, [readOnlyProp]);
 
     function setValue(next: T | undefined, variant: string = "direct") {
@@ -134,11 +134,11 @@ export function useOptionalField<T = unknown>(
             ok = false;
             message = "This field is required.";
         } else if (validate) {
-            const result = validate(current, !!report);
+            const result = validate(current, undefined, undefined, !!report);
             if (typeof result === "string") {
                 ok = false;
                 message = result;
-            } else if (result === false) {
+            } else if (!result) {
                 ok = false;
             }
         }
@@ -154,7 +154,7 @@ export function useOptionalField<T = unknown>(
     const dummyForm = {} as CoreContext<Dict>;
 
     return {
-        ref,
+        ref: ref as React.RefObject<HTMLElement>,
         get key() {
             return keyRef.current;
         },

@@ -3,12 +3,12 @@
 import * as React from "react";
 
 import type {
-   FieldLayoutConfig,
-   FieldOrdering,
-   FieldRootId,
-   FieldSlotId,
-   RelativeRootsMap,
-   SlotPlacement,
+    FieldLayoutConfig,
+    FieldOrdering,
+    FieldRootId,
+    FieldSlotId,
+    RelativeRootsMap,
+    SlotPlacement,
 } from "@/schema/input-field";
 
 /**
@@ -21,10 +21,10 @@ import type {
 export type HelperSlotId = Exclude<FieldSlotId, FieldRootId>;
 
 export interface HelperSlot {
-   id: HelperSlotId;
-   root: FieldRootId;
-   placement: SlotPlacement;
-   content: React.ReactNode;
+    id: HelperSlotId;
+    root: FieldRootId;
+    placement: SlotPlacement;
+    content: React.ReactNode;
 }
 
 /**
@@ -35,47 +35,42 @@ export interface HelperSlot {
  *   otherwise returns null (so React renders nothing).
  */
 export interface SlotAccessor {
-   root: FieldRootId;
-   placement: SlotPlacement;
+    root: FieldRootId;
+    placement: SlotPlacement;
 
-   /**
-    * Concrete list of slots for this root + placement.
-    * May be an empty array.
-    */
-   slots(): HelperSlot[];
+    /**
+     * Concrete list of slots for this root + placement.
+     * May be an empty array.
+     */
+    slots(): HelperSlot[];
 
-   /**
-    * Render this group.
-    *
-    * If no slots are present, returns null so nothing is rendered.
-    *
-    * Example:
-    *   graph
-    *     .getSlotsFor("input", "below")
-    *     .render((slots) =>
-    *       slots.map((slot) =>
-    *         renderHelperSlot("input", slot, classes)
-    *       )
-    *     );
-    */
-   render(
-      renderFn: (slots: HelperSlot[]) => React.ReactNode
-   ): React.ReactNode;
+    /**
+     * Render this group.
+     *
+     * If no slots are present, returns null so nothing is rendered.
+     *
+     * Example:
+     *   graph
+     *     .getSlotsFor("input", "below")
+     *     .render((slots) =>
+     *       slots.map((slot) =>
+     *         renderHelperSlot("input", slot, classes)
+     *       )
+     *     );
+     */
+    render(renderFn: (slots: HelperSlot[]) => React.ReactNode): React.ReactNode;
 }
 
 /**
  * Layout graph for helpers.
  */
 export interface LayoutGraph {
-   helperSlots: HelperSlot[];
+    helperSlots: HelperSlot[];
 
-   /**
-    * Get a slot accessor for a given root + placement.
-    */
-   getSlotsFor(
-      root: FieldRootId,
-      placement: SlotPlacement
-   ): SlotAccessor;
+    /**
+     * Get a slot accessor for a given root + placement.
+     */
+    getSlotsFor(root: FieldRootId, placement: SlotPlacement): SlotAccessor;
 }
 
 /**
@@ -83,10 +78,10 @@ export interface LayoutGraph {
  * does not specify anything.
  */
 const defaultRelativeRoots: RelativeRootsMap = {
-   sublabel: "label",
-   description: "input",
-   helpText: "input",
-   errorText: "input",
+    sublabel: "label",
+    description: "input",
+    helpText: "input",
+    errorText: "input",
 };
 
 /**
@@ -97,30 +92,32 @@ const defaultRelativeRoots: RelativeRootsMap = {
  * root + placement. It does not decide the placement itself.
  */
 const defaultOrdering: FieldOrdering = {
-   label: ["sublabel"],
-   input: ["errorText", "description", "helpText"],
+    label: ["sublabel"],
+    input: ["errorText", "description", "helpText"],
 };
 
 function defaultPlacementFor(id: HelperSlotId): SlotPlacement {
-   if (id === "sublabel") {
-      // Typical: small label text to the right of the main label
-      return "right";
-   }
-   // For description/help/error, "below" the root is the usual default
-   return "below";
+    if (id === "sublabel") {
+        // Typical: small label text to the right of the main label
+        return "right";
+    }
+
+    if (id == "tags") return "right";
+    // For description/help/error, "below" the root is the usual default
+    return "below";
 }
 
 interface BuildLayoutGraphArgs {
-   layout: FieldLayoutConfig;
-   /**
-    * Raw contents for each helper slot.
-    * Undefined/null means "no slot".
-    */
-   sublabel?: React.ReactNode;
-   description?: React.ReactNode;
-   helpText?: React.ReactNode;
-   errorText?: React.ReactNode;
-   tags?: React.ReactNode;
+    layout: FieldLayoutConfig;
+    /**
+     * Raw contents for each helper slot.
+     * Undefined/null means "no slot".
+     */
+    sublabel?: React.ReactNode;
+    description?: React.ReactNode;
+    helpText?: React.ReactNode;
+    errorText?: React.ReactNode;
+    tags?: React.ReactNode;
 }
 
 /**
@@ -128,103 +125,100 @@ interface BuildLayoutGraphArgs {
  * - the effective layout (after variant defaults + overrides)
  * - the actual content for each slot
  */
-export function buildLayoutGraph(
-   args: BuildLayoutGraphArgs
-): LayoutGraph {
-   const { layout, sublabel, description, helpText, errorText, tags } = args;
+export function buildLayoutGraph(args: BuildLayoutGraphArgs): LayoutGraph {
+    const { layout, sublabel, description, helpText, errorText, tags } = args;
 
-   const relativeRoots: RelativeRootsMap = {
-      ...defaultRelativeRoots,
-      ...(layout.relativeRoots ?? {}),
-   };
+    const relativeRoots: RelativeRootsMap = {
+        ...defaultRelativeRoots,
+        ...(layout.relativeRoots ?? {}),
+    };
 
-   const ordering: FieldOrdering = {
-      ...defaultOrdering,
-      ...(layout.ordering ?? {}),
-   };
+    const ordering: FieldOrdering = {
+        ...defaultOrdering,
+        ...(layout.ordering ?? {}),
+    };
 
-   const helperSlots: HelperSlot[] = [];
+    const helperSlots: HelperSlot[] = [];
 
-   const pushSlot = (
-      id: HelperSlotId,
-      content: React.ReactNode | undefined,
-      placement: SlotPlacement | undefined
-   ) => {
-      if (content === undefined || content === null) return;
+    const pushSlot = (
+        id: HelperSlotId,
+        content: React.ReactNode | undefined,
+        placement: SlotPlacement | undefined,
+    ) => {
+        if (content === undefined || content === null) return;
 
-      const root: FieldRootId =
-         relativeRoots[id] ??
-         (id === "sublabel" ? "label" : "input");
+        const root: FieldRootId =
+            relativeRoots[id] ?? ((id === "sublabel" || id == 'tags') ? "label" : "input");
 
-      const effectivePlacement: SlotPlacement =
-         placement ?? defaultPlacementFor(id);
+        const effectivePlacement: SlotPlacement =
+            placement ?? defaultPlacementFor(id);
 
-      if (effectivePlacement === "hidden") return;
+        if (effectivePlacement === "hidden") return;
 
-      helperSlots.push({
-         id,
-         root,
-         placement: effectivePlacement,
-         content,
-      });
-   };
+        helperSlots.push({
+            id,
+            root,
+            placement: effectivePlacement,
+            content,
+        });
+    };
 
-   pushSlot("sublabel", sublabel, layout.sublabelPlacement);
-   pushSlot("description", description, layout.descriptionPlacement);
-   pushSlot("helpText", helpText, layout.helpTextPlacement);
-   pushSlot("errorText", errorText, layout.errorTextPlacement);
-   pushSlot("tags", tags, layout.tagPlacement)
+    pushSlot("sublabel", sublabel, layout.sublabelPlacement);
+    pushSlot("description", description, layout.descriptionPlacement);
+    pushSlot("helpText", helpText, layout.helpTextPlacement);
+    pushSlot("errorText", errorText, layout.errorTextPlacement);
+    pushSlot("tags", tags, layout.tagPlacement);
 
-   function makeAccessor(
-      root: FieldRootId,
-      placement: SlotPlacement
-   ): SlotAccessor {
-      // cache per accessor so multiple .slots()/.render() calls
-      // don't keep re-filtering
-      let cache: HelperSlot[] | null = null;
+    function makeAccessor(
+        root: FieldRootId,
+        placement: SlotPlacement,
+    ): SlotAccessor {
+        // cache per accessor so multiple .slots()/.render() calls
+        // don't keep re-filtering
+        let cache: HelperSlot[] | null = null;
 
-      const compute = (): HelperSlot[] => {
-         if (cache) return cache;
+        const compute = (): HelperSlot[] => {
+            if (cache) return cache;
 
-         const base = helperSlots.filter(
-            (s) => s.root === root && s.placement === placement
-         );
+            const base = helperSlots.filter(
+                (s) => s.root === root && s.placement === placement,
+            );
 
-         const order = ordering[root] ?? [];
-         if (!order.length) {
-            cache = base;
+            const order = ordering[root] ?? [];
+            if (!order.length) {
+                cache = base;
+                return cache;
+            }
+
+            cache = [...base].sort((a, b) => {
+                const ai = order.indexOf(a.id);
+                const bi = order.indexOf(b.id);
+
+                const aRank = ai === -1 ? Number.POSITIVE_INFINITY : ai;
+                const bRank = bi === -1 ? Number.POSITIVE_INFINITY : bi;
+
+                return aRank - bRank;
+            });
+
             return cache;
-         }
+        };
 
-         cache = [...base].sort((a, b) => {
-            const ai = order.indexOf(a.id);
-            const bi = order.indexOf(b.id);
+        return {
+            root,
+            placement,
+            slots: () => compute(),
+            render(renderFn) {
+                const slots = compute();
+                if (!slots.length) return null; // nothing rendered
+                return renderFn(slots);
+            },
+        };
+    }
 
-            const aRank = ai === -1 ? Number.POSITIVE_INFINITY : ai;
-            const bRank = bi === -1 ? Number.POSITIVE_INFINITY : bi;
-
-            return aRank - bRank;
-         });
-
-         return cache;
-      };
-
-      return {
-         root,
-         placement,
-         slots: () => compute(),
-         render(renderFn) {
-            const slots = compute();
-            if (!slots.length) return null; // nothing rendered
-            return renderFn(slots);
-         },
-      };
-   }
-
-   return {
-      helperSlots,
-      getSlotsFor(root, placement) {
-         return makeAccessor(root, placement);
-      },
-   };
+    return {
+        helperSlots,
+        getSlotsFor(root, placement) {
+            return makeAccessor(root, placement);
+        },
+    };
 }

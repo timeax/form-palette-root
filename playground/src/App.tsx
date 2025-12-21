@@ -1,10 +1,31 @@
+//@ts-nocheck
+
 import * as React from "react";
 import { Form, Input, InputField } from "@timeax/form-palette";
-import { Check, Globe2, Hash, Info, MapPin, SearchIcon, Volume2, VolumeX } from "lucide-react";
+import {
+    Check,
+    Globe2,
+    Hash,
+    Info,
+    MapPin,
+    SearchIcon,
+    Volume2,
+    VolumeX,
+} from "lucide-react";
 import { Textarea } from "@timeax/form-palette";
 import { cn } from "@timeax/form-palette/lib/utils";
 import { TreeSelectOption } from "@timeax/form-palette/presets/shadcn-variants/treeselect";
-import { FileItem, CustomFileLoader, FileLike } from "@timeax/form-palette/presets/shadcn-variants/file";
+import {
+    FileItem,
+    CustomFileLoader,
+    FileLike,
+} from "@timeax/form-palette/presets/shadcn-variants/file";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@radix-ui/react-popover";
+import { HeadlessResponsiveDialog } from "./dialog";
 
 const permissionOptions = [
     { code: "read", title: "Read content", notes: "View only" },
@@ -18,7 +39,10 @@ export const App: React.FC = () => {
         // alert("Submitted (dummy)");
         console.log(e.form.inputs.getByName("email"), e.formData);
     }
-    const [regions, setRegions] = React.useState<(string | number)[] | undefined>();
+    const [regions, setRegions] = React.useState<
+        (string | number)[] | undefined
+    >();
+    const [openDialog, setOpenDialog] = React.useState(true);
     const regionOptions: TreeSelectOption[] = [
         {
             label: "Africa",
@@ -93,476 +117,568 @@ export const App: React.FC = () => {
                 page.
             </p>
 
-            <InputField variant='text' />
-            <Form onSubmit={handleSubmit}>
-                <InputField
-                    contain
-                    icon={
-                        <>
-                            <SearchIcon /> icon detected
-                        </>
-                    }
-                    name="email"
-                    label="Email"
-                    sublabel="@example.com"
-                    helpText="This is all fake for now."
-                    onChange={(e: any) => {
-                        console.log("Changed value:", e);
-                        // e.preventDefault()
-                    }}
-                    errorText="This field is required."
-                    variant="text"
-                />
-
-                <InputField
-                    name="phone"
-                    label="Phone"
-                    variant="text"
-                    mask="+99 99 999 999? x999"
-                    slotChar="_"
-                    onChange={(e: any) => {
-                        console.log("Phone changed:", e);
-                        // e.preventDefault();
-                    }}
-                    // unmask="raw" // form gets only digits
-                    leadingControl={<span>Leading control</span>}
-                    prefix="number: "
-                    autoClear // clears if incomplete on blur
-                />
-
-                <InputField
-                    name="password"
-                    label="Password"
-                    variant="phone"
-                    onChange={(e: any) => {
-                        console.log("Password changed:", e);
-                        // e.preventDefault();
-                    }}
-                    showToggle
-                />
-
-                <InputField
-                    name="age"
-                    label="Age"
-                    variant="number"
-                    onChange={(e: any) => {
-                        console.log("Age changed:", e);
-                        // e.value = 42;
-                        // e.detail.nativeEvent.preventDefault();
-                    }}
-                    showButtons
-                    min={0}
-                    max={120}
-                    step={1}
-                />
-
-                <InputField
-                    name="color"
-                    label="Favorite colour"
-                    variant="color"
-                    onChange={(e: any) => {
-                        console.log("Color changed:", e);
-                        // e.preventDefault();
-                    }}
-                    showPreview
-                    previewButtonClassName="bg-gray-200 hover:bg-gray-300"
-                />
-
-                <InputField
-                    name="phone-variant"
-                    label="Password variant"
-                    variant="password"
-                    placeholder='Enter your password '
-                    strengthMeter
-                    meterStyle="rules"
-                    onChange={(e: any) => {
-                        console.log("Phone variant changed:", e);
-                        // e.preventDefault();
-                    }}
-                />
-
-                <InputField
-                    name="birthdate"
-                    label="Birthdate"
-                    variant="date"
-                    onChange={(e: any) => {
-                        console.log("Date changed:", e);
-                        // e.preventDefault();
-                    }}
-                />
-
-                <InputField
-                    name="tags"
-                    label="Tags"
-                    variant="chips"
-                    textareaMode
-                    maxChipWidth={150}
-                    onChange={(e: any) => {
-                        console.log("Tags changed:", e);
-                        // e.preventDefault();
-                    }}
-                />
-
-                <InputField
-                    name="notes"
-                    label="Notes"
-                    variant="textarea"
-                    rows={4}
-                    autoResize={false}
-                    placeholder="Write your notes here…"
-                    onChange={(e: any) => {
-                        console.log("Notes changed:", e);
-                        // e.preventDefault();
-                    }}
-                />
-
-                <InputField
-                    name="subscribe"
-                    helpText={<span>You agree to our <a href="#">terms of service</a></span>}
-                    label="Subscribe to newsletter"
-                    variant="toggle"
-                    onChange={(e: any) => {
-                        console.log("Subscribe changed:", e);
-                        // e.preventDefault();
-                    }}
-                />
-
-                <SubscribeField />
-
-                <InputField
-                    name="plan"
-                    variant="radio"
-                    label="Choose a plan"
-                    items={[
-                        { value: "free", label: "Free", description: "Basic features" },
-                        { value: "pro", label: "Pro", description: "Advanced tools" },
-                    ]}
-                    renderOption={({ item, selected, disabled, radio }) => (
-                        <label className="flex w-full cursor-pointer items-center gap-3">
-                            {radio}
-                            <div className="flex flex-col">
-                                <span className="font-medium">
-                                    {item.label} {selected && "✓"}
-                                </span>
-                                {item.description && (
-                                    <span className="text-xs text-muted-foreground">
-                                        {item.description}
+            <div className="mb-4">
+                <button
+                    className="rounded-md border px-3 py-1 text-sm"
+                    type="button"
+                    onClick={() => setOpenDialog(true)}
+                >
+                    Open Form Dialog
+                </button>
+            </div>
+            <InputField variant={"checkbox"} label={"Remember me"} single />
+            <HeadlessResponsiveDialog
+                open={openDialog}
+                onOpenChange={setOpenDialog}
+                title="Playground Form"
+                description="All form fields wrapped in a responsive dialog."
+                drawerAt={640}
+                drawerSide="bottom"
+                maxVh={90}
+            >
+                <Form wrapped gap={15} onSubmit={handleSubmit}>
+                    <InputField
+                        contain
+                        icon={
+                            <>
+                                <SearchIcon /> icon detected
+                            </>
+                        }
+                        name="email"
+                        label="Email"
+                        sublabel="@example.com"
+                        helpText="This is all fake for now."
+                        onChange={(e: any) => {
+                            console.log("Changed value:", e);
+                            // e.preventDefault()
+                        }}
+                        errorText="This field is required."
+                        variant="text"
+                    />
+                    <InputField
+                        name="phone"
+                        label="Phone"
+                        variant="text"
+                        mask="+99 99 999 999? x999"
+                        slotChar="_"
+                        onChange={(e: any) => {
+                            console.log("Phone changed:", e);
+                            // e.preventDefault();
+                        }}
+                        // unmask="raw" // form gets only digits
+                        leadingControl={<span>Leading control</span>}
+                        prefix="number: "
+                        autoClear // clears if incomplete on blur
+                    />
+                    <InputField
+                        name="password"
+                        label="Password"
+                        variant="phone"
+                        onChange={(e: any) => {
+                            console.log("Password changed:", e);
+                            // e.preventDefault();
+                        }}
+                        showToggle
+                    />
+                    <InputField
+                        name="age"
+                        label="Age"
+                        variant="number"
+                        onChange={(e: any) => {
+                            console.log("Age changed:", e);
+                            // e.value = 42;
+                            // e.detail.nativeEvent.preventDefault();
+                        }}
+                        showButtons
+                        min={0}
+                        max={120}
+                        step={1}
+                    />
+                    <InputField
+                        name="color"
+                        label="Favorite colour"
+                        variant="color"
+                        onChange={(e: any) => {
+                            console.log("Color changed:", e);
+                            // e.preventDefault();
+                        }}
+                        showPreview
+                        previewButtonClassName="bg-gray-200 hover:bg-gray-300"
+                    />
+                    <InputField
+                        name="phone-variant"
+                        label="Password variant"
+                        variant="password"
+                        placeholder="Enter your password "
+                        strengthMeter
+                        meterStyle="rules"
+                        onChange={(e: any) => {
+                            console.log("Phone variant changed:", e);
+                            // e.preventDefault();
+                        }}
+                    />
+                    <InputField
+                        name="birthdate"
+                        label="Birthdate"
+                        variant="date"
+                        onChange={(e: any) => {
+                            console.log("Date changed:", e);
+                            // e.preventDefault();
+                        }}
+                    />
+                    <InputField
+                        name="tags"
+                        label="Tags"
+                        variant="chips"
+                        textareaMode
+                        maxChipWidth={150}
+                        onChange={(e: any) => {
+                            console.log("Tags changed:", e);
+                            // e.preventDefault();
+                        }}
+                    />
+                    <InputField
+                        name="notes"
+                        label="Notes"
+                        variant="textarea"
+                        rows={4}
+                        autoResize={false}
+                        placeholder="Write your notes here…"
+                        onChange={(e: any) => {
+                            console.log("Notes changed:", e);
+                            // e.preventDefault();
+                        }}
+                    />
+                    <InputField
+                        name="subscribe"
+                        helpText={
+                            <span>
+                                You agree to our{" "}
+                                <a href="#">terms of service</a>
+                            </span>
+                        }
+                        label="Subscribe to newsletter"
+                        variant="toggle"
+                        onChange={(e: any) => {
+                            console.log("Subscribe changed:", e);
+                            // e.preventDefault();
+                        }}
+                    />
+                    <SubscribeField />
+                    <InputField
+                        name="plan"
+                        variant="radio"
+                        label="Choose a plan"
+                        items={[
+                            {
+                                value: "free",
+                                label: "Free",
+                                description: "Basic features",
+                            },
+                            {
+                                value: "pro",
+                                label: "Pro",
+                                description: "Advanced tools",
+                            },
+                        ]}
+                        renderOption={({ item, selected, disabled, radio }) => (
+                            <label className="flex w-full cursor-pointer items-center gap-3">
+                                {radio}
+                                <div className="flex flex-col">
+                                    <span className="font-medium">
+                                        {item.label} {selected && "✓"}
                                     </span>
-                                )}
-                            </div>
-                        </label>
-                    )}
-
-                    onChange={(e) => {
-                        console.log(e)
-                    }}
-                />
-
-                <InputField
-                    name="newsletter"
-                    variant="checkbox"
-                    label="Subscribe to newsletter"
-                    helpText="We only email occasionally."
-                    // single-mode checkbox
-                    single
-                    // non-tristate (default)
-                    defaultValue={false} // unchecked (or omit)
-                />
-
-                <InputField
-                    name="gdpr_consent"
-                    variant="checkbox"
-                    label="GDPR consent"
-                    description="You can explicitly accept or reject."
-                    // single checkbox tri-state
-                    single
-                    tristate
-                    // undefined → internal "none"
-                    defaultValue={undefined}
-                    onChange={(e) => {
-                        console.log(e.value)
-                    }}
-                />
-
-                <InputField
-                    name="roles"
-                    variant="checkbox"
-                    label="Roles"
-                    description="Select the roles assigned to this user."
-                    // non-tristate group
-                    items={[
-                        { value: "viewer", label: "Viewer" },
-                        { value: "editor", label: "Editor" },
-                        { value: "admin", label: "Admin", description: "Full access" },
-                    ]}
-                    defaultValue={[
-                        { value: "viewer", state: true },
-                    ]}
-                />
-
-                <InputField
-                    name="permissions"
-                    variant="checkbox"
-                    label="Permissions"
-                    sublabel="Tri-state aware"
-                    helpText="True/false both have meaning; 'none' is not stored."
-                    tristate // default for all items
-                    items={[
-                        {
-                            value: "read",
-                            label: "Read",
-                            description: "Can view content",
-                            // inherits tristate: true
-                        },
-                        {
-                            value: "write",
-                            label: "Write",
-                            description: "Can modify content",
-                            // inherits tristate: true
-                        },
-                        {
-                            value: "delete",
-                            label: "Delete",
-                            description: "Can remove content",
-                            tristate: false, // specific item is normal on/off
-                        },
-                    ]}
-                    defaultValue={[
-                        { value: "read", state: true },
-                        { value: "write", state: false },
-                        // "delete" starts at "none" (no entry)
-                    ]}
-                    onChange={e => {
-                        console.log(e.value)
-                    }}
-                />
-
-                <InputField
-                    name="permissions2"
-                    variant="checkbox"
-                    label="Permissions (optionValue/optionLabel)"
-                    items={permissionOptions}
-                    tristate
-                    optionValue="code"   // maps to TValue
-                    optionLabel="title"  // label to display
-                    renderOption={({ item, checkbox, state, effectiveTristate }) => (
-                        <div className="flex w-full items-start gap-3">
-                            {checkbox}
-                            <div className="flex min-w-0 flex-col">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm font-medium">
-                                        {item.label}
-                                    </span>
-                                    {effectiveTristate && (
-                                        <span className="text-[0.7rem] text-muted-foreground">
-                                            {state === "none"
-                                                ? "No stance"
-                                                : state === true
-                                                    ? "Allowed"
-                                                    : "Explicitly denied"}
+                                    {item.description && (
+                                        <span className="text-xs text-muted-foreground">
+                                            {item.description}
                                         </span>
                                     )}
                                 </div>
+                            </label>
+                        )}
+                        onChange={(e) => {
+                            console.log(e);
+                        }}
+                    />
+                    <InputField
+                        name="newsletter"
+                        variant="checkbox"
+                        label="Subscribe to newsletter"
+                        helpText="We only email occasionally."
+                        // single-mode checkbox
+                        single
+                        // non-tristate (default)
+                        defaultValue={false} // unchecked (or omit)
+                    />
+                    <InputField
+                        name="gdpr_consent"
+                        variant="checkbox"
+                        label="GDPR consent"
+                        description="You can explicitly accept or reject."
+                        // single checkbox tri-state
+                        single
+                        tristate
+                        // undefined → internal "none"
+                        defaultValue={undefined}
+                        onChange={(e) => {
+                            console.log(e.value);
+                        }}
+                    />
+                    <InputField
+                        name="roles"
+                        variant="checkbox"
+                        label="Roles"
+                        description="Select the roles assigned to this user."
+                        // non-tristate group
+                        items={[
+                            { value: "viewer", label: "Viewer" },
+                            { value: "editor", label: "Editor" },
+                            {
+                                value: "admin",
+                                label: "Admin",
+                                description: "Full access",
+                            },
+                        ]}
+                        defaultValue={[{ value: "viewer", state: true }]}
+                    />
+                    <InputField
+                        name="permissions"
+                        variant="checkbox"
+                        label="Permissions"
+                        sublabel="Tri-state aware"
+                        helpText="True/false both have meaning; 'none' is not stored."
+                        tristate // default for all items
+                        items={[
+                            {
+                                value: "read",
+                                label: "Read",
+                                description: "Can view content",
+                                // inherits tristate: true
+                            },
+                            {
+                                value: "write",
+                                label: "Write",
+                                description: "Can modify content",
+                                // inherits tristate: true
+                            },
+                            {
+                                value: "delete",
+                                label: "Delete",
+                                description: "Can remove content",
+                                tristate: false, // specific item is normal on/off
+                            },
+                        ]}
+                        defaultValue={[
+                            { value: "read", state: true },
+                            { value: "write", state: false },
+                            // "delete" starts at "none" (no entry)
+                        ]}
+                        onChange={(e) => {
+                            console.log(e.value);
+                        }}
+                    />
+                    <InputField
+                        name="permissions2"
+                        variant="checkbox"
+                        label="Permissions (optionValue/optionLabel)"
+                        items={permissionOptions}
+                        tristate
+                        optionValue="code" // maps to TValue
+                        optionLabel="title" // label to display
+                        renderOption={({
+                            item,
+                            checkbox,
+                            state,
+                            effectiveTristate,
+                        }) => (
+                            <div className="flex w-full items-start gap-3">
+                                {checkbox}
+                                <div className="flex min-w-0 flex-col">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm font-medium">
+                                            {item.label}
+                                        </span>
+                                        {effectiveTristate && (
+                                            <span className="text-[0.7rem] text-muted-foreground">
+                                                {state === "none"
+                                                    ? "No stance"
+                                                    : state === true
+                                                      ? "Allowed"
+                                                      : "Explicitly denied"}
+                                            </span>
+                                        )}
+                                    </div>
 
-                                {item.description && (
-                                    <span className="mt-0.5 text-xs text-muted-foreground">
-                                        {item.description}
-                                    </span>
-                                )}
+                                    {item.description && (
+                                        <span className="mt-0.5 text-xs text-muted-foreground">
+                                            {item.description}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
+                        )}
+                    />
+                    <InputField
+                        name="marketing_optin"
+                        variant="checkbox"
+                        label="Marketing emails"
+                        helpText="We might send you updates about new features."
+                        single
+                        // inline row: checkbox + label on one row
+                        inline
+                        labelPlacement="right"
+                    />
+                    <InputField
+                        name="country"
+                        variant="select"
+                        label="Country"
+                        helpText="Used for billing & tax."
+                        // ⬇️ These are SELECT VARIANT props, but they live directly on InputField
+                        options={[]}
+                        optionValue="code"
+                        optionLabel="name"
+                        searchable
+                        searchPlaceholder="Search countries..."
+                        emptyLabel="No country selected"
+                        emptySearchText="No countries found"
+                        clearable
+                        // still works with shared props like disabled, required, size, density, etc.
+                        required
+                    />
+                    <InputField
+                        name="status"
+                        variant="select"
+                        label="Status"
+                        // options={["active", "paused", "disabled"]}
+                        searchable={false}
+                        clearable
+                        icon={<span>O</span>}
+                        autoCap
+                    />
+                    <BigSelectPrimitiveDemo />
+                    <InputField
+                        variant="multi-select"
+                        name="countries"
+                        options={["ng", "gh", "ke", "tz"]}
+                        autoCap
+                        showSelectAll
+                        clearable
+                        searchable
+                    />
+                    <InputField
+                        variant="slider"
+                        name="volume"
+                        label="Volume"
+                        helpText="Drag to adjust"
+                        min={0}
+                        max={100}
+                        step={5}
+                    />
+                    <InputField
+                        variant="slider"
+                        name="volume"
+                        label="Volume"
+                        helpText="Drag to adjust"
+                        min={0}
+                        max={100}
+                        step={5}
+                        // variant props – all flat, no wrapper
+                        leadingIcons={[
+                            <VolumeX key="quiet" className="h-4 w-4" />,
+                        ]}
+                        trailingIcons={[
+                            <Volume2 key="loud" className="h-4 w-4" />,
+                        ]}
+                        leadingControl={
+                            <button
+                                type="button"
+                                className="px-2 text-xs"
+                                onClick={() => {
+                                    // your own handler via onChange if you want
+                                }}
+                            >
+                                -10
+                            </button>
+                        }
+                        trailingControl={
+                            <button
+                                type="button"
+                                className="px-2 text-xs"
+                                onClick={() => {
+                                    // your own handler via onChange if you want
+                                }}
+                            >
+                                +10
+                            </button>
+                        }
+                    />
+                    // Boxed (first sketch)
+                    <InputField
+                        variant="slider"
+                        name="counter"
+                        min={0}
+                        max={100}
+                        step={5}
+                        label="Counter"
+                        controlVariant="boxed"
+                    />
+                    // Edge / loose (second sketch)
+                    <InputField
+                        variant="slider"
+                        name="counterLoose"
+                        min={0}
+                        max={100}
+                        step={5}
+                        label="Counter"
+                        controlVariant="edge"
+                    />
+                    <InputField variant="keyvalue" label="Key values" />
+                    <AppCustomVariantDemo />
+                    <InputField
+                        name="regions"
+                        label="Regions"
+                        description="Pick one or more regions / countries."
+                        variant="treeselect" // <-- your ShadcnTreeSelectVariant, wired in the registry
+                        value={regions}
+                        onValue={(next, detail) => {
+                            // `next` is (string | number)[] | undefined
+                            // `detail.raw` is the last toggled node's raw option object
+                            console.log("TREE VALUE:", next);
+                            console.log("LAST TOGGLED RAW:", detail.raw);
+                            setRegions(next);
+                        }}
+                        // Tree-select specific props (merged into InputField props)
+                        options={regionOptions}
+                        searchable
+                        searchPlaceholder="Search regions…"
+                        placeholder="Select regions…"
+                        clearable
+                        autoCap
+                        emptySearchText="No matching region"
+                        // Only leaf nodes are selectable (countries, not continents)
+                        leafOnly
+                        expandAll
+                        // Icons & controls (same pattern as text/select/slider)
+                        icon={
+                            <Globe2 className="h-4 w-4 text-muted-foreground" />
+                        }
+                        trailingIcons={[
+                            <MapPin
+                                key="pin"
+                                className="h-3.5 w-3.5 text-muted-foreground"
+                            />,
+                        ]}
+                        joinControls
+                        // extendBoxToControls
+                        size="md"
+                        multiple={false}
+                        density="comfortable"
+                    />
+                    <InputField
+                        variant="file"
+                        multiple={false}
+                        placeholder="Load file"
+                        onChange={(e) => console.log(e)}
+                    />
+                    <InputField
+                        variant="toggle-group"
+                        options={["light", "dark"]}
+                        autoCap
+                        itemClassName="bg-amber-600"
+                        activeClassName="data-[state=on]:bg-[red]"
+                        fillWidth
+                    />
+                    <InputField variant={"editor"} />
+                    <InputField
+                        variant="json-editor"
+                        label="Configuration (Popover)"
+                        description="Advanced JSON configuration with schema validation (Popover mode)"
+                        defaultValue={{
+                            api: {
+                                endpoint: "https://api.example.com",
+                                timeout: 5000,
+                                retry: true,
+                            },
+                            features: ["auth", "logging"],
+                        }}
+                        schema={{
+                            type: "object",
+                            properties: {
+                                api: {
+                                    type: "object",
+                                    properties: {
+                                        endpoint: { type: "string", format: "uri" },
+                                        timeout: { type: "number", minimum: 0 },
+                                        retry: { type: "boolean" },
+                                    },
+                                    required: ["endpoint"],
+                                },
+                                features: {
+                                    type: "array",
+                                    items: { type: "string" },
+                                },
+                            },
+                        }}
+                    />
+                    <InputField
+                        variant="json-editor"
+                        mode="accordion"
+                        label="Settings (Accordion)"
+                        description="Inline JSON editor with accordion-like expansion"
+                        defaultValue={{
+                            theme: "dark",
+                            notifications: {
+                                email: true,
+                                push: false,
+                            },
+                        }}
+                    />
+                    <AppSamples />
+                    <button type="submit">Submit</button>
+                </Form>
+            </HeadlessResponsiveDialog>
+
+            <div className="mt-10 p-6 border-t">
+                <h2 className="text-xl font-bold mb-4">JSON Editor Samples (Outside Dialog)</h2>
+                <Form onSubmit={(e) => console.log("Outside form submit", e.formData)}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-4">
+                            <h3 className="font-semibold">Accordion Mode</h3>
+                            <InputField
+                                variant="json-editor"
+                                mode="accordion"
+                                label="Project Config"
+                                description="Directly embedded in the layout"
+                                defaultValue={{
+                                    name: "form-palette",
+                                    version: "1.0.0",
+                                    dependencies: {
+                                        react: "^18.0.0",
+                                        ajv: "^8.0.0"
+                                    }
+                                }}
+                            />
                         </div>
-                    )}
-                />
-
-                <InputField
-                    name="marketing_optin"
-                    variant="checkbox"
-                    label="Marketing emails"
-                    helpText="We might send you updates about new features."
-                    single
-                    // inline row: checkbox + label on one row
-                    inline
-                    labelPlacement="right"
-                />
-
-                <InputField
-                    name="country"
-                    variant="select"
-                    label="Country"
-                    helpText="Used for billing & tax."
-
-                    // ⬇️ These are SELECT VARIANT props, but they live directly on InputField
-                    options={[
-                        { code: "ng", name: "Nigeria" },
-                        { code: "gh", name: "Ghana" },
-                        { code: "ke", name: "Kenya" },
-                    ]}
-                    optionValue="code"
-                    optionLabel="name"
-                    searchable
-                    searchPlaceholder="Search countries..."
-                    emptyLabel="No country selected"
-                    emptySearchText="No countries found"
-                    clearable
-
-                    // still works with shared props like disabled, required, size, density, etc.
-                    required
-                />
-
-                <InputField
-                    name="status"
-                    variant="select"
-                    label="Status"
-                    // options={["active", "paused", "disabled"]}
-                    searchable={false}
-                    clearable
-                    icon={<span>O</span>}
-                    autoCap
-                />
-
-                <BigSelectPrimitiveDemo />
-
-                <InputField
-                    variant="multi-select"
-                    name="countries"
-                    options={["ng", "gh", "ke", "tz"]}
-                    autoCap
-                    showSelectAll
-                    clearable
-                    searchable
-                />
-
-                <InputField
-                    variant="slider"
-                    name="volume"
-                    label="Volume"
-                    helpText="Drag to adjust"
-                    min={0}
-                    max={100}
-                    step={5}
-                />
-
-                <InputField
-                    variant="slider"
-                    name="volume"
-                    label="Volume"
-                    helpText="Drag to adjust"
-                    min={0}
-                    max={100}
-                    step={5}
-                    // variant props – all flat, no wrapper
-                    leadingIcons={[<VolumeX key="quiet" className="h-4 w-4" />]}
-                    trailingIcons={[<Volume2 key="loud" className="h-4 w-4" />]}
-                    leadingControl={
-                        <button
-                            type="button"
-                            className="px-2 text-xs"
-                            onClick={() => {
-                                // your own handler via onChange if you want
-                            }}
-                        >
-                            -10
-                        </button>
-                    }
-                    trailingControl={
-                        <button
-                            type="button"
-                            className="px-2 text-xs"
-                            onClick={() => {
-                                // your own handler via onChange if you want
-                            }}
-                        >
-                            +10
-                        </button>
-                    }
-                />
-
-                // Boxed (first sketch)
-                <InputField
-                    variant="slider"
-                    name="counter"
-                    min={0}
-                    max={100}
-                    step={5}
-                    label="Counter"
-                    controlVariant="boxed"
-                />
-
-// Edge / loose (second sketch)
-                <InputField
-                    variant="slider"
-                    name="counterLoose"
-                    min={0}
-                    max={100}
-                    step={5}
-                    label="Counter"
-                    controlVariant="edge"
-                />
-
-                <InputField
-                    variant='keyvalue'
-                    label="Key values"
-                />
-
-                <AppCustomVariantDemo />
-
-                <InputField
-                    name="regions"
-                    label="Regions"
-                    description="Pick one or more regions / countries."
-                    variant="treeselect" // <-- your ShadcnTreeSelectVariant, wired in the registry
-                    value={regions}
-                    onValue={(next, detail) => {
-                        // `next` is (string | number)[] | undefined
-                        // `detail.raw` is the last toggled node's raw option object
-                        console.log("TREE VALUE:", next);
-                        console.log("LAST TOGGLED RAW:", detail.raw);
-                        setRegions(next);
-                    }}
-                    // Tree-select specific props (merged into InputField props)
-                    options={regionOptions}
-                    searchable
-                    searchPlaceholder="Search regions…"
-                    placeholder="Select regions…"
-                    clearable
-                    autoCap
-                    emptySearchText="No matching region"
-                    // Only leaf nodes are selectable (countries, not continents)
-                    leafOnly
-                    expandAll
-                    // Icons & controls (same pattern as text/select/slider)
-                    icon={<Globe2 className="h-4 w-4 text-muted-foreground" />}
-                    trailingIcons={[
-                        <MapPin key="pin" className="h-3.5 w-3.5 text-muted-foreground" />,
-                    ]}
-                    joinControls
-                    // extendBoxToControls
-                    size="md"
-                    multiple={false}
-                    density="comfortable"
-                />
-
-                <InputField
-                    variant='file'
-                    multiple={false}
-                    placeholder='Load file'
-                    onChange={e => console.log(e)}
-                />
-
-                <InputField
-                    variant='toggle-group'
-                    options={['light', 'dark']}
-                    autoCap
-                    itemClassName='bg-amber-600'
-                    activeClassName='data-[state=on]:bg-[red]'
-                    fillWidth
-                />
-
-                <AppSamples />
-
-                <button type="submit">Submit</button>
-            </Form>
-
+                        <div className="space-y-4">
+                            <h3 className="font-semibold">Popover Mode</h3>
+                            <InputField
+                                variant="json-editor"
+                                mode="popover"
+                                label="User Metadata"
+                                description="Opens in a popover for better space usage"
+                                triggerLabel="Edit Metadata"
+                                defaultValue={{
+                                    lastLogin: "2023-10-27T10:00:00Z",
+                                    preferences: {
+                                        language: "en",
+                                        timezone: "UTC"
+                                    }
+                                }}
+                            />
+                        </div>
+                    </div>
+                </Form>
+            </div>
 
             {/* <div className="my-5 space-y-5">
                 <Textarea
@@ -588,7 +704,6 @@ export const App: React.FC = () => {
         </div>
     );
 };
-
 
 export function AppSamples() {
     const [files, setFiles] = React.useState<FileItem[]>([]);
@@ -630,32 +745,33 @@ export function AppSamples() {
                 name="hero_media"
                 label="Hero media"
                 description="Selected via custom media manager, but drag-and-drop still works."
-
                 // value + change
                 value={files}
                 onValue={(next, detail) => {
                     setFiles(next);
                     console.log("file change", next, detail);
                 }}
-
                 // core file behaviour (all flat props – NO variantProps)
                 multiple
                 customLoader={mediaManagerLoader}
-                mergeMode="append"          // or "replace"
+                mergeMode="append" // or "replace"
                 showDropArea
                 dropTitle="Click to open media manager or drop files"
                 dropDescription="You can mix uploads with existing media files."
-                showCheckboxes              // enable multi-select + bulk delete
+                showCheckboxes // enable multi-select + bulk delete
                 accept={["image/*", ".pdf"]}
 
-            // optional: custom item renderer etc. (if you expose them)
-            // renderFileItem={({ item }) => <div>{item.name}</div>}
+                // optional: custom item renderer etc. (if you expose them)
+                // renderFileItem={({ item }) => <div>{item.name}</div>}
             />
         </div>
     );
 }
 
-const bigCountryList = Array.from({ length: 2000 }, (_, i) => `country-${i + 1}`);
+const bigCountryList = Array.from(
+    { length: 2000 },
+    (_, i) => `country-${i + 1}`
+);
 
 export function BigSelectPrimitiveDemo() {
     return (
@@ -673,8 +789,8 @@ export function BigSelectPrimitiveDemo() {
                 placeholder="Choose one…"
                 // performance bits
                 virtualScroll
-                virtualScrollPageSize={80}      // show 80 at a time
-                virtualScrollThreshold={64}     // load more when ~64px from bottom
+                virtualScrollPageSize={80} // show 80 at a time
+                virtualScrollThreshold={64} // load more when ~64px from bottom
                 // just to show the value coming back
                 onChange={(e) => {
                     // e.value is string | undefined here
@@ -705,11 +821,9 @@ export function SubscribeField() {
         <InputField
             name="subscribe"
             variant="radio"
-
             // chrome
             label="Subscribe to product updates?"
             helpText="You can toggle this off anytime."
-
             // everything else (sublabel, description, helpText, error)
             // will be positioned by the smart layout graph
 
@@ -719,7 +833,6 @@ export function SubscribeField() {
             // helpTextPlacement="below"
 
             defaultValue={"yes" as SubscribeDecision}
-
             items={subscribeOptions}
         />
     );
@@ -749,7 +862,6 @@ function CommentBox() {
         />
     );
 }
-
 
 function NotesWithAction() {
     const [value, setValue] = React.useState("");
@@ -842,13 +954,12 @@ function HexDumpTextarea() {
             placeholder="Enter hex data (0–9, A–F)…"
             size="md"
             density="compact"
-            keyFilter="hex"        // preset from the textarea
+            keyFilter="hex" // preset from the textarea
             keyFilterOn="beforeinput"
             keyFilterOnPaste={true}
         />
     );
 }
-
 
 /**
  * Example custom control that doesn't know anything

@@ -1,3 +1,13 @@
 # utils.txt
 # Structure file for @timeax/scaffold
 # Define your desired folders/files here.
+
+lib/
+  json-editor/
+    filters.ts
+    tree.ts
+    utils.ts
+    types.ts
+    routes.ts
+    layout.ts
+    glob.ts

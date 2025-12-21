@@ -76,27 +76,25 @@ function itemsToMap(items: KV[]): KeyValueMap {
 }
 
 function clampVisible(
-   total: number,
-   minVisible: number,
-   maxVisible: number
+    total: number,
+    minVisible: number,
+    maxVisible: number
 ): number {
-   if (total === 0) return 0;
-   const clampedMax = Math.max(minVisible, maxVisible);
-   return Math.min(total, clampedMax);
+    if (total === 0) return 0;
+    const clampedMax = Math.max(minVisible, maxVisible);
+    return Math.min(total, clampedMax);
 }
 
 function sizeClasses(size?: Size) {
-   switch (size) {
-      case "sm":
-         return "text-xs min-h-[2rem]";
-      case "lg":
-         return "text-sm min-h-[2.75rem]";
-      case "md":
-      default:
-         return "text-sm min-h-[2.5rem]";
-   }
+    switch (size) {
+        case "sm":
+            return "h-8 text-xs";
+        case "lg":
+            return "h-11 text-base";
+        default:
+            return "h-9 text-sm";
+    }
 }
-
 function densityPadding(density?: Density) {
    switch (density) {
       case "compact":
@@ -105,7 +103,7 @@ function densityPadding(density?: Density) {
          return "py-3 px-3 gap-3";
       case "comfortable":
       default:
-         return "py-2 px-3 gap-2";
+         return "py-1 px-3 gap-2";
    }
 }
 

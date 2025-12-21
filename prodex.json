@@ -27,7 +27,9 @@
             "**/*.d.ts"
         ],
         "aliases": {
-            "@": "./packages/form-palette/src"
+            "@": "./packages/form-palette/src",
+            "@inertiajs": ".scaffold",
+            "@toast-ui": "packages/form-palette/src/presets/shadcn-variants"
         },
         "exclude": [
             "node_modules/**",
@@ -38,8 +40,10 @@
         "limit": 200
     },
     "shortcuts": {
-       "core-provider": {
-            "files": ["./packages/form-palette/src/core/core-provider.tsx"]
-       }
+        "core-provider": {
+            "files": [
+                "./packages/form-palette/src/core/core-provider.tsx"
+            ]
+        }
     }
 }

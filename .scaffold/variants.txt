@@ -1,7 +1,6 @@
 variants/
   index.ts
   shared.ts
-  select-shared.ts
   registry.ts
 
   helpers/
@@ -26,3 +25,4 @@ variants/
     custom.tsx
     slider.tsx
     toggle-group.tsx
+    json-editor.tsx

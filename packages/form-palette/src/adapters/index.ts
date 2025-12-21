@@ -22,15 +22,15 @@ export { createAxiosAdapter, createInertiaAdapter };
  * an error is thrown.
  */
 export function registerAxiosAdapter(): void {
-   // Basic sanity check – if this fails, something is wrong with the axios import.
-   if (!axios || typeof axios.request !== "function") {
-      throw new Error(
-         "[form-palette] Axios does not appear to be available. " +
-         "Make sure 'axios' is installed and resolvable before calling registerAxiosAdapter()."
-      );
-   }
+    // Basic sanity check – if this fails, something is wrong with the axios import.
+    if (!axios || typeof axios.request !== "function") {
+        throw new Error(
+            "[form-palette] Axios does not appear to be available. " +
+                "Make sure 'axios' is installed and resolvable before calling registerAxiosAdapter()."
+        );
+    }
 
-   registerAdapter<"axios">("axios", createAxiosAdapter);
+    registerAdapter<"axios">("axios", createAxiosAdapter);
 }
 
 /**
@@ -46,25 +46,25 @@ export function registerAxiosAdapter(): void {
  *     await registerInertiaAdapter();
  */
 export async function registerInertiaAdapter(): Promise<void> {
-   try {
-      const mod: any = await import("@inertiajs/react");
-      const router = mod?.router ?? mod?.Inertia;
+    try {
+        const mod: any = await import("@inertiajs/react");
+        const router = mod?.router ?? mod?.Inertia;
 
-      if (!router || typeof router.visit !== "function") {
-         throw new Error(
-            "[form-palette] '@inertiajs/react' was imported, " +
-            "but no router with a .visit() method was found."
-         );
-      }
-   } catch (error) {
-      throw new Error(
-         "[form-palette] Failed to import '@inertiajs/react'. " +
-         "Cannot register the 'inertia' adapter. " +
-         "Make sure '@inertiajs/react' is installed and resolvable."
-      );
-   }
+        if (!router || typeof router.visit !== "function") {
+            throw new Error(
+                "[form-palette] '@inertiajs/react' was imported, " +
+                    "but no router with a .visit() method was found."
+            );
+        }
+    } catch (error) {
+        throw new Error(
+            "[form-palette] Failed to import '@inertiajs/react'. " +
+                "Cannot register the 'inertia' adapter. " +
+                "Make sure '@inertiajs/react' is installed and resolvable."
+        );
+    }
 
-   registerAdapter<"inertia">("inertia", createInertiaAdapter);
+    registerAdapter<"inertia">("inertia", createInertiaAdapter);
 }
 
 /**
@@ -74,18 +74,26 @@ export async function registerInertiaAdapter(): Promise<void> {
  * registerInertiaAdapter directly.
  */
 export async function registerKnownAdapter(key: AdapterKey): Promise<void> {
-   switch (key) {
-      case "axios":
-         registerAxiosAdapter();
-         return;
-      case "inertia":
-         await registerInertiaAdapter();
-         return;
-      default:
-         // For now, we only special-case axios/inertia here.
-         // Other adapters can be registered by calling registerAdapter() directly.
-         throw new Error(
-            `[form-palette] registerKnownAdapter: adapter "${key}" is not handled here.`
-         );
-   }
+    switch (key) {
+        case "axios":
+            registerAxiosAdapter();
+            return;
+        case "inertia":
+            await registerInertiaAdapter();
+            return;
+        default:
+            // For now, we only special-case axios/inertia here.
+            // Other adapters can be registered by calling registerAdapter() directly.
+            throw new Error(
+                `[form-palette] registerKnownAdapter: adapter "${key}" is not handled here.`
+            );
+    }
+}
+
+/**
+ * Convenience helper: register all known adapters.
+ **/
+export function registerAllAdapters(): void {
+    registerAxiosAdapter();
+    registerInertiaAdapter();
 }

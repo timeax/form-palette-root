@@ -1,14 +1,13 @@
 // src/presets/shadcn-variants/radio.tsx
+// noinspection GrazieInspection
 
 import * as React from "react";
 import type { VariantBaseProps, ChangeDetail } from "@/variants/shared";
-import { cn } from "@/lib/utils";
+import { buildGroupLayoutClasses } from "@/lib/group-layout";
 
 // Adjust path if your radio group lives elsewhere
-import {
-   RadioGroup,
-   RadioGroupItem,
-} from "@/presets/ui/radio-group";
+import { RadioGroup, RadioGroupItem } from "@/presets/ui/radio-group";
+import { globalNormalizeCheckBasedOptions } from "@/lib/normalise-options";
 
 // ─────────────────────────────────────────────
 // Types
@@ -38,234 +37,234 @@ export type RadioLayoutMode = "list" | "grid";
  * Base radio item shape.
  */
 export interface RadioItem<TValue> {
-   value: TValue;
-   label: React.ReactNode;
-   description?: React.ReactNode;
-   disabled?: boolean;
-   key?: React.Key;
+    value: TValue;
+    label: React.ReactNode;
+    description?: React.ReactNode;
+    disabled?: boolean;
+    key?: React.Key;
+
+    /**
+     * Option-level renderer (provided by the normaliser).
+     * If present, it overrides the variant-level `renderOption` for this item.
+     */
+    render?: (ctx: RadioRenderOptionContext<TValue>) => React.ReactNode;
 }
 
 /**
  * Mapping functions used when TItem is not `RadioItem<TValue>`.
  */
 export interface RadioMappers<TItem, TValue> {
-   getValue: (item: TItem, index: number) => TValue;
-   getLabel: (item: TItem, index: number) => React.ReactNode;
-   getDescription?: (item: TItem, index: number) => React.ReactNode;
-   isDisabled?: (item: TItem, index: number) => boolean;
-   getKey?: (item: TItem, index: number) => React.Key;
+    getValue: (item: TItem, index: number) => TValue;
+    getLabel: (item: TItem, index: number) => React.ReactNode;
+    getDescription?: (item: TItem, index: number) => React.ReactNode;
+    isDisabled?: (item: TItem, index: number) => boolean;
+    getKey?: (item: TItem, index: number) => React.Key;
 }
 
 /**
  * Context passed to a custom renderOption callback.
  */
 export interface RadioRenderOptionContext<TValue> {
-   item: RadioItem<TValue>;
-   index: number;
-   selected: boolean;
-   disabled: boolean;
-   size: RadioSize;
-   density: RadioDensity;
-   /**
-    * DOM id of this option (tied to the underlying RadioGroupItem).
-    */
-   optionId?: string;
+    item: RadioItem<TValue>;
+    index: number;
+    selected: boolean;
+    disabled: boolean;
+    size: RadioSize;
+    density: RadioDensity;
+    click(): void;
+    /**
+     * DOM id of this option (tied to the underlying RadioGroupItem).
+     */
+    optionId?: string;
 
-   /**
-    * Prebuilt radio control for convenience.
-    * You can ignore this and render your own if you want.
-    */
-   radio: React.ReactNode;
+    /**
+     * Prebuilt radio control for convenience.
+     * You can ignore this and render your own if you want.
+     */
+    radio: React.ReactNode;
 }
 
 /**
  * UI-specific radio props (independent of VariantBaseProps).
  */
 export interface ShadcnRadioUiProps<TItem, TValue> {
-   /**
-    * Items to render as choices.
-    *
-    * Can be:
-    * - `RadioItem<TValue>[]`, or
-    * - any custom TItem[] when used with mapping functions
-    *   or optionValue/optionLabel keys.
-    * - primitive arrays such as `string[]` or `number[]` (fallback).
-    */
-   items: readonly TItem[];
+    /**
+     * Items to render as choices.
+     *
+     * Can be:
+     * - `RadioItem<TValue>[]`, or
+     * - any custom TItem[] when used with mapping functions
+     *   or optionValue/optionLabel keys.
+     * - primitive arrays such as `string[]` or `number[]` (fallback).
+     */
+    items: readonly TItem[];
 
-   /**
-    * Mapping functions for TItem → value/label/etc.
-    *
-    * Takes precedence over optionValue/optionLabel if provided.
-    */
-   mappers?: RadioMappers<TItem, TValue>;
+    /**
+     * Mapping functions for TItem → value/label/etc.
+     *
+     * Takes precedence over optionValue/optionLabel if provided.
+     */
+    mappers?: RadioMappers<TItem, TValue>;
 
-   /**
-    * Property name on TItem that holds the **value**.
-    *
-    * Example:
-    *   items = [{ id: "free", title: "Free" }]
-    *   optionValue = "id"
-    */
-   optionValue?: keyof TItem;
+    /**
+     * Property name on TItem that holds the **value**.
+     *
+     * Example:
+     *   items = [{ id: "free", title: "Free" }]
+     *   optionValue = "id"
+     */
+    optionValue?: keyof TItem | string;
 
-   /**
-    * Property name on TItem that holds the **label**.
-    *
-    * Example:
-    *   items = [{ id: "free", title: "Free" }]
-    *   optionLabel = "title"
-    */
-   optionLabel?: keyof TItem;
+    /**
+     * Property name on TItem that holds the **label**.
+     *
+     * Example:
+     *   items = [{ id: "free", title: "Free" }]
+     *   optionLabel = "title"
+     */
+    optionLabel?: keyof TItem | string;
 
-   /**
-    * Optional custom renderer for each option.
-    *
-    * If provided, the default label/description layout is skipped and
-    * this function is responsible for rendering the row.
-    */
-   renderOption?: (
-      ctx: RadioRenderOptionContext<TValue>
-   ) => React.ReactNode;
+    /**
+     * Optional custom renderer for each option.
+     *
+     * If provided, the default label/description layout is skipped and
+     * this function is responsible for rendering the row.
+     */
+    renderOption?: (ctx: RadioRenderOptionContext<TValue>) => React.ReactNode;
 
-   /**
-    * Layout mode for the group.
-    * Default: "list".
-    */
-   layout?: RadioLayoutMode;
+    /**
+     * Layout mode for the group.
+     * Default: "list".
+     */
+    layout?: RadioLayoutMode;
 
-   /**
-    * Number of columns in grid mode.
-    * Default: 2.
-    */
-   columns?: number;
+    /**
+     * Number of columns in grid mode.
+     * Default: 2.
+     */
+    columns?: number;
 
-   /**
-    * Gap between items (list rows or grid cells) in px.
-    * If omitted, Tailwind gaps/classes can handle spacing.
-    */
-   itemGapPx?: number;
+    /**
+     * Gap between items (list rows or grid cells) in px.
+     * If omitted, Tailwind gaps/classes can handle spacing.
+     */
+    itemGapPx?: number;
 
-   /**
-    * Visual size of the radios.
-    * Default: "md".
-    */
-   size?: RadioSize;
+    /**
+     * Visual size of the radios.
+     * Default: "md".
+     */
+    size?: RadioSize;
 
-   /**
-    * Vertical density (padding) of each row.
-    * Default: "comfortable".
-    */
-   density?: RadioDensity;
+    /**
+     * Vertical density (padding) of each row.
+     * Default: "comfortable".
+     */
+    density?: RadioDensity;
 
-   /**
-    * When true, capitalizes the **first letter** of the label
-    * (only applied when the label is a string).
-    */
-   autoCap?: boolean;
+    /**
+     * When true, capitalizes the **first letter** of the label
+     * (only applied when the label is a string).
+     */
+    autoCap?: boolean;
 
-   /**
-    * ARIA overrides for the group.
-    */
-   "aria-label"?: string;
-   "aria-labelledby"?: string;
+    /**
+     * ARIA overrides for the group.
+     */
+    "aria-label"?: string;
+    "aria-labelledby"?: string;
 
-   /**
-    * Wrapper class for the whole radio group.
-    */
-   groupClassName?: string;
+    /**
+     * Wrapper class for the whole radio group.
+     */
+    groupClassName?: string;
 
-   /**
-    * Extra classes for each radio option row.
-    */
-   optionClassName?: string;
+    /**
+     * Extra classes for each radio option row.
+     */
+    optionClassName?: string;
 
-   /**
-    * Extra classes for the option label node.
-    */
-   labelClassName?: string;
+    /**
+     * Extra classes for the option label node.
+     */
+    labelClassName?: string;
 
-   /**
-    * Extra classes for the description text under the label.
-    */
-   descriptionClassName?: string;
+    /**
+     * Extra classes for the description text under the label.
+     */
+    descriptionClassName?: string;
 }
 
 /**
  * Full props for the Shadcn-based radio variant.
  */
 export type ShadcnRadioVariantProps<
-   TValue,
-   TItem = RadioItem<TValue>
+    TValue,
+    TItem = RadioItem<TValue>,
 > = ShadcnRadioUiProps<TItem, TValue> &
-   Pick<
-      VariantBaseProps<TValue | undefined>,
-      "value" | "onValue" | "error" | "disabled" | "required"
-   > &
-   Pick<
-      React.ComponentProps<typeof RadioGroup>,
-      // we want to allow name + data-* etc through
-      "name"
-   > & {
-      id?: string;
-      className?: string; // alias for groupClassName
-      "aria-describedby"?: string;
-   };
+    Pick<
+        VariantBaseProps<TValue | undefined>,
+        "value" | "onValue" | "error" | "disabled" | "required"
+    > & {
+        id?: string;
+        name?: string;
+        className?: string; // alias for groupClassName
+        "aria-describedby"?: string;
+    };
 
 /**
  * Convenience type for the concrete React component.
  */
 export interface ShadcnRadioVariantComponent<
-   TValue,
-   TItem = RadioItem<TValue>
+    TValue,
+    TItem = RadioItem<TValue>,
 > extends React.ForwardRefExoticComponent<
-   ShadcnRadioVariantProps<TValue, TItem> &
-   React.RefAttributes<HTMLDivElement>
-> { }
+    ShadcnRadioVariantProps<TValue, TItem> & React.RefAttributes<HTMLDivElement>
+> {}
 
 // ─────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────
 
 function paddingForDensity(density: RadioDensity): string {
-   switch (density) {
-      case "compact":
-         return "py-1.5";
-      case "loose":
-         return "py-3";
-      case "comfortable":
-      default:
-         return "py-1";
-   }
+    switch (density) {
+        case "compact":
+            return "py-1.5";
+        case "loose":
+            return "py-3";
+        case "comfortable":
+        default:
+            return "py-1";
+    }
 }
 
 function labelTextSize(size: RadioSize): string {
-   switch (size) {
-      case "sm":
-         return "text-xs";
-      case "lg":
-         return "text-base";
-      case "md":
-      default:
-         return "text-sm";
-   }
+    switch (size) {
+        case "sm":
+            return "text-xs";
+        case "lg":
+            return "text-base";
+        case "md":
+        default:
+            return "text-sm";
+    }
 }
 
 function descriptionTextSize(size: RadioSize): string {
-   switch (size) {
-      case "sm":
-         return "text-[0.7rem]";
-      case "lg":
-         return "text-sm";
-      case "md":
-      default:
-         return "text-xs";
-   }
+    switch (size) {
+        case "sm":
+            return "text-[0.7rem]";
+        case "lg":
+            return "text-sm";
+        case "md":
+        default:
+            return "text-xs";
+    }
 }
 
 function capitalizeFirst(label: string): string {
-   if (!label) return label;
-   return label.charAt(0).toUpperCase() + label.slice(1);
+    if (!label) return label;
+    return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
 /**
@@ -276,331 +275,287 @@ function capitalizeFirst(label: string): string {
  * - primitive arrays (string[] / number[] / boolean[])
  */
 function normalizeItems<TItem, TValue>(
-   items: readonly TItem[],
-   mappers?: RadioMappers<TItem, TValue>,
-   optionValueKey?: keyof TItem,
-   optionLabelKey?: keyof TItem
+    items: readonly TItem[],
+    mappers?: RadioMappers<TItem, TValue>,
+    optionValueKey?: keyof TItem,
+    optionLabelKey?: keyof TItem
 ): RadioItem<TValue>[] {
-   // 1) Full mappers win – most explicit
-   if (mappers) {
-      return items.map((item, index) => ({
-         value: mappers.getValue(item, index),
-         label: mappers.getLabel(item, index),
-         description: mappers.getDescription
-            ? mappers.getDescription(item, index)
-            : undefined,
-         disabled: mappers.isDisabled
-            ? mappers.isDisabled(item, index)
-            : false,
-         key: mappers.getKey ? mappers.getKey(item, index) : index,
-      }));
-   }
+    // 1) Full mappers win – most explicit
+    if (mappers) {
+        return items.map((item, index) => ({
+            value: mappers.getValue(item, index),
+            label: mappers.getLabel(item, index),
+            description: mappers.getDescription
+                ? mappers.getDescription(item, index)
+                : undefined,
+            disabled: mappers.isDisabled
+                ? mappers.isDisabled(item, index)
+                : false,
+            key: mappers.getKey ? mappers.getKey(item, index) : index,
+        }));
+    }
 
-   // 2) optionValue / optionLabel keys
-   if (optionValueKey || optionLabelKey) {
-      return items.map((item, index) => {
-         const anyItem = item as any;
+    // 2) optionValue / optionLabel keys
+    if (optionValueKey || optionLabelKey) {
+        return items.map((item, index) => {
+            return globalNormalizeCheckBasedOptions(
+                item as any,
+                index,
+                optionLabelKey,
+                optionValueKey
+            );
+        });
+    }
 
-         const rawValue =
-            optionValueKey != null
-               ? anyItem[optionValueKey as string]
-               : anyItem.value;
+    // 3) Fallbacks:
+    //    - primitive arrays (string[] / number[] / boolean[])
+    //    - already-shaped RadioItem<TValue>[]
+    return items.map((item, index) => {
+        // Primitive → use as both value and label
+        if (
+            typeof item === "string" ||
+            typeof item === "number" ||
+            typeof item === "boolean"
+        ) {
+            const v = item as unknown as TValue;
+            return {
+                value: v,
+                label: String(item),
+                description: undefined,
+                disabled: false,
+                key: index,
+            } satisfies RadioItem<TValue>;
+        }
 
-         const value = rawValue as TValue;
-
-         const rawLabel =
-            optionLabelKey != null
-               ? anyItem[optionLabelKey as string]
-               : anyItem.label ?? String(rawValue ?? index);
-
-         const description = anyItem.description;
-         const disabled = !!anyItem.disabled;
-         const key: React.Key = anyItem.key ?? index;
-
-         return {
-            value,
-            label: rawLabel,
-            description,
-            disabled,
-            key,
-         };
-      });
-   }
-
-   // 3) Fallbacks:
-   //    - primitive arrays (string[] / number[] / boolean[])
-   //    - already-shaped RadioItem<TValue>[]
-   return items.map((item, index) => {
-      // Primitive → use as both value and label
-      if (
-         typeof item === "string" ||
-         typeof item === "number" ||
-         typeof item === "boolean"
-      ) {
-         const v = item as unknown as TValue;
-         return {
-            value: v,
-            label: String(item),
-            description: undefined,
-            disabled: false,
-            key: index,
-         } satisfies RadioItem<TValue>;
-      }
-
-      // Assume it's already a RadioItem<TValue>-like object
-      return item as unknown as RadioItem<TValue>;
-   });
+        // Assume it's already a RadioItem<TValue>-like object
+        return item as unknown as RadioItem<TValue>;
+    });
 }
 
 /**
  * Shallow-ish equality for values.
  */
 function isEqualValue(a: unknown, b: unknown): boolean {
-   return Object.is(a, b);
+    return Object.is(a, b);
 }
 
 // ─────────────────────────────────────────────
 // Component
 // ─────────────────────────────────────────────
 
-const InnerShadcnRadioVariant = <
-   TValue,
-   TItem = RadioItem<TValue>
->(
-   props: ShadcnRadioVariantProps<TValue, TItem>,
-   ref: React.Ref<HTMLDivElement>
+const InnerShadcnRadioVariant = <TValue, TItem = RadioItem<TValue>>(
+    props: ShadcnRadioVariantProps<TValue, TItem>,
+    ref: React.Ref<HTMLDivElement>
 ) => {
-   const {
-      // variant base
-      value,
-      onValue,
-      error,
-      disabled,
-      required,
+    const {
+        // variant base
+        value,
+        onValue,
+        error,
+        disabled,
+        required,
 
-      // radio UI
-      items,
-      mappers,
-      optionValue,
-      optionLabel,
-      renderOption,
-      layout = "list",
-      columns = 2,
-      itemGapPx,
-      size = "md",
-      density = "comfortable",
-      autoCap = false,
-      "aria-label": ariaLabel,
-      "aria-labelledby": ariaLabelledBy,
-      "aria-describedby": ariaDescribedBy,
-      name,
+        // radio UI
+        items,
+        mappers,
+        optionValue,
+        optionLabel,
+        renderOption,
+        layout = "list",
+        columns = 2,
+        itemGapPx,
+        size = "md",
+        density = "comfortable",
+        autoCap = false,
+        "aria-label": ariaLabel,
+        "aria-labelledby": ariaLabelledBy,
+        "aria-describedby": ariaDescribedBy,
+        name,
 
-      groupClassName,
-      optionClassName,
-      labelClassName,
-      descriptionClassName,
+        groupClassName,
+        optionClassName,
+        labelClassName,
+        descriptionClassName,
 
-      className, // alias for groupClassName
-      id,
+        className, // alias for groupClassName
+        id,
 
-      // passthrough to RadioGroup
-      ...restGroupProps
-   } = props;
+        // passthrough to RadioGroup
+        ...restGroupProps
+    } = props;
 
-   const hasError = !!error;
+    const hasError = !!error;
 
-   const normalized = React.useMemo(
-      () =>
-         normalizeItems<TItem, TValue>(
-            items,
-            mappers,
-            optionValue,
-            optionLabel
-         ),
-      [items, mappers, optionValue, optionLabel]
-   );
+    const normalized = React.useMemo(
+        () =>
+            normalizeItems<TItem, TValue>(
+                items,
+                mappers,
+                //@ts-ignore
+                optionValue,
+                optionLabel
+            ),
+        [items, mappers, optionValue, optionLabel]
+    );
 
-   // Map TValue → string for RadioGroup
-   const selectedString = React.useMemo(() => {
-      if (value === undefined) return undefined;
-      const found = normalized.find((item) =>
-         isEqualValue(item.value, value)
-      );
-      return found ? String(found.value) : undefined;
-   }, [normalized, value]);
+    // Map TValue → string for RadioGroup
+    const selectedString = React.useMemo(() => {
+        if (value === undefined) return undefined;
+        const found = normalized.find((item) =>
+            isEqualValue(item.value, value)
+        );
+        return found ? String(found.value) : undefined;
+    }, [normalized, value]);
 
-   const handleSelect = React.useCallback(
-      (next: TValue) => {
-         if (!onValue || disabled) return;
+    const handleSelect = React.useCallback(
+        (next: TValue) => {
+            if (!onValue || disabled) return;
 
-         const detail: ChangeDetail = {
-            source: "variant",
-            raw: next,
-            nativeEvent: undefined,
-            meta: undefined,
-         };
-
-         onValue(next, detail);
-      },
-      [onValue, disabled]
-   );
-
-   const handleRadioChange = React.useCallback(
-      (raw: string) => {
-         const found = normalized.find(
-            (item) => String(item.value) === raw
-         );
-         if (!found) return;
-         handleSelect(found.value);
-      },
-      [normalized, handleSelect]
-   );
-
-   const groupStyle: React.CSSProperties | undefined = React.useMemo(() => {
-      if (!itemGapPx) {
-         if (layout === "grid") {
-            return {
-               gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+            const detail: ChangeDetail = {
+                source: "variant",
+                raw: next,
+                nativeEvent: undefined,
+                meta: undefined,
             };
-         }
-         return undefined;
-      }
 
-      if (layout === "list") {
-         return { rowGap: itemGapPx };
-      }
+            onValue(next, detail);
+        },
+        [onValue, disabled]
+    );
 
-      return {
-         gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-         gap: itemGapPx,
-      };
-   }, [layout, columns, itemGapPx]);
+    const handleRadioChange = React.useCallback(
+        (raw: string) => {
+            const found = normalized.find((item) => String(item.value) === raw);
+            if (!found) return;
+            handleSelect(found.value);
+        },
+        [normalized, handleSelect]
+    );
 
-   const groupClasses = cn(
-      layout === "grid" ? "grid" : "flex flex-col",
-      groupClassName ?? className
-   );
+    const {
+        groupStyle,
+        groupClasses,
+        baseOptionClass,
+        labelClassesBase,
+        descriptionClassesBase,
+    } = buildGroupLayoutClasses({
+        layout,
+        columns,
+        itemGapPx,
+        groupClassName,
+        className,
+        optionClassName,
+        labelClassName,
+        descriptionClassName,
+        densityPaddingClass: paddingForDensity(density),
+        labelTextSizeClass: labelTextSize(size),
+        descriptionTextSizeClass: descriptionTextSize(size),
+    });
 
-   const baseOptionClass = cn(
-      // layout container for each option row
-      "relative flex items-start",
-      // keep disabled styles
-      "data-[disabled=true]:opacity-60 data-[disabled=true]:cursor-not-allowed",
-      // vertical padding from density
-      paddingForDensity(density),
-      optionClassName
-   );
+    return (
+        <RadioGroup
+            ref={ref}
+            id={id}
+            name={name}
+            value={selectedString}
+            onValueChange={handleRadioChange}
+            disabled={disabled}
+            aria-label={ariaLabel}
+            aria-labelledby={ariaLabelledBy}
+            aria-describedby={ariaDescribedBy}
+            aria-invalid={hasError || undefined}
+            aria-required={required || undefined}
+            className={groupClasses}
+            style={groupStyle}
+            data-slot="radio-group"
+            {...restGroupProps}
+        >
+            {normalized.map((item, index) => {
+                const itemString = String(item.value);
+                const selected = selectedString === itemString;
+                const optionDisabled = !!disabled || !!item.disabled;
+                const optionKey = item.key ?? index;
+                const optionId = id ? `${id}-option-${optionKey}` : undefined;
 
-   const labelClassesBase = cn(
-      "font-medium text-foreground",
-      labelTextSize(size),
-      labelClassName
-   );
+                // Apply autoCap to string labels for display
+                let displayItem: RadioItem<TValue> = item;
+                if (autoCap && typeof item.label === "string") {
+                    displayItem = {
+                        ...item,
+                        label: capitalizeFirst(item.label),
+                    };
+                }
 
-   const descriptionClassesBase = cn(
-      "mt-0.5 text-muted-foreground",
-      descriptionTextSize(size),
-      descriptionClassName
-   );
+                const radioNode = (
+                    <RadioGroupItem
+                        id={optionId}
+                        value={itemString}
+                        disabled={optionDisabled}
+                        className="mt-1"
+                    />
+                );
 
-   return (
-      <RadioGroup
-         ref={ref}
-         id={id}
-         name={name}
-         value={selectedString}
-         onValueChange={handleRadioChange}
-         disabled={disabled}
-         aria-label={ariaLabel}
-         aria-labelledby={ariaLabelledBy}
-         aria-describedby={ariaDescribedBy}
-         aria-invalid={hasError || undefined}
-         aria-required={required || undefined}
-         className={groupClasses}
-         style={groupStyle}
-         data-slot="radio-group"
-         {...restGroupProps}
-      >
-         {normalized.map((item, index) => {
-            const itemString = String(item.value);
-            const selected = selectedString === itemString;
-            const optionDisabled = !!disabled || !!item.disabled;
-            const optionKey = item.key ?? index;
-            const optionId = id ? `${id}-option-${optionKey}` : undefined;
+                const renderer = (item as RadioItem<TValue>).render ?? renderOption;
 
-            // Apply autoCap to string labels for display
-            let displayItem: RadioItem<TValue> = item;
-            if (autoCap && typeof item.label === "string") {
-               displayItem = {
-                  ...item,
-                  label: capitalizeFirst(item.label),
-               };
-            }
+                // Custom renderer path
+                if (renderer) {
+                    return (
+                        <div
+                            key={optionKey}
+                            data-slot="radio-option"
+                            data-checked={selected ? "true" : "false"}
+                            data-disabled={optionDisabled ? "true" : "false"}
+                            className={baseOptionClass}
+                        >
+                            {renderer({
+                                item: displayItem,
+                                index,
+                                selected,
+                                disabled: optionDisabled,
+                                size,
+                                density,
+                                optionId,
+                                click() {
+                                    if (optionDisabled) return;
+                                    handleSelect(displayItem.value);
+                                },
+                                radio: radioNode,
+                            })}
+                        </div>
+                    );
+                }
 
-            const radioNode = (
-               <RadioGroupItem
-                  id={optionId}
-                  value={itemString}
-                  disabled={optionDisabled}
-                  className="mt-1"
-               />
-            );
+                // Default rendering
+                return (
+                    <div
+                        key={optionKey}
+                        data-slot="radio-option"
+                        data-checked={selected ? "true" : "false"}
+                        data-disabled={optionDisabled ? "true" : "false"}
+                        className={baseOptionClass}
+                    >
+                        <label
+                            htmlFor={optionId}
+                            className="flex cursor-pointer items-start gap-3 w-full"
+                        >
+                            {radioNode}
 
-            // Custom renderer path
-            if (renderOption) {
-               return (
-                  <div
-                     key={optionKey}
-                     data-slot="radio-option"
-                     data-checked={selected ? "true" : "false"}
-                     data-disabled={optionDisabled ? "true" : "false"}
-                     className={baseOptionClass}
-                  >
-                     {renderOption({
-                        item: displayItem,
-                        index,
-                        selected,
-                        disabled: optionDisabled,
-                        size,
-                        density,
-                        optionId,
-                        radio: radioNode,
-                     })}
-                  </div>
-               );
-            }
-
-            // Default rendering
-            return (
-               <div
-                  key={optionKey}
-                  data-slot="radio-option"
-                  data-checked={selected ? "true" : "false"}
-                  data-disabled={optionDisabled ? "true" : "false"}
-                  className={baseOptionClass}
-               >
-                  <label
-                     htmlFor={optionId}
-                     className="flex cursor-pointer items-start gap-3 w-full"
-                  >
-                     {radioNode}
-
-                     <div className="flex flex-col min-w-0">
-                        <span className={labelClassesBase}>
-                           {displayItem.label}
-                        </span>
-                        {displayItem.description != null && (
-                           <span className={descriptionClassesBase}>
-                              {displayItem.description}
-                           </span>
-                        )}
-                     </div>
-                  </label>
-               </div>
-            );
-         })}
-      </RadioGroup>
-   );
+                            <div className="flex flex-col min-w-0">
+                                <span className={labelClassesBase}>
+                                    {displayItem.label}
+                                </span>
+                                {displayItem.description != null && (
+                                    <span className={descriptionClassesBase}>
+                                        {displayItem.description}
+                                    </span>
+                                )}
+                            </div>
+                        </label>
+                    </div>
+                );
+            })}
+        </RadioGroup>
+    );
 };
 
 /**
@@ -608,14 +563,12 @@ const InnerShadcnRadioVariant = <
  *
  * Cast to a generic-friendly type so TS can still infer TValue/TItem.
  */
-export const ShadcnRadioVariant =
-   React.forwardRef(InnerShadcnRadioVariant) as unknown as <
-      TValue,
-      TItem = RadioItem<TValue>
-   >(
-      props: ShadcnRadioVariantProps<TValue, TItem> & {
-         ref?: React.Ref<HTMLDivElement>;
-      }
-   ) => React.ReactElement | null;
+export const ShadcnRadioVariant = React.forwardRef(
+    InnerShadcnRadioVariant
+) as unknown as <TValue, TItem = RadioItem<TValue>>(
+    props: ShadcnRadioVariantProps<TValue, TItem> & {
+        ref?: React.Ref<HTMLDivElement>;
+    }
+) => React.ReactElement | null;
 
 export default ShadcnRadioVariant;
