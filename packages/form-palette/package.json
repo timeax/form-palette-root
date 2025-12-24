@@ -1,7 +1,7 @@
 {
     "name": "@timeax/form-palette",
     "private": false,
-    "version": "0.0.28",
+    "version": "0.0.30",
     "description": "This package extracts and standardizes the **form + input + variant system** from an existing Laravel/Inertia/React project into a **reusable, framework-friendly** library",
     "keywords": [
         "Form",
@@ -38,6 +38,11 @@
             "types": "./dist/adapters.d.ts",
             "import": "./dist/adapters.mjs",
             "require": "./dist/adapters.cjs"
+        },
+        "./extra": {
+            "types": "./dist/extra.d.ts",
+            "import": "./dist/extra.mjs",
+            "require": "./dist/extra.cjs"
         }
     },
     "sideEffects": false,
@@ -66,7 +71,8 @@
         "@radix-ui/react-tooltip": "^1.2.8",
         "@toast-ui/editor": "^3.2.2",
         "react": "^18 || ^19",
-        "react-dom": "^18 || ^19"
+        "react-dom": "^18 || ^19",
+        "axios": "^1.13.2"
     },
     "peerDependenciesMeta": {
         "@inertiajs/core": {

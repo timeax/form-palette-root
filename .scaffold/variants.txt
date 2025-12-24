@@ -26,3 +26,4 @@ variants/
     slider.tsx
     toggle-group.tsx
     json-editor.tsx
+    lister.tsx

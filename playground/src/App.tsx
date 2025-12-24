@@ -32,6 +32,24 @@ const permissionOptions = [
     { code: "write", title: "Write content", notes: "Create & edit" },
     { code: "delete", title: "Delete content", notes: "Remove items" },
 ] as const;
+
+const dummyListerHost = {
+    can: () => true,
+    log: (entry: any) => console.log("[Lister]", entry),
+};
+
+const userListerDef = {
+    source: {
+        endpoint: "https://jsonplaceholder.typicode.com/users",
+        method: "GET",
+    },
+    mapping: {
+        // optionValue: (raw: any) => raw.id,
+        optionLabel: (raw: any) => raw.name,
+        optionDescription: (raw: any) => raw.email,
+    },
+};
+
 export const App: React.FC = () => {
     function handleSubmit(e: any) {
         // later we'll wire actual values here
@@ -42,7 +60,7 @@ export const App: React.FC = () => {
     const [regions, setRegions] = React.useState<
         (string | number)[] | undefined
     >();
-    const [openDialog, setOpenDialog] = React.useState(true);
+    const [openDialog, setOpenDialog] = React.useState(false);
     const regionOptions: TreeSelectOption[] = [
         {
             label: "Africa",
@@ -127,6 +145,12 @@ export const App: React.FC = () => {
                 </button>
             </div>
             <InputField variant={"checkbox"} label={"Remember me"} single />
+            <InputField
+                variant={"select"}
+                label={"Remember me"}
+                mode={"button"}
+                options={["name", "email", "value"]}
+            />
             <HeadlessResponsiveDialog
                 open={openDialog}
                 onOpenChange={setOpenDialog}
@@ -607,7 +631,10 @@ export const App: React.FC = () => {
                                 api: {
                                     type: "object",
                                     properties: {
-                                        endpoint: { type: "string", format: "uri" },
+                                        endpoint: {
+                                            type: "string",
+                                            format: "uri",
+                                        },
                                         timeout: { type: "number", minimum: 0 },
                                         retry: { type: "boolean" },
                                     },
@@ -633,14 +660,21 @@ export const App: React.FC = () => {
                             },
                         }}
                     />
+                    <ListerSample />
                     <AppSamples />
                     <button type="submit">Submit</button>
                 </Form>
             </HeadlessResponsiveDialog>
 
             <div className="mt-10 p-6 border-t">
-                <h2 className="text-xl font-bold mb-4">JSON Editor Samples (Outside Dialog)</h2>
-                <Form onSubmit={(e) => console.log("Outside form submit", e.formData)}>
+                <h2 className="text-xl font-bold mb-4">
+                    JSON Editor Samples (Outside Dialog)
+                </h2>
+                <Form
+                    onSubmit={(e) =>
+                        console.log("Outside form submit", e.formData)
+                    }
+                >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-4">
                             <h3 className="font-semibold">Accordion Mode</h3>
@@ -654,8 +688,8 @@ export const App: React.FC = () => {
                                     version: "1.0.0",
                                     dependencies: {
                                         react: "^18.0.0",
-                                        ajv: "^8.0.0"
-                                    }
+                                        ajv: "^8.0.0",
+                                    },
                                 }}
                             />
                         </div>
@@ -667,40 +701,132 @@ export const App: React.FC = () => {
                                 label="User Metadata"
                                 description="Opens in a popover for better space usage"
                                 triggerLabel="Edit Metadata"
+                                optionValue={"id"}
                                 defaultValue={{
                                     lastLogin: "2023-10-27T10:00:00Z",
                                     preferences: {
                                         language: "en",
-                                        timezone: "UTC"
-                                    }
+                                        timezone: "UTC",
+                                    },
                                 }}
                             />
                         </div>
                     </div>
                 </Form>
+
+                <h2 className="text-xl font-bold mt-12 mb-4">
+                    Lister Samples (Outside Dialog)
+                </h2>
+                <Form
+                    onSubmit={(e) =>
+                        console.log("Lister form submit", e.formData)
+                    }
+                >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-4">
+                            <h3 className="font-semibold">Single Selection</h3>
+                            <InputField
+                                variant="lister"
+                                label="Remote User"
+                                description="Select a single user from API"
+                                host={dummyListerHost}
+                                onChange={(e) =>
+                                    console.log("Lister change", e)
+                                }
+                                def={userListerDef}
+                                mode="single"
+                            />
+                        </div>
+                        <div className="space-y-4">
+                            <h3 className="font-semibold">
+                                Multiple Selection
+                            </h3>
+                            <InputField
+                                variant="lister"
+                                label="Remote Users"
+                                description="Select multiple users from API"
+                                host={dummyListerHost}
+                                optionValue={"id"}
+                                def={userListerDef}
+                                mode="multiple"
+                                defaultValue={[1, 2]}
+                            />
+                        </div>
+                    </div>
+
+                    <InputField
+                        variant="lister"
+                        label="Remote Users"
+                        description="Select multiple users from API"
+                        host={dummyListerHost}
+                        optionValue="id"
+                        def={userListerDef}
+                        mode="multiple"
+                        defaultValue={[1, 2]}
+                        filtersSpec={{
+                            options: [
+                                // input-based filter (bindKey => filter column/key)
+                                {
+                                    value: "name",
+                                    label: "Name",
+                                    description: "Filter by name",
+                                    input: {
+                                        variant: "text",
+                                        bindKey: "name",
+                                        unsetOnEmpty: true,
+                                        props: {
+                                            placeholder: "e.g. Leanne",
+                                        },
+                                    },
+                                },
+
+                                {
+                                    value: "email_domain",
+                                    label: "Email domain",
+                                    bindKey: "email_domain",
+                                    children: [
+                                        {
+                                            id: "email_domain.email_gmail", // ✅ matches UI generated id
+                                            value: "email_gmail",
+                                            label: "Gmail",
+                                            kind: "value",
+                                            dbValue: "gmail.com",
+                                            bindKey: "email_domain", // ✅ add if inheritance isn't working yet
+                                        },
+                                        {
+                                            id: "email_domain.email_yahoo",
+                                            value: "email_yahoo",
+                                            label: "Yahoo",
+                                            kind: "value",
+                                            dbValue: "yahoo.com",
+                                            bindKey: "email_domain",
+                                        },
+                                        {
+                                            id: "email_domain.email_org",
+                                            value: "email_org",
+                                            label: ".org",
+                                            kind: "value",
+                                            dbValue: "org",
+                                            bindKey: "email_domain",
+                                        },
+                                    ],
+                                },
+
+                                // simple toggle (true => applied; click again => unset)
+                                {
+                                    value: "has_phone",
+                                    label: "Has phone",
+                                    description: "Applies has_phone=true",
+                                    kind: "value",
+                                    bindKey: "has_phone",
+                                    dbValue: true,
+                                    apply: { toggleable: true },
+                                },
+                            ],
+                        }}
+                    />
+                </Form>
             </div>
-
-            {/* <div className="my-5 space-y-5">
-                <Textarea
-                    placeholder="Write a short note…"
-                />
-
-                <Textarea
-                    placeholder="Describe the issue you’re facing…"
-                    leadingIcons={[<AlertTriangle key="warn" className="h-3.5 w-3.5 text-amber-500" />]}
-                    trailingIcons={[<Clock key="clock" className="h-3.5 w-3.5 text-muted-foreground" />]}
-                    // iconGap={6}
-                />
-
-                <CommentBox />
-
-                <NotesWithAction />
-                <RichCommentBox />
-                <LimitedTextarea />
-                <HexDumpTextarea />
-            </div>
-
-            <input className="ring" type="text" /> */}
         </div>
     );
 };
@@ -735,7 +861,7 @@ export function AppSamples() {
 
             return multiple ? base : base[0];
         },
-        []
+        [],
     );
 
     return (
@@ -770,7 +896,7 @@ export function AppSamples() {
 
 const bigCountryList = Array.from(
     { length: 2000 },
-    (_, i) => `country-${i + 1}`
+    (_, i) => `country-${i + 1}`,
 );
 
 export function BigSelectPrimitiveDemo() {
@@ -990,7 +1116,7 @@ const PillToggle = React.forwardRef<HTMLButtonElement, PillToggleProps>(
                     checked
                         ? "bg-primary text-primary-foreground border-primary"
                         : "bg-background text-foreground border-input hover:bg-muted",
-                    disabled && "opacity-50 cursor-not-allowed"
+                    disabled && "opacity-50 cursor-not-allowed",
                 )}
             >
                 <span
@@ -998,7 +1124,7 @@ const PillToggle = React.forwardRef<HTMLButtonElement, PillToggleProps>(
                         "flex size-3.5 items-center justify-center rounded-full border",
                         checked
                             ? "border-primary-foreground bg-primary-foreground text-primary"
-                            : "border-muted-foreground/40 text-muted-foreground"
+                            : "border-muted-foreground/40 text-muted-foreground",
                     )}
                 >
                     {checked && <Check className="size-3" />}
@@ -1006,7 +1132,7 @@ const PillToggle = React.forwardRef<HTMLButtonElement, PillToggleProps>(
                 <span className="truncate">{children}</span>
             </button>
         );
-    }
+    },
 );
 
 /**
@@ -1052,3 +1178,27 @@ export function AppCustomVariantDemo() {
         </div>
     );
 }
+
+const ListerSample = () => {
+    return "";
+    return (
+        <>
+            <InputField
+                variant="lister"
+                label="User (Single Select)"
+                description="Select a user via Lister"
+                host={dummyListerHost}
+                def={userListerDef}
+                mode="single"
+            />
+            <InputField
+                variant="lister"
+                label="Users (Multi Select)"
+                description="Select multiple users via Lister"
+                host={dummyListerHost}
+                def={userListerDef}
+                mode="multiple"
+            />
+        </>
+    );
+};

@@ -46,13 +46,24 @@ Common props (apply to most variants):
 - name: unique field key
 - variant: which control to render (see Variant reference below)
 - label, sublabel: title and a small inline hint
-- description/helpText: helper copy under the control
-- errorText: force an error message (or rely on validation)
+- description, helpText: helper copy under the control
+- errorText: force an error message (visual override)
 - required, disabled, readOnly
-- icon, prefix, suffix, leadingControl, trailingControl: decorate the input content
-- contain: force the input and label to share a tile-like container
-- validate(value, report): return true | false | string for simple inline validation
-- onChange(detail): detail.value holds the new value; prevent default if you need to override
+- onChange(e): e.value holds the new value; e.detail provides extra context (source, meta)
+- onValidate(value, field, form): custom validation logic (returns string | boolean)
+- size: "sm" | "md" | "lg"
+- density: "compact" | "comfortable" | "loose"
+- labelPlacement, sublabelPlacement, descriptionPlacement, helpTextPlacement, errorTextPlacement: customize layout ("top" | "bottom" | "left" | "right" | "below")
+- inline, fullWidth, contain: layout flags
+- tags: array of tag objects { label, icon, className, color, bgColor }
+- className, labelClassName, sublabelClassName, descriptionClassName, helpTextClassName, errorClassName, groupClassName, contentClassName, variantClassName: targeting specific parts of the field chrome
+
+Input decoration props (available for text, number, color, phone, select, multi-select, date):
+- icon, prefix, suffix, leadingControl, trailingControl: decorate the input box
+- leadingIcons, trailingIcons: arrays of React nodes
+- iconGap, leadingIconSpacing, trailingIconSpacing: spacing controls
+- joinControls, extendBoxToControls: visual integration for controls
+- leadingControlClassName, trailingControlClassName: decoration styling
 
 Example with decorations and validation:
 
@@ -92,7 +103,7 @@ Note on options: selection controls accept options as primitives ("US") or objec
 
 1) text
 - Value: string | undefined
-- Nice extras: mask, slotChar, unmask, autoClear (phone-like masking); icon/prefix/suffix; searchable isn’t applicable here
+- Props: mask, slotChar, unmask, autoClear (phone-like masking); prefix, suffix, stripPrefix, stripSuffix, inputClassName
 - Example:
 ```tsx
 <InputField name="email" label="Email" variant="text" />
@@ -100,7 +111,12 @@ Note on options: selection controls accept options as primitives ("US") or objec
 
 2) number
 - Value: number | undefined
-- Props: min, max, step, showButtons
+- Props: 
+  - min, max, step, showButtons, buttonLayout ("stacked" | "inline")
+  - mode: "decimal" | "currency"
+  - currency, currencyDisplay, currencySymbol
+  - locale, useGrouping, minFractionDigits, maxFractionDigits
+  - roundingMode, allowEmpty
 - Example:
 ```tsx
 <InputField name="age" label="Age" variant="number" min={0} max={120} step={1} showButtons />
@@ -108,61 +124,100 @@ Note on options: selection controls accept options as primitives ("US") or objec
 
 3) password
 - Value: string | undefined
-- Props: showToggle; strengthMeter; meterStyle="rules" | "bar" (depending on preset)
+- Props:
+  - revealToggle: boolean (show eye icon); default true
+  - defaultRevealed, onRevealChange, renderToggleIcon, toggleAriaLabel, toggleButtonClassName
+  - strengthMeter: boolean | StrengthOptions (calc, labels, thresholds, minScore, showLabel, display)
+  - meterStyle: "simple" | "rules"
+  - ruleDefinitions, ruleUses: customize validation rules
+  - meterWrapperClassName, meterContainerClassName, meterBarClassName, meterLabelClassName
 - Example:
 ```tsx
-<InputField name="pwd" label="Password" variant="password" showToggle strengthMeter meterStyle="rules" />
+<InputField name="pwd" label="Password" variant="password" revealToggle strengthMeter meterStyle="rules" />
 ```
 
-4) color
+4) date
+- Value: Date | DateRange | undefined
+- Props:
+  - mode: "single" | "range"
+  - kind: "date" | "datetime" | "time" | "hour" | "monthYear" | "year"
+  - formatSingle, formatRange, rangeSeparator
+  - minDate, maxDate, disabledDays, stayOpenOnSelect
+  - showTime, timeMode ("dropdown" | "input"), timeStep, timeLabel
+  - clearable, calendarClassName, popoverClassName
+- Example:
+```tsx
+<InputField name="appointment" variant="date" kind="datetime" label="Appointment" />
+```
+
+5) color
 - Value: string | undefined (hex or css color)
-- Props: showPreview, previewButtonClassName
+- Props: showPreview, showPickerToggle, previewSize, previewButtonClassName, previewSwatchClassName, pickerInputClassName, pickerToggleIcon, wrapperClassName
 - Example:
 ```tsx
 <InputField name="color" label="Favorite colour" variant="color" showPreview />
 ```
 
-5) phone
+6) phone
 - Value: string | undefined
-- Typical usage uses masking controls the same way as text: mask, slotChar, unmask, autoClear
-- Example (from playground labeled "Phone"):
+- Props:
+  - countries: PhoneCountry[] (custom list of available countries)
+  - defaultCountry: string (ISO code, e.g. "US")
+  - valueMode: "masked" | "e164" | "national"
+  - showFlag, showSelectedDial, showDialInList, showCountry, showSelectedLabel
+  - keepCharPositions, countrySelectClassName, countryTriggerClassName
+- Typical usage:
 ```tsx
 <InputField
   name="phone"
   label="Phone"
-  variant="text" // or a dedicated phone variant if enabled in your build
-  mask="+99 99 999 999? x999"
-  slotChar="_"
-  autoClear
+  variant="phone"
+  defaultCountry="US"
+  valueMode="e164"
 />
 ```
 
-6) textarea
+7) textarea
 - Value: string | undefined
-- Usual textarea props like placeholder, rows, etc.
+- Usual textarea props like placeholder, rows, cols, resize, etc.
 - Example:
 ```tsx
 <InputField name="bio" label="Bio" variant="textarea" description="Tell us about you" />
 ```
 
-7) toggle
+8) toggle
 - Value: boolean | undefined
+- Props: size, density, controlPlacement ("left" | "right"), onText, offText, switchClassName, switchThumbClassName
 - Example:
 ```tsx
-<InputField name="tos" variant="toggle" label="Accept Terms" required />
+<InputField name="tos" variant="toggle" label="Accept Terms" onText="Yes" offText="No" required />
 ```
 
-8) toggle-group
-- Value: string | number | undefined (selected item)
-- Props: options (primitives or objects), layout/density sizing depending on preset
-
-9) radio
-- Value: string | number | undefined
+9) toggle-group
+- Value: string | string[] | number | undefined
 - Props:
-  - options: primitives or objects with { value, label, description?, disabled? }
-  - layout?: "list" | "grid" (default "list"); columns?: number (when layout="grid")
-  - size?: "sm" | "md" | "lg"; density?: "compact" | "comfortable" | "loose"
-  - You can also map custom item shapes via optionValue/optionLabel style mappers depending on preset
+  - options: primitives or objects
+  - multiple, variant ("default" | "outline"), layout ("horizontal" | "vertical" | "grid"), gridCols, fillWidth
+  - optionValue, optionLabel, optionIcon, optionDisabled, optionTooltip, optionMeta: mapping keys
+- Example:
+```tsx
+<InputField
+  name="size"
+  variant="toggle-group"
+  options={["sm", "md", "lg"]}
+/>
+```
+
+10) radio
+- Value: any (selected value)
+- Props:
+  - options: primitives or objects
+  - layout: "list" | "grid"; columns, itemGapPx
+  - size, density, autoCap
+  - optionValue, optionLabel, optionDescription, optionDisabled
+  - mappers: { getValue, getLabel, getDescription, isDisabled, getKey }
+  - renderOption: (ctx) => ReactNode
+  - groupClassName, optionClassName, labelClassName, descriptionClassName
 - Example:
 ```tsx
 <InputField
@@ -176,8 +231,17 @@ Note on options: selection controls accept options as primitives ("US") or objec
 /> 
 ```
 
-10) checkbox
-- Value: boolean | string[] | number[] depending on single vs group usage
+11) checkbox
+- Value: boolean (single) | CheckboxGroupEntry[] (group)
+- Props:
+  - options: primitives or objects (for group mode)
+  - single: boolean (switches to single-checkbox mode)
+  - tristate: boolean (enables indeterminate state)
+  - layout: "list" | "grid"; columns, itemGapPx
+  - size, density, autoCap
+  - optionValue, optionLabel, renderOption
+  - mappers: { getValue, getLabel, getDescription, isDisabled, getKey, getTristate }
+  - groupClassName, optionClassName, labelClassName, optionLabelClassName, descriptionClassName
 - Single boolean checkbox:
 ```tsx
 <InputField variant="checkbox" label="Remember me" />
@@ -191,30 +255,21 @@ Note on options: selection controls accept options as primitives ("US") or objec
   options={[
     { value: "read", label: "Read content" },
     { value: "write", label: "Write content" },
-    { value: "delete", label: "Delete content" },
   ]}
 /> 
 ```
 
-- Extras:
-  - single?: boolean switches to single‑checkbox mode (value becomes boolean | undefined)
-  - tristate?: boolean enables an indeterminate state for single or per‑item
-  - layout?: "list" | "grid"; columns?: number (grid mode)
-  - size?: "sm" | "md" | "lg"; density?: "compact" | "comfortable" | "loose"
-
-11) select
+12) select
 - Value: string | number | undefined
-- Props (high‑use):
-  - options: (string|number)[] | { label?, value?, description?, disabled?, icon?, ... }[]
-  - searchable?: boolean (inline search box)
-  - searchPlaceholder?: string (placeholder inside the search box)
-  - clearable?: boolean (show clear button)
-  - placeholder?: string
-  - autoCap?: boolean (capitalise label text)
-  - emptyLabel?: React.ReactNode (shown when there are no options)
-  - emptySearchText?: React.ReactNode (shown when search returns no results)
-  - optionLabel, optionValue, optionDescription, optionDisabled, optionIcon, optionKey: map/compute option pieces
-  - renderOption?: (ctx) => ReactNode (custom row rendering; per‑option render overrides this)
+- Props:
+  - options: primitives or objects
+  - searchable, searchPlaceholder, clearable, placeholder, autoCap
+  - emptyLabel, emptySearchText
+  - mode: "default" | "button"; button: ReactNode | ((ctx) => ReactNode)
+  - virtualScroll, virtualScrollPageSize, virtualScrollThreshold
+  - optionLabel, optionValue, optionDescription, optionDisabled, optionIcon, optionKey
+  - renderOption, renderValue: custom renderers
+  - triggerClassName, contentClassName
 - Example:
 ```tsx
 <InputField
@@ -222,20 +277,22 @@ Note on options: selection controls accept options as primitives ("US") or objec
   variant="select"
   label="Country"
   options={[{ label: "USA", value: "US" }, { label: "Canada", value: "CA" }]}
-  placeholder="Select a country"
   searchable
   clearable
 />
 ```
 
-12) multi-select
-- Value: (string|number)[] | undefined
-- Props: same mapping props as select (optionLabel, optionValue, optionDescription, optionDisabled, optionIcon, optionKey)
-  - searchable?: boolean; searchPlaceholder?: string
-  - clearable?: boolean; placeholder?: React.ReactNode
-  - autoCap?: boolean
-  - emptyLabel?: React.ReactNode; emptySearchText?: React.ReactNode
-  - renderOption?: (ctx) => ReactNode (custom row rendering; per‑option render overrides this)
+13) multi-select
+- Value: (string | number)[] | undefined
+- Props:
+  - options: primitives or objects
+  - searchable, searchPlaceholder, clearable, placeholder, autoCap
+  - showSelectAll, selectAllLabel, selectAllPosition
+  - mode: "default" | "button"; button: ReactNode | ((ctx) => ReactNode)
+  - maxListHeight
+  - optionLabel, optionValue, optionDescription, optionDisabled, optionIcon, optionKey
+  - renderOption, renderValue, renderCheckbox
+  - triggerClassName, contentClassName
 - Example:
 ```tsx
 <InputField
@@ -246,83 +303,155 @@ Note on options: selection controls accept options as primitives ("US") or objec
 />
 ```
 
-13) chips
-- Value: string[] | number[] | undefined
-- Free‑form or from options; often used to add/remove tokens
-
-14) treeselect
-- Value: (string|number)[] | string | number | undefined (single or multiple tree selection)
-- Option type: TreeSelectOption = { label, value, icon?, description?, children?: TreeSelectOption[] }
+14) chips
+- Value: string[] | undefined
+- Props:
+  - placeholder, separators (string | RegExp), allowDuplicates, maxChips
+  - addOnEnter, addOnTab, addOnBlur, backspaceRemovesLast
+  - clearable, textareaMode, placement ("inline" | "below")
+  - maxVisibleChips, maxChipChars, maxChipWidth
+  - renderChip, renderOverflowChip
+  - onAddChips, onRemoveChips
+  - chipsClassName, chipClassName, chipLabelClassName, chipRemoveClassName, inputClassName
 - Example:
 ```tsx
-import { TreeSelectOption } from "@timeax/form-palette/presets/shadcn-variants/tree-select-types";
-
-const regionOptions: TreeSelectOption[] = [
-  { label: "Africa", value: "africa", children: [{ label: "Nigeria", value: "ng" }] },
-  { label: "Europe", value: "europe" },
-];
-
-<InputField
-  name="regions"
-  label="Regions"
-  variant="treeselect"
-  options={regionOptions}
-/> 
+<InputField name="keywords" variant="chips" label="Keywords" />
 ```
 
-- Props (high‑use):
-  - multiple?: boolean (default true). If false, single‑select behaviour.
-  - searchable?: boolean; searchPlaceholder?: string
-  - clearable?: boolean; placeholder?: React.ReactNode
-  - autoCap?: boolean
+15) treeselect
+- Value: TreeKey | TreeKey[] | undefined
+- Props:
+  - options: TreeSelectOption[]
+  - multiple, searchable, clearable, placeholder, autoCap
+  - expandAll, defaultExpandedValues, leafOnly
+  - mode: "default" | "button"; button: ReactNode | ((ctx) => ReactNode)
+  - selectedBadge, selectedBadgeVariant, selectedBadgePlacement
   - optionLabel, optionValue, optionDescription, optionDisabled, optionIcon, optionKey
-  - emptyLabel?: React.ReactNode; emptySearchText?: React.ReactNode
-  - renderOption?: ({ item, selected, option, click }) => ReactNode
-  - renderValue?: ({ selectedItems, placeholder }) => ReactNode (custom trigger content)
-  - expandAll?: boolean; defaultExpandedValues?: (string|number)[]
-  - leafOnly?: boolean (only leaf nodes are selectable)
-  - mode?: "default" | "button"; when "button", you can provide a custom trigger and show a selected‑count badge
-
-15) slider
-- Value: number | [number, number] depending on range mode
-- Props: min, max, step; possibly range/multiple depending on preset
-
-16) file
-- Value: File | File[] | Custom file shape depending on configuration
-- Types: FileItem, CustomFileLoader, FileLike are exported from the preset if you need advanced control
-- Example (simple):
+  - renderOption, renderValue
+  - triggerClassName, contentClassName
+- Example:
 ```tsx
-<InputField name="avatar" label="Avatar" variant="file" />
+<InputField name="regions" variant="treeselect" options={regionOptions} />
 ```
 
-17) keyvalue
-- Value: Record<string, string> | undefined
-- Use to capture arbitrary key/value pairs
+16) slider
+- Value: number | undefined
+- Props:
+  - min, max, step
+  - showValue, valuePlacement ("start" | "end")
+  - formatValue: (val) => ReactNode
+  - sliderClassName, valueClassName
+- Example:
+```tsx
+<InputField name="volume" variant="slider" min={0} max={100} />
+```
 
-18) editor
+17) file
+- Value: FileItem[] | undefined
+- Props:
+  - multiple, accept, maxFiles, maxTotalSize
+  - showDropArea, dropIcon, dropTitle, dropDescription
+  - renderDropArea, renderFileItem, showCheckboxes
+  - onFilesAdded, customLoader, mergeMode ("append" | "replace")
+  - formatFileName, formatFileSize
+  - mode: "default" | "button"; button: ReactNode | ((ctx) => ReactNode)
+  - selectedBadge, selectedBadgeVariant, selectedBadgePlacement
+  - dropAreaClassName, listClassName, triggerClassName
+- Example:
+```tsx
+<InputField name="attachments" variant="file" multiple />
+```
+
+18) keyvalue
+- Value: Record<string, string> | undefined
+- Props:
+  - min, max, minVisible, maxVisible
+  - showAddButton, showMenuButton, dialogTitle
+  - keyLabel, valueLabel, submitLabel, emptyLabel, moreLabel
+  - chipsClassName, chipClassName, renderChip
+- Example:
+```tsx
+<InputField name="headers" variant="keyvalue" label="HTTP Headers" />
+```
+
+19) editor
 - Value: string | undefined (HTML or Markdown)
-- Requires host CSS import once in your app:
-  - import "@toast-ui/editor/dist/toastui-editor.css";
-- Props (high‑use):
-  - format?: "html" | "markdown" (stored value format; default "html")
-  - toolbar?: "default" | "none" | ToastToolbarItem[][]
-  - height?: string (e.g., "400px"), placeholder?: string
-  - editType?: "wysiwyg" | "markdown"; previewStyle?: "vertical" | "tab"
-  - pastePlainText?: boolean (force plain text on paste)
+- Props:
+  - format: "html" | "markdown"
+  - toolbar: "default" | "none" | ToastToolbarItem[][]
+  - height, placeholder, editType ("wysiwyg" | "markdown"), previewStyle ("vertical" | "tab")
+  - pastePlainText, useCommandShortcut
+- Example:
+```tsx
+<InputField name="content" variant="editor" format="markdown" />
+```
+
+20) lister
+- Value: ListerId | ListerId[] | undefined
+- Advanced picker for remote/large datasets. Requires `ListerProvider` and `ListerUI` from `@timeax/form-palette/extra`.
+- Props:
+  - def: `ListerDefinition` (the remote data engine)
+  - endpoint, method, buildRequest, selector: inline remote config
+  - filters, filtersSpec, initialQuery: initial state and filter UI configuration
+  - search, searchTarget, searchMode: control search behavior and targets
+  - mode: "single" | "multiple"
+  - confirm: boolean (for single mode); permissions: array of strings
+  - title, clearable, maxDisplayItems, showRefresh, refreshMode
+  - optionValue, optionLabel, optionIcon, optionDescription, optionDisabled, optionGroup, optionMeta: mapping keys (accepts key string or mapper function)
+  - renderTrigger, renderOption: custom rendering hooks
+  - panelClassName, contentClassName, triggerClassName
+  - leadingIcons, trailingIcons, icon, leadingControl, trailingControl, joinControls, extendBoxToControls: standard input decoration
 - Example:
 ```tsx
 <InputField
-  name="content"
-  label="Content"
-  variant="editor"
-  format="markdown"
-  toolbar="default"
-  height="400px"
+  name="user"
+  variant="lister"
+  endpoint="/api/users"
+  optionLabel="fullName"
+  optionValue="id"
 />
 ```
 
-19) custom
-- Bring your own control but still benefit from InputField’s layout and validation chrome
+21) json-editor
+- Value: JsonObject | undefined
+- Advanced visual editor for complex JSON structures.
+- Props:
+  - title, schema: header text and validation schema (JSON Schema or ID)
+  - fieldMap, layout, defaults: configure how JSON keys are rendered as form fields
+  - nav, filters, permissions, callbacks: behavior and access control
+  - mode: "popover" | "accordion" (wrapper display mode)
+  - triggerLabel, triggerVariant, triggerSize: customize the trigger button (popover mode)
+  - route, defaultRoute, onRouteChange: navigation control (JSON path)
+  - viewMode, defaultViewMode, onViewModeChange: "split" | "visual" | "raw"
+  - renderRouteLabel, renderField: custom rendering hooks
+  - contentClassName, navClassName, triggerClassName, popoverClassName, panelClassName
+  - leadingIcons, trailingIcons, icon, leadingControl, trailingControl, joinControls, extendBoxToControls: standard input decoration (for popover trigger)
+- Example:
+```tsx
+<InputField
+  name="config"
+  variant="json-editor"
+  title="App Configuration"
+  mode="popover"
+  triggerLabel="Edit App Config"
+/>
+```
+
+22) custom
+- Props:
+  - component: ReactComponent to render
+  - valueProp, changeProp, disabledProp, readOnlyProp, errorProp, idProp, nameProp, placeholderProp
+  - mapValue, mapDetail: transform values on the way out/in
+- Example:
+```tsx
+<InputField
+  name="custom"
+  variant="custom"
+  component={MyCustomInput}
+  valueProp="currentValue"
+  changeProp="onMyChange"
+/>
+```
 
 ---
 
@@ -351,6 +480,7 @@ Password with strength meter:
   placeholder="Enter your password"
   strengthMeter
   meterStyle="rules"
+  revealToggle
 />
 ```
 
@@ -420,8 +550,172 @@ function Example() {
 - Prefer InputField over wiring controls by hand; it gives you consistent labels, descriptions, and error placement.
 - Use options as primitives for quick setups, or objects when you need description/disabled/icon per item.
 - Use validate for quick client checks; you can also set errorText manually.
-- For grouped controls (radios/checkbox groups), pass options; for a single boolean, omit options.
-- Keep labels short and place longer helper copy into description/helpText.
+- For grouped controls (radios/checkbox groups), pass `options`; for a single boolean, omit `options` and use `variant="checkbox"`.
+- Use `variant="date"` with `kind` to switch between date, time, and datetime pickers.
+- For complex data, `variant="lister"` provides a powerful remote search/picker UI.
+- Use `onValidate` for quick client checks; return a string for the error message or `true` if valid.
+
+---
+
+### Advanced providers and standalone usage
+
+Some components like `lister` or `json-editor` can be used as standalone utilities outside of `InputField` or even outside of a `Form`.
+
+#### 1. Lister System (ListerProvider & ListerUI)
+
+The `lister` variant relies on a global engine for remote data fetching, caching, and state management. You must place `ListerProvider` at the root of your app and include `ListerUI` to render the floating selection panels.
+
+```tsx
+import { ListerProvider, ListerUI } from "@timeax/form-palette/extra";
+
+const listerHost = {
+  can: (perms) => true,
+  log: (entry) => console.log(entry.message),
+};
+
+function App() {
+  return (
+    <ListerProvider host={listerHost}>
+      {/* ... your app ... */}
+      <ListerUI />
+    </ListerProvider>
+  );
+}
+```
+
+**ListerProvider props:**
+- `host`: `ListerProviderHost` (Required) - Handles permissions (`can`) and global logging (`log`).
+- `presets`: `PresetMap` - Registry of named `ListerDefinition` objects.
+- `http`: `ListerHttpClient` - Custom HTTP client (e.g., axios wrapper).
+- `remoteDebounceMs`: `number` (default: 300).
+
+**Programmatic usage with `useLister`:**
+
+You can trigger a lister picker from anywhere in your app (e.g., a custom button) using the `useLister` hook.
+
+```tsx
+import { useLister } from "@timeax/form-palette/extra";
+
+function CustomButton() {
+  const { api } = useLister();
+
+  async function pickUser() {
+    // Open the lister UI and wait for selection
+    const result = await api.open({
+      source: { endpoint: "/api/users" },
+      mapping: { optionLabel: "fullName", optionValue: "id" }
+    }, {}, {
+      title: "Select a User",
+      mode: "single"
+    });
+
+    if (result.reason === "apply") {
+      console.log("Selected user ID:", result.value);
+      console.log("Full user object:", result.details.raw);
+    }
+  }
+
+  return <button onClick={pickUser}>Choose User</button>;
+}
+```
+
+- `api.open(def | kind, filters, options)`: Returns a promise that resolves when the user applies, cancels, or closes the lister.
+- `api.fetch(def | kind, filters, options)`: Fetches data using the lister engine without opening the UI.
+
+---
+
+#### 2. JSON Editor Standalone
+
+While `InputField variant="json-editor"` is convenient for forms, you can use the `JsonEditor` component directly for full-page editors or custom configuration screens.
+
+```tsx
+import { JsonEditor } from "@timeax/form-palette/extra";
+
+function ConfigPage() {
+  const [config, setConfig] = useState({ theme: "dark", notifications: true });
+
+  return (
+    <div className="h-[600px] border rounded">
+      <JsonEditor
+        root={config}
+        onRoot={setConfig}
+        title="Site Configuration"
+        mode="accordion"
+        viewMode="split"
+        fieldMap={{
+          "theme": { variant: "select", options: ["light", "dark"] },
+          "notifications": { variant: "toggle" }
+        }}
+      />
+    </div>
+  );
+}
+```
+
+##### Props for `JsonEditor` (Standalone)
+
+| Prop | Type | Description |
+| :--- | :--- | :--- |
+| `root` | `JsonObject` | The JSON object to edit (Controlled). |
+| `onRoot` | `(next: JsonObject, detail: ChangeDetail) => void` | Callback when the JSON structure changes. |
+| `title` | `ReactNode` | Header title displayed at the top. |
+| `schema` | `string \| JsonObject` | Optional JSON Schema for validation. |
+| `mode` | `"popover" \| "accordion"` | `"popover"` shows a trigger; `"accordion"` is inline. |
+| `viewMode` | `"split" \| "visual" \| "raw"` | Visual vs Code editor vs both. |
+| `fieldMap` | `JsonEditorFieldMap` | Map JSON paths to specific `InputField` variants. |
+| `layout` | `JsonEditorLayoutMap` | Define the visual order and grouping of fields. |
+| `defaults` | `JsonEditorDefaults` | Default values and variant-level defaults. |
+| `nav` | `JsonEditorNavOptions` | Configure sidebar navigation and hierarchical views. |
+| `filters` | `JsonEditorFilters` | Include or exclude specific JSON paths. |
+| `permissions` | `JsonEditorPermissions` | Read-only vs Read-Write controls per path. |
+| `callbacks` | `JsonEditorCallbacks` | Callbacks for `onAdd`, `onDelete`, `onEdit`. |
+
+---
+
+### Full Technical Reference (Advanced)
+
+#### Lister System Types
+
+**ListerProvider Props**
+
+| Prop | Type | Description |
+| :--- | :--- | :--- |
+| `host` | `ListerProviderHost` | **Required**. Handles permissions (`can`) and logging (`log`). |
+| `presets` | `PresetMap` | Map of pre-defined lister configurations. |
+| `http` | `ListerHttpClient` | Custom client for data fetching. |
+| `remoteDebounceMs`| `number` | Debounce for remote search (default 300ms). |
+
+**ListerDefinition (Engine config)**
+
+| Prop | Type | Description |
+| :--- | :--- | :--- |
+| `source` | `ListerSource` | Remote URL and request builder. |
+| `mapping` | `ListerMapping` | How raw data maps to value/label/icon/etc. |
+| `selector` | `Selector` | Extraction path from API response (default `body.data`). |
+| `search` | `ListerSearchSpec` | Search behavior and column targets. |
+
+**ListerOpenOptions (api.open / api.fetch options)**
+
+| Prop | Type | Description |
+| :--- | :--- | :--- |
+| `mode` | `"single" \| "multiple"` | Selection mode. |
+| `confirm` | `boolean` | Require explicit "Apply" button in single mode. |
+| `defaultValue`| `any` | Initial selection. |
+| `permissions`| `string[]` | Permission keys required for this session. |
+| `searchMode` | `ListerSearchMode` | "local", "remote", or "hybrid". |
+| `title` | `string` | UI title for the popover. |
+| `filtersSpec` | `ListerFilterSpec` | Specification for the filter UI. |
+
+#### JSON Editor Types
+
+**JsonEditorFieldMap Entry**
+
+| Prop | Type | Description |
+| :--- | :--- | :--- |
+| `variant` | `VariantKey` | Which `@timeax/form-palette` variant to use. |
+| `props` | `VariantProps` | Props passed to the variant. |
+| `label` | `string` | Display label for this field. |
+| `description`| `string` | Help text shown under the field. |
 
 ---
 

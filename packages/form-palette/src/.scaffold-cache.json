@@ -637,6 +637,20 @@
       "sizeAtCreate": 0,
       "groupName": "presets",
       "groupRoot": "./"
+    },
+    "presets/shadcn-variants/lister.tsx": {
+      "path": "presets/shadcn-variants/lister.tsx",
+      "createdAt": "2025-12-22T11:20:30.010Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "variants/core/lister.tsx": {
+      "path": "variants/core/lister.tsx",
+      "createdAt": "2025-12-22T11:45:35.475Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
     }
   }
 }

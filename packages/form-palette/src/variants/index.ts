@@ -32,6 +32,7 @@ import { fileManagerModule } from "./core/file";
 import { toggleGroupModule } from "./core/toggle-group";
 import { shadcnEditorVariant } from "@/variants/core/editor";
 import { jsonEditorVariant } from "./core/json-editor";
+import listerVariant from "./core/lister";
 
 export type { VariantKey, VariantModule, VariantValueFor, VariantPropsFor };
 export {
@@ -63,7 +64,8 @@ const variants = [
     fileManagerModule,
     toggleGroupModule,
     shadcnEditorVariant,
-    jsonEditorVariant
+    jsonEditorVariant,
+    listerVariant
 ]
 
 /**

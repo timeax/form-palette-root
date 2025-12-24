@@ -24,6 +24,7 @@ presets/
     phone.tsx
     slider.tsx
     toggle-group.tsx
+    lister.tsx
     json-editor/
       types.ts
       index.tsx

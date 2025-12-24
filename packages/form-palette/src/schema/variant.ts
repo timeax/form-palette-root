@@ -36,6 +36,7 @@ import { ShadcnToggleVariantProps as ShadcnToggleGroupVariantProps } from "@/pre
 import { ShadcnEditorVariantProps } from "@/presets/shadcn-variants/editor";
 import { JsonObject } from "@/lib/json-editor/utils";
 import { ShadcnJsonEditorProps } from "@/presets/shadcn-variants/json-editor/types";
+import { ListerVariantProps } from "@/presets/shadcn-variants/lister/types";
 
 /**
  * Helper type for a single variant registry entry.
@@ -100,6 +101,7 @@ export interface Variants<H = unknown> {
     file: VariantEntry<FileLike, ShadcnFileVariantProps>
     editor: VariantEntry<string | undefined, ShadcnEditorVariantProps>
     'json-editor': VariantEntry<JsonObject | undefined, ShadcnJsonEditorProps>
+    lister: VariantEntry<any | undefined, ListerVariantProps>
 }
 
 

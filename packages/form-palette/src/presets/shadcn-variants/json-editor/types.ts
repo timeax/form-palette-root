@@ -301,6 +301,24 @@ export interface ShadcnJsonEditorVariantProps extends Pick<
         field: JsonEditorResolvedField;
         route: JsonPath;
     }) => React.ReactNode;
+
+    // icons & controls (popover trigger only)
+    leadingIcons?: React.ReactNode[];
+    trailingIcons?: React.ReactNode[];
+    icon?: React.ReactNode;
+    iconGap?: number;
+    leadingIconSpacing?: number;
+    trailingIconSpacing?: number;
+
+    leadingControl?: React.ReactNode;
+    trailingControl?: React.ReactNode;
+    leadingControlClassName?: string;
+    trailingControlClassName?: string;
+
+    joinControls?: boolean;
+    extendBoxToControls?: boolean;
+
+    triggerClassName?: string;
 }
 
 /* ─────────────────────────────────────────────────────────────

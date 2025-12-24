@@ -5,6 +5,7 @@ export default defineConfig({
     entry: {
         index: "src/index.ts", // main library entry
         adapters: "src/adapters/index.ts", // 👈 new entry
+        extra: "src/extra.ts",
     },
     outDir: "dist",
     format: ["esm", "cjs"],
@@ -17,6 +18,7 @@ export default defineConfig({
     platform: "browser",
     external: [
         "react",
+        "axios",
         "react-dom",
         "@inertiajs/core",
         "@inertiajs/react",
