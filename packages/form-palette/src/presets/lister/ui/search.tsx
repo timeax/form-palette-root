@@ -169,6 +169,7 @@ export function SearchBar(props: {
             specOnly.length > 0 ||
             allowCustomSubject);
 
+
     return (
         <div className="px-3 py-2" onMouseDown={() => actions.focus(id)}>
             <Input
@@ -401,7 +402,7 @@ export function SearchBar(props: {
                         <InputField
                             variant="select"
                             mode="button"
-                            value={searchMode}
+                            defaultValue={searchMode}
                             triggerClassName={'border-none ring-0 shadow-none! px-1! cursor-pointer'}
                             options={[
                                 {

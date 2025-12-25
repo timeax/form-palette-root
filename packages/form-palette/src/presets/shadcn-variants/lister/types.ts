@@ -20,8 +20,8 @@ import type {
  * ───────────────────────────────────────────────────────────── */
 
 export type ListerFieldBaseProps<TValue> = {
-    value: TValue;
-    onValue: (next: TValue, detail?: any) => void;
+    value?: TValue;
+    onValue?: (next: TValue, detail?: any) => void;
     disabled?: boolean;
     readOnly?: boolean;
     className?: string;
@@ -78,12 +78,12 @@ export type ListerTriggerRenderCtx<
  * Variant props
  * ───────────────────────────────────────────────────────────── */
 export type ListerVariantProps<
+    TMode extends ListerMode,
     P extends PresetMap = PresetMap,
     TRaw extends Record<string, any> = any,
     TValue extends ListerId = any,
     TFilters extends Record<string, any> = Record<string, any>,
     TMeta = any,
-    TMode extends ListerMode = "single",
     TCtx = any,
     TSearchColumn extends string = string,
 > = ListerFieldBaseProps<ListerValueForMode<TValue, TMode>> & {

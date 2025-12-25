@@ -21,7 +21,7 @@ function ListerResolvedInner<
     TFilters extends Record<string, any>,
     TMeta,
     TMode extends "single" | "multiple",
->(props: ListerVariantProps<P, TRaw, TValue, TFilters, TMeta, TMode>) {
+>(props: ListerVariantProps<TMode, P, TRaw, TValue, TFilters, TMeta>) {
     const { api } = useLister<P>();
 
     const {

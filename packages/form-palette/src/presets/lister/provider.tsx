@@ -1,9 +1,9 @@
 // resources/js/context/lister/lister-context.tsx
+// noinspection GrazieInspection,SpellCheckingInspection
 
 import * as React from "react";
 
 import type {
-    ListerApi,
     ListerDefinition,
     ListerFilterCtx,
     ListerFilterOption,
@@ -26,11 +26,11 @@ import { buildDetails } from "./engine/details";
 import { extractArray } from "./engine/extract";
 import { defaultHttpClient, type ListerHttpClient } from "./engine/http";
 import { mapOptions } from "./engine/map";
-import { filterOptionsLocal } from "./engine/search";
+import { filterRawListLocal } from "./engine/search";
 import { computeNextDraft, makeChangeEvent } from "./engine/selection";
 import { evaluatePermissions } from "./utils/permissions";
 
-type AnyDef = ListerDefinition<any, any, any, any>;
+export type AnyDef = ListerDefinition<any, any, any, any>;
 
 /**
  * IMPORTANT:
@@ -39,13 +39,15 @@ type AnyDef = ListerDefinition<any, any, any, any>;
  *
  * This keeps compilation green while you finish syncing the types.
  */
-type AnyState = ListerRuntimeState<any, any, any, any, any> & {
+// add this extra field
+export type AnyState = ListerRuntimeState<any, any, any, any, any> & {
     searchSpec?: any;
     searchTarget?: any;
+    searchPayload?: any; // ✅ NEW (payload override)
     ownerKey?: string;
 };
 
-type InternalContextValue = {
+export type InternalContextValue = {
     host: ListerProviderHost;
     http: ListerHttpClient;
 
@@ -133,7 +135,7 @@ type InternalContextValue = {
     getVisibleOptions(id: ListerSessionId): any[];
 };
 
-const Ctx = React.createContext<InternalContextValue | null>(null);
+export const Ctx = React.createContext<InternalContextValue | null>(null);
 
 function anchorToPos(anchor: any): { x: number; y: number } | null {
     if (!anchor) return null;
@@ -166,7 +168,7 @@ function shallowMerge<T extends object>(
  * Filter option resolution helpers
  * ───────────────────────────────────────────── */
 
-type ResolvedFilterNode<TFilters> = {
+export type ResolvedFilterNode<TFilters> = {
     option: ListerFilterOption<TFilters>;
     id: string; // UI id (PATH id, e.g. "email_domain.email_gmail")
     kind?: string; // "group" | "value" | "input" (host-defined)
@@ -346,10 +348,11 @@ function initialSessionState(sessionId: ListerSessionId): AnyState {
 
         // IMPORTANT: these are now OPTION IDS (not db values)
         selectedFilterValues: [],
+        searchPayload: undefined,
     };
 }
 
-function buildSearchPayloadFromTarget(
+export function buildSearchPayloadFromTarget(
     target?: ListerSearchTarget | null,
 ): ListerSearchPayload | undefined {
     if (!target) return undefined;
@@ -363,8 +366,9 @@ function buildSearchPayloadFromTarget(
 
     if (target.mode === "only") {
         const only = Array.isArray(target.only)
-            ? target.only.filter(Boolean)
+            ? target.only.filter((v) => v !== null && v !== undefined) // ✅ keep 0
             : undefined;
+
         return only && only.length ? { searchOnly: only } : undefined;
     }
 
@@ -714,11 +718,19 @@ export function ListerProvider(props: {
             const query = override?.query ?? s0.query;
             const filters =
                 override?.filters ?? s0.effectiveFilters ?? s0.filters;
-            const search =
-                override?.search ??
-                buildSearchPayloadFromTarget(
-                    (getSession(id) as any)?.searchTarget,
-                );
+
+            // ✅ search resolution order:
+            // 1) explicit override passed to fetchAndHydrate
+            // 2) session-level payload override (from searchLocal/searchRemote)
+            // 3) derived from current searchTarget
+            const hasSearchOverride =
+                !!override &&
+                Object.prototype.hasOwnProperty.call(override, "search");
+
+            const search: ListerSearchPayload | undefined = hasSearchOverride
+                ? override!.search
+                : ((s0 as any).searchPayload ??
+                  buildSearchPayloadFromTarget((s0 as any).searchTarget));
 
             patchSession(id, {
                 errorCode: undefined,
@@ -788,7 +800,6 @@ export function ListerProvider(props: {
             reconcileDraftAfterFetch,
         ],
     );
-
     const getFilterCtx = React.useCallback(
         <TFilters,>(id: ListerSessionId): ListerFilterCtx<TFilters> => {
             const refresh = () => {
@@ -826,7 +837,9 @@ export function ListerProvider(props: {
                         spec,
                     );
 
-                    shouldFetch = spec?.autoFetch !== false;
+                    // ✅ local mode = don’t fetch (unless you want to override this behavior)
+                    shouldFetch =
+                        spec?.autoFetch !== false && s.searchMode !== "local";
 
                     return {
                         ...s,
@@ -1026,6 +1039,10 @@ export function ListerProvider(props: {
                     (prev?.filtersSpec as any);
 
                 const filtersPatch = (prev?.filtersPatch as any) ?? {};
+                const resolvedSearchMode: ListerSearchMode =
+                    (opts?.searchMode as ListerSearchMode | undefined) ??
+                    (prev?.searchMode as ListerSearchMode | undefined) ??
+                    "remote";
 
                 const selectedFilterValues =
                     (prev?.selectedFilterValues as any[]) ?? [];
@@ -1057,7 +1074,8 @@ export function ListerProvider(props: {
                     "";
 
                 // Fetch using *effectiveFilters* and *searchTarget*
-                const searchPayload =
+                const searchPayload: ListerSearchPayload | undefined =
+                    (prev as any)?.searchPayload ??
                     buildSearchPayloadFromTarget(searchTarget);
                 const { rawList, optionsList } = await performFetch(
                     def,
@@ -1091,7 +1109,7 @@ export function ListerProvider(props: {
                             position: pos,
                             hasMoved: false,
 
-                            searchMode: opts?.searchMode ?? "remote",
+                            searchMode: resolvedSearchMode,
                             query: initialQuery,
 
                             searchSpec,
@@ -1364,9 +1382,25 @@ export function ListerProvider(props: {
 
     const setSearchMode = React.useCallback(
         (id: ListerSessionId, mode: ListerSearchMode) => {
+            const s = getSession(id);
+            if (!s) return;
+
+            const prevMode = s.searchMode;
             patchSession(id, { searchMode: mode });
+
+            if (prevMode === mode) return;
+
+            // ✅ when entering local: fetch a base dataset (no query + no search payload)
+            // then local UI applies current query/payload/filters via getVisibleOptions()
+            if (mode === "local") {
+                fetchAndHydrate(id, "refresh", {
+                    filters: s.effectiveFilters ?? s.filters,
+                    query: "", // base fetch (unsearched)
+                    search: undefined, // force NO search payload
+                });
+            }
         },
-        [patchSession],
+        [fetchAndHydrate, getSession, patchSession],
     );
 
     const scheduleRemoteFetch = React.useCallback(
@@ -1380,9 +1414,14 @@ export function ListerProvider(props: {
 
             timerBySessionRef.current[id] = setTimeout(() => {
                 const s = getSession(id);
-                const search =
+
+                // ✅ same precedence everywhere:
+                // payloadOverride > session.searchPayload > derived from searchTarget
+                const search: ListerSearchPayload | undefined =
                     payloadOverride ??
+                    (s as any)?.searchPayload ??
                     buildSearchPayloadFromTarget((s as any)?.searchTarget);
+
                 fetchAndHydrate(id, "search", { query: q, search });
             }, debounceMs);
         },
@@ -1391,9 +1430,11 @@ export function ListerProvider(props: {
 
     const setSearchTarget = React.useCallback(
         (id: ListerSessionId, target: ListerSearchTarget) => {
-            patchSession(id, { searchTarget: target });
+            patchSession(id, {
+                searchTarget: target,
+                searchPayload: undefined,
+            }); // ✅ clear override
 
-            // If we're in remote/hybrid, changing the target should re-run the current query.
             const s = getSession(id);
             const mode = s?.searchMode ?? "remote";
             const q = s?.query ?? "";
@@ -1407,12 +1448,12 @@ export function ListerProvider(props: {
 
     const searchLocalImpl = React.useCallback(
         (id: ListerSessionId, q: string, payload?: ListerSearchPayload) => {
-            patchSession(id, { query: q });
+            // ✅ store payload override so local UI respects it
+            patchSession(id, { query: q, searchPayload: payload });
 
             const s = getSession(id);
             if (!s) return;
 
-            // Hybrid: update query immediately (local filter) AND also remote fetch.
             if (s.searchMode === "hybrid") {
                 scheduleRemoteFetch(id, q, payload);
             }
@@ -1422,7 +1463,8 @@ export function ListerProvider(props: {
 
     const searchRemoteImpl = React.useCallback(
         (id: ListerSessionId, q: string, payload?: ListerSearchPayload) => {
-            patchSession(id, { query: q });
+            // ✅ keep payload override in session too
+            patchSession(id, { query: q, searchPayload: payload });
             scheduleRemoteFetch(id, q, payload);
         },
         [patchSession, scheduleRemoteFetch],
@@ -1459,12 +1501,38 @@ export function ListerProvider(props: {
             const s = getSession(id);
             if (!s) return [];
 
-            if (s.searchMode === "local")
-                return filterOptionsLocal(s.optionsList as any, s.query);
-            if (s.searchMode === "hybrid")
-                return filterOptionsLocal(s.optionsList as any, s.query);
+            // remote mode: show fetched options as-is
+            if (s.searchMode === "remote") return s.optionsList;
 
-            return s.optionsList;
+            const def = s.definition as AnyDef | undefined;
+            if (!def) return [];
+
+            const filters = s.effectiveFilters ?? s.filters;
+
+            // ✅ payload: explicit override wins, else derive from searchTarget
+            const payload: ListerSearchPayload | undefined =
+                (s as any).searchPayload ??
+                buildSearchPayloadFromTarget((s as any)?.searchTarget);
+
+            // ✅ local “equivalent” filtering: filters + payload + query
+            const visibleRaw = filterRawListLocal(
+                (s.rawList ?? []) as any[],
+                s.query,
+                payload,
+                filters,
+                {
+                    searchSpec: (s as any).searchSpec ?? def.search,
+                    filtersSpec: (s as any).filtersSpec,
+                },
+            );
+
+            // ✅ IMPORTANT: remap with CURRENT ctx (mirrors remote)
+            const mapCtx = { query: s.query, filters };
+            return mapOptions<any, any, any, any>(
+                visibleRaw,
+                def.mapping as any,
+                mapCtx,
+            );
         },
         [getSession],
     );
@@ -1541,121 +1609,4 @@ export function ListerProvider(props: {
     );
 
     return <Ctx.Provider value={value}>{props.children}</Ctx.Provider>;
-}
-
-export function useLister<P extends PresetMap>(): {
-    api: ListerApi<P>;
-    store: ListerStoreState;
-    /** active session convenience (can be undefined if none open) */
-    state: AnyState | undefined;
-    actions: {
-        focus(id: ListerSessionId): void;
-        dispose(id: ListerSessionId): void;
-
-        apply(id: ListerSessionId): void;
-        cancel(id: ListerSessionId): void;
-        close(id: ListerSessionId): void;
-
-        toggle(id: ListerSessionId, value: ListerId): void;
-        select(id: ListerSessionId, value: ListerId): void;
-        deselect(id: ListerSessionId, value: ListerId): void;
-        clear(id: ListerSessionId): void;
-
-        setQuery(id: ListerSessionId, q: string): void;
-        setSearchMode(id: ListerSessionId, mode: ListerSearchMode): void;
-        setSearchTarget(id: ListerSessionId, target: ListerSearchTarget): void;
-
-        searchLocal: {
-            (id: ListerSessionId, q: string): void;
-            (
-                id: ListerSessionId,
-                q: string,
-                payload?: ListerSearchPayload,
-            ): void;
-        };
-
-        searchRemote: {
-            (id: ListerSessionId, q: string): void;
-            (
-                id: ListerSessionId,
-                q: string,
-                payload?: ListerSearchPayload,
-            ): void;
-        };
-
-        refresh(id: ListerSessionId): void;
-        setPosition(
-            id: ListerSessionId,
-            pos: { x: number; y: number } | null,
-        ): void;
-
-        /** Filters (non-UI logic) */
-        getFilterCtx<TFilters>(id: ListerSessionId): ListerFilterCtx<TFilters>;
-        applyFilterOption(id: ListerSessionId, optionId: string | number): void;
-
-        registerPreset(kind: string, def: AnyDef): void;
-        getPreset(kind: string): AnyDef | undefined;
-
-        getVisibleOptions(id: ListerSessionId): any[];
-    };
-} {
-    const ctx = React.useContext(Ctx);
-    if (!ctx)
-        throw new Error("useLister must be used within <ListerProvider />");
-
-    const api = React.useMemo(() => {
-        const fetch = ((kindOrDef: any, filters?: any, opts?: any) =>
-            ctx.apiFetchAny(kindOrDef, filters, opts)) as ListerApi<P>["fetch"];
-        const open = ((kindOrDef: any, filters?: any, opts?: any) =>
-            ctx.apiOpenAny(kindOrDef, filters, opts)) as ListerApi<P>["open"];
-
-        return {
-            fetch,
-            open,
-            registerPreset: (kind: string, def: AnyDef) =>
-                ctx.registerPreset(kind, def),
-            getPreset: (kind: string) => ctx.getPreset(kind),
-        } satisfies ListerApi<P>;
-    }, [ctx]);
-
-    const active = ctx.store.activeId
-        ? (ctx.store.sessions[ctx.store.activeId] as AnyState | undefined)
-        : undefined;
-
-    return {
-        api,
-        store: ctx.store,
-        state: active,
-        actions: {
-            focus: ctx.focus,
-            dispose: ctx.dispose,
-
-            apply: ctx.apply,
-            cancel: ctx.cancel,
-            close: ctx.close,
-
-            toggle: ctx.toggle,
-            select: ctx.select,
-            deselect: ctx.deselect,
-            clear: ctx.clear,
-
-            setQuery: ctx.setQuery,
-            setSearchMode: ctx.setSearchMode,
-            setSearchTarget: ctx.setSearchTarget,
-
-            searchLocal: ctx.searchLocal,
-            searchRemote: ctx.searchRemote,
-
-            refresh: ctx.refresh,
-            setPosition: ctx.setPosition,
-
-            getFilterCtx: ctx.getFilterCtx,
-            applyFilterOption: ctx.applyFilterOption,
-
-            registerPreset: ctx.registerPreset,
-            getPreset: ctx.getPreset,
-
-            getVisibleOptions: ctx.getVisibleOptions,
-        },
-    };
 }

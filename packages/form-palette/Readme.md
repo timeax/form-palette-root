@@ -706,6 +706,657 @@ function ConfigPage() {
 | `title` | `string` | UI title for the popover. |
 | `filtersSpec` | `ListerFilterSpec` | Specification for the filter UI. |
 
+## `useData` hook (Lister preset) — detailed guide
+
+`useData` is the lightweight data + search + selection hook used by the **Lister** preset. It’s meant for “fetch list → search it (remote/local/hybrid) → optionally select items by stable IDs”.
+
+You’ll typically use it inside lister-style UIs or any picker/list component that wants the same semantics as the Lister engine.
+
+---
+
+### What it manages
+
+`useData` manages these concerns for you:
+
+1. **Fetching**
+
+* Uses the `ListerProvider` context (`Ctx`) to call `ctx.apiFetchAny(...)`.
+* Supports request building via inline definition inputs (`endpoint`, `method`, `selector`, `buildRequest`, `search`).
+
+2. **Search modes**
+
+* **remote**: typing triggers a debounced fetch with search payload.
+* **local**: fetch a “base dataset” once, then search/filter client-side.
+* **hybrid**: fetch remote on typing *and* also supports local filtering rules.
+
+3. **Search targeting**
+
+* Uses `searchTarget` to build a provider-compatible search payload via `buildSearchPayloadFromTarget(...)`.
+* Payload can express:
+
+  * `subject` (search only a specific field)
+  * `searchAll` (broad search)
+  * `searchOnly` (restrict results to allowed IDs / “only”)
+
+4. **Filters**
+
+* Tracks `filters` state and can auto-refetch when filters change (remote/hybrid).
+
+5. **Selection (optional)**
+
+* Select **by stable key** (`id`, `value`, or a custom key resolver).
+* Supports `single` or `multiple` selection.
+* Returns **selected objects**, not just IDs.
+* Keeps a cache so selection can survive list changes.
+
+---
+
+### Basic usage
+
+```tsx
+const {
+  data,
+  visible,
+  loading,
+
+  query,
+  setQuery,
+
+  searchMode,
+  setSearchMode,
+
+  searchTarget,
+  setSearchTarget,
+
+  filters,
+  setFilters,
+
+  refresh,
+} = useData({
+  endpoint: "/api/users",
+  method: "GET",
+  search: { default: "fullName" }, // default subject for subject-search
+});
+```
+
+**Key outputs**
+
+* `data`: the latest fetched list
+* `visible`: the list after applying local/hybrid filtering rules
+* `loading` / `error`
+* `query` + `setQuery(...)`
+* `searchMode` + `setSearchMode(...)`
+* `searchTarget` + `setSearchTarget(...)`
+* `filters` + filter helpers
+* `refresh()` and `fetch()` for manual control
+
+---
+
+### Fetching details
+
+`useData` builds an **inline lister definition** (via `makeInlineDef`) from:
+
+* `endpoint`
+* `method`
+* `selector` (how to extract array from response)
+* `buildRequest` (how to shape params/body/headers)
+* `search` (search spec defaults)
+
+Then it calls:
+
+```ts
+ctx.apiFetchAny(inlineDef, filters, {
+  query,
+  search: buildSearchPayloadFromTarget(searchTarget),
+});
+```
+
+**Last-request-wins**
+
+* The hook uses an internal request counter so only the latest request updates state.
+
+---
+
+### Search mode semantics
+
+#### `remote`
+
+* Every query change triggers a **debounced fetch**.
+* The fetch includes a search payload derived from `searchTarget`.
+* Best when the dataset is large or server-side search is needed.
+
+#### `local`
+
+* When you switch to `local`, the hook performs a one-time fetch for a “base list”:
+
+  * `query: ""`
+  * `search: undefined`
+* After that, it searches locally over `data` to produce `visible`.
+* No more fetches on query changes.
+
+This is ideal when:
+
+* you want “download once, search locally”
+* your endpoint can return an appropriate base dataset
+
+#### `hybrid`
+
+* Behaves like remote (debounced fetch on query changes),
+* but also allows local filtering semantics for `visible`
+  (useful if the UI wants to apply `searchOnly` / field search locally too).
+
+---
+
+### `searchTarget` and what it does
+
+`searchTarget` is a structured way to describe *how* you want to search.
+`buildSearchPayloadFromTarget(searchTarget)` converts it into a normalized payload the provider understands.
+
+Common patterns:
+
+* **Subject search** (search a single column/property):
+
+  * payload contains `subject: "fullName"`
+* **Only restriction** (restrict to a subset of IDs):
+
+  * payload contains `searchOnly: [...]`
+
+In `local`/`hybrid`, `visible` uses that payload to decide:
+
+* whether to filter by `searchOnly`
+* whether to search a specific subject field
+* otherwise falls back to a broad string match
+
+---
+
+### Filters
+
+You can pass initial filters:
+
+```tsx
+useData({
+  endpoint: "/api/users",
+  filters: { status: "active" },
+});
+```
+
+And update them via:
+
+* `setFilters(next)`
+* `patchFilters(partial)`
+* `clearFilters()`
+
+**Auto-fetch on filter change**
+
+* Controlled by `autoFetchOnFilterChange` (default: true)
+* Only triggers fetches in `remote`/`hybrid` modes
+* `local` mode does not re-fetch on filter change (by design)
+
+---
+
+### Selection support (optional)
+
+Enable selection like:
+
+```tsx
+const d = useData({
+  endpoint: "/api/users",
+  selection: {
+    mode: "multiple",
+    key: "id",          // or (item) => item.user_id
+    prune: "never",     // recommended default
+  },
+});
+```
+
+**What you get**
+
+* `selectionMode`: `"none" | "single" | "multiple"`
+* `selectedIds`: `id | id[] | null`
+* `selected`: the resolved object(s) from the latest list/cache
+* selection helpers:
+
+  * `select(id|ids)`
+  * `deselect(id|ids)`
+  * `toggle(id)`
+  * `clearSelection()`
+  * `isSelected(id)`
+  * `getSelection()` (returns object(s), not ids)
+
+**Key resolution**
+
+* If you don’t provide `selection.key`, it defaults to:
+
+  * `item.id ?? item.value`
+
+**Cache behavior**
+
+* The hook maintains an internal `Map<id, item>` cache.
+* This allows `selected` to still return objects even if the latest `data` no longer contains them.
+
+**Pruning**
+
+* `prune: "missing"` will remove selection IDs that do not exist in the latest fetched list.
+* Default is `"never"` (recommended), because remote searching can change the list and you don’t want selection wiped.
+
+---
+
+### When to use which mode
+
+* Use **remote** when:
+
+  * dataset is large
+  * server-side filtering/search is required
+* Use **local** when:
+
+  * you can fetch a reasonable base dataset once
+  * you want fast client-side searching
+* Use **hybrid** when:
+
+  * you want remote search results but still need local-only behaviors (like `searchOnly` restrictions)
+
+## `useLister` hook (programmatic lister control)
+
+`useLister` is the **low-level programmatic API** for the lister engine. Use it when you want to:
+
+* Open a lister picker from anywhere (button click, context menu, shortcut)
+* Fetch option lists using the same engine as the `lister` variant (without opening UI)
+* Read and control active lister sessions (query, mode, filters, selection)
+* Register/retrieve reusable lister presets at runtime
+
+It must be used inside `<ListerProvider />`.
+
+---
+
+### Import
+
+```tsx
+import { useLister } from "@timeax/form-palette/extra";
+```
+
+---
+
+### What you get back
+
+```ts
+const { api, store, state, actions } = useLister();
+```
+
+#### 1) `api`
+
+A stable object exposing the two core operations:
+
+* **`api.open(kindOrDef, filters?, opts?)`**
+  Opens the lister UI (popover/panel) and returns a promise that resolves when the user **Apply / Cancel / Close**.
+
+* **`api.fetch(kindOrDef, filters?, opts?)`**
+  Performs a fetch through the same engine and returns `{ rawList, optionsList }`-style results (depending on your mapping/selector).
+  Use this when you want data but don’t want to show the picker UI.
+
+Also includes:
+
+* **`api.registerPreset(kind, def)`** — register a preset definition by string key
+* **`api.getPreset(kind)`** — retrieve a preset
+
+> `kindOrDef` can be either a preset key (string) or a full `ListerDefinition` object.
+
+---
+
+#### 2) `store`
+
+The **global lister store** maintained by the provider.
+
+* `store.order`: session z-order / focus stack
+* `store.activeId`: currently focused session id
+* `store.sessions`: record of all sessions keyed by `sessionId`
+
+This is useful if you’re building custom UI around sessions.
+
+---
+
+#### 3) `state`
+
+A convenience accessor for the **active session state**:
+
+```ts
+const active = state; // AnyState | undefined
+```
+
+* `undefined` when no session is open/focused
+* otherwise the session’s runtime state (query, lists, selection, filters, etc.)
+
+---
+
+#### 4) `actions`
+
+Direct actions wired to the provider.
+
+These are **imperative controls** you can call from anywhere.
+
+##### Session lifecycle
+
+* `focus(sessionId)` — bring session to front and make it active
+* `dispose(sessionId)` — destroy session state and timers
+
+##### Finalize
+
+* `apply(sessionId)` — resolve promise with “apply” and (if ephemeral) close
+* `cancel(sessionId)` — resolve promise with “cancel” and close
+* `close(sessionId)` — resolve promise with “close” and close
+
+##### Selection
+
+* `toggle(sessionId, value)`
+* `select(sessionId, value)`
+* `deselect(sessionId, value)`
+* `clear(sessionId)`
+
+> These operate on the session’s **draftValue** (single id or array of ids).
+
+##### Search state
+
+* `setQuery(sessionId, q)` — updates session query
+* `setSearchMode(sessionId, mode)` — local/remote/hybrid
+* `setSearchTarget(sessionId, target)` — persist subject/all/only targeting
+
+##### Search execution
+
+You get two overload-friendly helpers:
+
+* `searchRemote(sessionId, q, payload?)`
+* `searchLocal(sessionId, q, payload?)`
+
+Both accept an optional **payload override** (`{ subject } | { searchAll: true } | { searchOnly: [...] }`).
+If you omit it, the provider derives payload from `searchTarget`.
+
+##### Refresh + positioning
+
+* `refresh(sessionId)` — re-fetch using latest filters/query/target
+* `setPosition(sessionId, pos)` — store draggable panel position
+
+##### Filters
+
+Filters are intentionally split into two layers:
+
+1. **Ctx-driven filters** (data state)
+
+* `getFilterCtx(sessionId)` returns a small controller:
+
+  * `ctx.set(key, value)`
+  * `ctx.merge(patch)`
+  * `ctx.unset(key)`
+  * `ctx.clear()`
+  * `ctx.refresh()`
+
+2. **Filter option clicks** (UI option-id based)
+
+* `applyFilterOption(sessionId, optionId)`
+
+This method toggles a filter option by its **UI id** (not DB value) and recomputes the effective filter payload.
+
+##### Visible options (local/hybrid)
+
+* `getVisibleOptions(sessionId)`
+
+Returns the current “visible” list after applying:
+
+* local/hybrid filtering rules
+* search payload (`subject/searchAll/searchOnly`)
+* filters
+
+This is what you typically render in custom UIs.
+
+---
+
+### Common usage patterns
+
+#### 1) Open a picker from a button
+
+```tsx
+function PickUserButton() {
+  const { api } = useLister();
+
+  async function pick() {
+    const res = await api.open(
+      {
+        source: { endpoint: "/api/users" },
+        mapping: { optionLabel: "fullName", optionValue: "id" },
+      },
+      {},
+      { title: "Select a user", mode: "single" }
+    );
+
+    if (res.reason === "apply") {
+      console.log("Selected id", res.value);
+      console.log("Selected object", res.details.raw);
+    }
+  }
+
+  return <button onClick={pick}>Pick user</button>;
+}
+```
+
+#### 2) Fetch options without opening UI
+
+```tsx
+function useUserOptions() {
+  const { api } = useLister();
+
+  return React.useCallback(async () => {
+    const res = await api.fetch(
+      {
+        source: { endpoint: "/api/users" },
+        mapping: { optionLabel: "fullName", optionValue: "id" },
+      },
+      { status: "active" },
+      { query: "", search: { searchAll: true } }
+    );
+
+    return res.options;
+  }, [api]);
+}
+```
+
+#### 3) Drive the active session imperatively
+
+```tsx
+function ListerDebugControls() {
+  const { state, actions } = useLister();
+
+  if (!state) return null;
+
+  return (
+    <div className="flex gap-2">
+      <button onClick={() => actions.refresh(state.sessionId)}>Refresh</button>
+      <button onClick={() => actions.clear(state.sessionId)}>Clear</button>
+      <button onClick={() => actions.close(state.sessionId)}>Close</button>
+    </div>
+  );
+}
+```
+
+---
+
+### Notes and gotchas
+
+* `useLister` does **not** render UI. The UI is rendered by `ListerUI` (and the `lister` variant) which reads the provider store.
+* Sessions can be **ephemeral** (default) or **persistent** when opened with `ownerKey` (so their filters/target/query survive popover reopen).
+* In **local** and **hybrid** modes, use `getVisibleOptions(sessionId)` for the UI list, not `state.optionsList`.
+* `applyFilterOption` expects the **option UI id** (path-like ids), not the DB value.
+
+---
+
+## `useData` hook (lightweight data fetch + local/remote search)
+
+`useData` is a small hook that reuses the lister engine’s request semantics (`buildRequest`, `selector`, and `searchTarget → payload`) without opening the lister UI.
+
+It’s designed for:
+
+* Fetching and displaying remote lists in normal pages
+* Supporting remote/hybrid/local search modes
+* Optional lightweight selection state by stable item key
+
+It must be used inside `<ListerProvider />` because it calls the provider’s `apiFetchAny` internally.
+
+---
+
+### When to use `useData` vs `useLister`
+
+* Use **`useData`** when you want a simple list in your component (table, dropdown, cards) and don’t need the lister panel UI.
+* Use **`useLister`** when you need to open the lister UI and/or control sessions.
+
+---
+
+### Minimal usage
+
+```tsx
+function UsersList() {
+  const users = useData({
+    endpoint: "/api/users",
+    selector: "data", // or (body) => body.data
+    search: { default: "fullName" },
+    searchMode: "remote",
+  });
+
+  return (
+    <div>
+      <input
+        value={users.query}
+        onChange={(e) => users.setQuery(e.target.value)}
+        placeholder="Search…"
+      />
+
+      {users.loading ? (
+        <div>Loading…</div>
+      ) : (
+        <ul>
+          {users.visible.map((u: any) => (
+            <li key={u.id}>{u.fullName}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+```
+
+---
+
+### Inputs (`UseDataOptions`)
+
+#### Request configuration
+
+* `endpoint` (required): URL to fetch
+* `method`: `GET | POST` (default `GET`)
+* `selector`: how to extract the list from the response (path or function)
+* `buildRequest(ctx)`: advanced request builder
+
+  * receives `{ filters, query, cursor }`
+  * returns `{ params, body, headers }`
+
+#### Search
+
+* `search`: minimal search config
+
+  * `default`: the default **subject** key when `searchTarget.mode === "subject"`
+* `searchMode`: `local | remote | hybrid` (default `remote`)
+* `debounceMs`: debounce for remote/hybrid query typing
+* `fetchOnMount`: defaults to `true` unless `initial` is provided
+
+#### Filters
+
+* `filters`: base filters object
+* `autoFetchOnFilterChange`: default `true` (only meaningful for remote/hybrid)
+
+#### Selection (optional)
+
+If you provide `selection`, the hook exposes selection helpers (`select`, `toggle`, etc.) and returns selected objects (not just ids).
+
+* `selection.mode`: `single | multiple`
+* `selection.key`: how to resolve item id
+
+  * string / keyof: `item[key]`
+  * function: `(item) => id`
+  * default: `item.id ?? item.value`
+* `selection.prune`:
+
+  * `never` (default): keep ids even if the latest list doesn’t include them
+  * `missing`: remove ids not present in the latest fetched list
+
+---
+
+### Outputs (`UseDataResult`)
+
+* `data`: last fetched list
+* `visible`: list after applying local/hybrid filtering using `searchTarget + query`
+* `loading`, `error`
+* `query`, `setQuery(q)`
+* `searchMode`, `setSearchMode(mode)`
+* `searchTarget`, `setSearchTarget(target)`
+* `filters`, `setFilters(next)`, `patchFilters(patch)`, `clearFilters()`
+* `refresh()`
+* `fetch(override?)`: imperative fetch; supports `{ query, filters, searchTarget }`
+
+If selection is enabled:
+
+* `selectedIds`, `selected`
+* `select(id|ids)`, `deselect(id|ids)`, `toggle(id)`
+* `isSelected(id)`, `clearSelection()`, `getSelection()`
+
+---
+
+### Search semantics
+
+`useData` follows the lister payload model via `buildSearchPayloadFromTarget(searchTarget)`:
+
+* `target.mode === "subject"` → `{ subject: "fieldName" }`
+* `target.mode === "all"` → `{ searchAll: true }`
+* `target.mode === "only"` → `{ searchOnly: [ids...] }`
+
+**Remote/hybrid:** query typing triggers a debounced fetch.
+
+**Local:** the hook fetches a base dataset once (when switching to local), then filters client-side.
+
+---
+
+### Selection example
+
+```tsx
+function UsersChooser() {
+  const users = useData({
+    endpoint: "/api/users",
+    selector: "data",
+    search: { default: "fullName" },
+    searchMode: "remote",
+    selection: { mode: "multiple", key: "id" },
+  });
+
+  return (
+    <div>
+      <input value={users.query} onChange={(e) => users.setQuery(e.target.value)} />
+
+      <ul>
+        {users.visible.map((u: any) => (
+          <li key={u.id}>
+            <label>
+              <input
+                type="checkbox"
+                checked={users.isSelected(u.id)}
+                onChange={() => users.toggle(u.id)}
+              />
+              {u.fullName}
+            </label>
+          </li>
+        ))}
+      </ul>
+
+      <pre>{JSON.stringify(users.getSelection(), null, 2)}</pre>
+    </div>
+  );
+}
+```
+
+
 #### JSON Editor Types
 
 **JsonEditorFieldMap Entry**

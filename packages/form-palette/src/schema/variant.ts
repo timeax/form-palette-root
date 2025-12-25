@@ -101,7 +101,7 @@ export interface Variants<H = unknown> {
     file: VariantEntry<FileLike, ShadcnFileVariantProps>
     editor: VariantEntry<string | undefined, ShadcnEditorVariantProps>
     'json-editor': VariantEntry<JsonObject | undefined, ShadcnJsonEditorProps>
-    lister: VariantEntry<any | undefined, ListerVariantProps>
+    lister: VariantEntry<any | undefined, ListerVariantProps<any>>
 }
 
 
