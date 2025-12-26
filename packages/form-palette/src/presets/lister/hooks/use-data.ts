@@ -15,7 +15,7 @@ import type {
  * - function: (body) => array
  * - string: path selector
  */
-export type DataSelector<T> = any;
+export type DataSelector<T> = ((body: any) => T[]) | string;
 
 export type DataSearchConfig = {
     default?: string;
@@ -154,6 +154,32 @@ function isKey(x: any): x is DataKey {
     return typeof x === "string" || typeof x === "number";
 }
 
+function stringifyForSearch(v: any): string {
+    if (v == null) return "";
+    if (typeof v === "string") return v;
+    if (
+        typeof v === "number" ||
+        typeof v === "boolean" ||
+        typeof v === "bigint"
+    ) {
+        return String(v);
+    }
+    if (v instanceof Date) {
+        return Number.isNaN(v.getTime()) ? "" : v.toISOString();
+    }
+    if (Array.isArray(v)) {
+        return v.map(stringifyForSearch).join(" ");
+    }
+    if (typeof v === "object") {
+        try {
+            return JSON.stringify(v);
+        } catch {
+            return String(v);
+        }
+    }
+    return String(v);
+}
+
 export function useData<TItem = any, TFilters = Record<string, any>>(
     opts: UseDataOptions<TItem, TFilters>,
 ): UseDataResult<TItem, TFilters> {
@@ -166,6 +192,11 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
     const [data, setData] = React.useState<TItem[]>(() => opts.initial ?? []);
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<any>(undefined);
+
+    const dataRef = React.useRef<TItem[]>(data);
+    React.useEffect(() => {
+        dataRef.current = data;
+    }, [data]);
 
     const [query, _setQuery] = React.useState("");
     const [searchMode, _setSearchMode] = React.useState<ListerSearchMode>(
@@ -231,6 +262,12 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
     // prevent mode switch immediate-fetch from also triggering the debounce effect fetch
     const skipNextModeEffectRef = React.useRef(false);
 
+    React.useEffect(() => {
+        return () => {
+            if (timerRef.current) clearTimeout(timerRef.current);
+        };
+    }, []);
+
     // ✅ inline def built from minimal inputs
     const inlineDef = React.useMemo(() => {
         return makeInlineDef({
@@ -290,13 +327,9 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
             query?: string;
             filters?: TFilters;
             searchTarget?: ListerSearchTarget;
-            /**
-             * Rare internal override: allow bypassing payload derivation.
-             * (Used when switching to local mode to fetch a base dataset.)
-             */
             search?: ListerSearchPayload;
         }): Promise<TItem[]> => {
-            if (!enabled) return data;
+            if (!enabled) return dataRef.current;
 
             const q = override?.query ?? query;
             const f = override?.filters ?? filters;
@@ -318,46 +351,45 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
 
                 const list = (res?.rawList ?? res?.raw ?? []) as TItem[];
 
-                // cache items for selection lookup
+                // last-request-wins (DON'T update state if stale)
+                if (reqIdRef.current !== myReq) return list;
+
+                // cache items for selection lookup (latest request only)
                 commitSelectedCache(list);
 
-                // optional prune
+                // optional prune (latest request only)
                 if (selectionMode !== "none" && selectionPrune === "missing") {
                     const nextIds = new Set<DataKey>();
                     for (const item of list) {
                         const k = getItemKey(item);
                         if (k != null) nextIds.add(k);
                     }
-
                     setSelectedIdsArr((prev) =>
                         prev.filter((x) => nextIds.has(x)),
                     );
                 }
 
-                if (reqIdRef.current !== myReq) return list;
-
                 setData(list);
                 setLoading(false);
                 return list;
             } catch (e: any) {
-                if (reqIdRef.current !== myReq) return data;
+                if (reqIdRef.current !== myReq) return dataRef.current;
                 setError(e);
                 setLoading(false);
-                return data;
+                return dataRef.current;
             }
         },
         [
-            commitSelectedCache,
-            ctx,
-            data,
             enabled,
-            filters,
-            getItemKey,
-            inlineDef,
             query,
+            filters,
             searchTarget,
+            ctx,
+            inlineDef,
+            commitSelectedCache,
             selectionMode,
             selectionPrune,
+            getItemKey,
         ],
     );
 
@@ -395,19 +427,10 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
         [fetchImpl],
     );
 
-    const setSearchTarget = React.useCallback(
-        (t: ListerSearchTarget) => {
-            _setSearchTarget(t);
-
-            if (searchMode === "remote" || searchMode === "hybrid") {
-                if (timerRef.current) clearTimeout(timerRef.current);
-                timerRef.current = setTimeout(() => {
-                    void fetchImpl({ searchTarget: t });
-                }, debounceMs);
-            }
-        },
-        [debounceMs, fetchImpl, searchMode],
-    );
+    const setSearchTarget = React.useCallback((t: ListerSearchTarget) => {
+        _setSearchTarget(t);
+        // debounced fetch is handled by the query/searchTarget effect
+    }, []);
 
     const setFilters = React.useCallback(
         (next: TFilters | undefined) => _setFilters(next),
@@ -433,7 +456,7 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
     }, []);
 
     /**
-     * Debounced fetch on query changes (remote/hybrid only)
+     * Debounced fetch on query/searchTarget changes (remote/hybrid only)
      */
     React.useEffect(() => {
         if (!enabled) return;
@@ -515,9 +538,7 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
 
         // all / fallback
         return list.filter((item: any) =>
-            String(item ?? "")
-                .toLowerCase()
-                .includes(ql),
+            stringifyForSearch(item).toLowerCase().includes(ql),
         );
     }, [data, getItemKey, query, searchMode, searchTarget]);
 

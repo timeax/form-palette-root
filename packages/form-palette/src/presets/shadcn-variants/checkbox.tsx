@@ -110,6 +110,14 @@ export interface ShadcnCheckboxUiProps<TItem, TValue> {
      * Single mode:
      *  - Optional; if provided, `items[0]` can supply label/description.
      */
+    options?: readonly TItem[];
+    /**
+     * Group mode:
+     *  - Optional; if provided, `items` can supply label/description.
+     *
+     * Single mode:
+     *  - Required when `single` is true.
+     */
     items?: readonly TItem[];
 
     /**
@@ -421,6 +429,7 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
 
         // UI / behaviour
         items,
+        options,
         mappers,
         optionValue,
         optionLabel,
@@ -562,12 +571,12 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
     const normalized = React.useMemo(
         () =>
             normalizeItems<TItem, TValue>(
-                items,
+                items ?? options,
                 mappers,
                 optionValue,
                 optionLabel
             ),
-        [items, mappers, optionValue, optionLabel]
+        [items, options, mappers, optionValue, optionLabel]
     );
 
     const {

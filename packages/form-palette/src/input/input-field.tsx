@@ -222,6 +222,7 @@ export function InputField<K extends VariantKey = VariantKey>(
         description,
         helpText,
         errorText,
+        autoOff,
 
         // Container + tags
         contain,
@@ -589,6 +590,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                 <FieldContent className={inlineFieldContentClass}>
                     <Variant
                         {...(rest as any)}
+                        name={autoOff ? undefined : name}
                         id={key}
                         ref={ref as any}
                         value={value}
@@ -857,6 +859,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                             >
                                 <Variant
                                     {...(rest as any)}
+                                    name={autoOff ? undefined : name}
                                     id={key}
                                     ref={ref as any}
                                     value={value}

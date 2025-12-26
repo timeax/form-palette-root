@@ -41,6 +41,7 @@ export interface InputFieldBaseProps<TValue = unknown> {
     main?: boolean;
     tags?: FieldTag[];
     contain?: boolean
+    autoOff?: boolean
 
     // ─────────────────────────────────────────────
     // Chrome / description

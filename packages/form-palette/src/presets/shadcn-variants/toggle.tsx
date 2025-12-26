@@ -21,7 +21,7 @@ type Density = "default" | "dense";
 export interface ShadcnToggleUiProps
    extends Omit<
       React.ComponentProps<typeof Switch>,
-      "checked" | "onCheckedChange" | "className"
+      "checked" | "onCheckedChange" | "className" | 'defaultValue' | 'onChange'
    > {
    /**
     * Visual size of the switch / text.

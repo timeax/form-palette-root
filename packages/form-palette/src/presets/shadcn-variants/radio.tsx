@@ -97,7 +97,8 @@ export interface ShadcnRadioUiProps<TItem, TValue> {
      *   or optionValue/optionLabel keys.
      * - primitive arrays such as `string[]` or `number[]` (fallback).
      */
-    items: readonly TItem[];
+    options?: readonly TItem[];
+    items?: readonly TItem[];
 
     /**
      * Mapping functions for TItem → value/label/etc.
@@ -357,6 +358,7 @@ const InnerShadcnRadioVariant = <TValue, TItem = RadioItem<TValue>>(
 
         // radio UI
         items,
+        options,
         mappers,
         optionValue,
         optionLabel,
@@ -389,13 +391,13 @@ const InnerShadcnRadioVariant = <TValue, TItem = RadioItem<TValue>>(
     const normalized = React.useMemo(
         () =>
             normalizeItems<TItem, TValue>(
-                items,
+                (items ?? options)!,
                 mappers,
                 //@ts-ignore
                 optionValue,
                 optionLabel
             ),
-        [items, mappers, optionValue, optionLabel]
+        [items, options, mappers, optionValue, optionLabel]
     );
 
     // Map TValue → string for RadioGroup
