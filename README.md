@@ -74,11 +74,10 @@ Example with decorations and validation:
   label="Username"
   sublabel="public handle"
   prefix="@"
-  validate={(value, report) => {
-    if (!value) return report ? "Required" : false;
-    if (value.length < 3) return report ? "Min 3 characters" : false;
-    return true;
-  }}
+  onValidate={(v) => {
+                        const s = String(v ?? '');
+                        return !/^[a-z][a-z0-9_]*$/.test(s) ? 'Use lowercase letters (and underscores if needed)' : false;
+                    }}
   onChange={(e) => console.log("username:", e.value)}
 />
 ```
