@@ -52,7 +52,7 @@ function resolveLayoutForField(
     defaults: FieldLayoutConfig | undefined,
     overrides: Partial<FieldLayoutConfig>,
     props: unknown,
-    variantResolve?: (ctx: LayoutResolveContext) => FieldLayoutConfig
+    variantResolve?: (ctx: LayoutResolveContext) => FieldLayoutConfig,
 ): FieldLayoutConfig {
     const base: FieldLayoutConfig = defaults ? { ...defaults } : {};
 
@@ -77,7 +77,7 @@ function resolveLayoutForField(
 function renderHelperSlot(
     root: "label" | "input",
     slot: HelperSlot,
-    classes: any
+    classes: any,
 ): React.ReactNode {
     const placement: SlotPlacement = slot.placement;
 
@@ -88,7 +88,7 @@ function renderHelperSlot(
                     key={`sublabel-${placement}-${root}`}
                     className={cn(
                         "text-xs text-muted-foreground",
-                        classes?.sublabel
+                        classes?.sublabel,
                     )}
                     data-slot={`sublabel-${placement}`}
                 >
@@ -102,7 +102,7 @@ function renderHelperSlot(
                     key={`description-${placement}-${root}`}
                     className={cn(
                         "text-xs text-muted-foreground",
-                        classes?.description
+                        classes?.description,
                     )}
                     data-slot={`description-${placement}`}
                 >
@@ -116,7 +116,7 @@ function renderHelperSlot(
                     key={`helpText-${placement}-${root}`}
                     className={cn(
                         "text-xs text-muted-foreground",
-                        classes?.helpText
+                        classes?.helpText,
                     )}
                     data-slot={`helptext-${placement}`}
                 >
@@ -155,7 +155,7 @@ export function getClasses(
     props: InputFieldClassNameProps & {
         className?: string;
         classes?: Partial<InputFieldClassNames>;
-    }
+    },
 ): InputFieldClassNames {
     const legacy = props.classes ?? {};
 
@@ -200,7 +200,7 @@ export function getClasses(
  *   "label" vs "input" roots without empty wrapper divs.
  */
 export function InputField<K extends VariantKey = VariantKey>(
-    props: InputFieldProps<K>
+    props: InputFieldProps<K>,
 ) {
     const {
         variant,
@@ -263,8 +263,8 @@ export function InputField<K extends VariantKey = VariantKey>(
             // eslint-disable-next-line no-console
             console.warn(
                 `[form-palette] InputField: variant "${String(
-                    variant
-                )}" is not registered.`
+                    variant,
+                )}" is not registered.`,
             );
         }
         return null;
@@ -308,7 +308,7 @@ export function InputField<K extends VariantKey = VariantKey>(
             defaultsLayout,
             overrides,
             props,
-            module.resolveLayout as any
+            module.resolveLayout as any,
         );
     }, [
         module,
@@ -340,7 +340,7 @@ export function InputField<K extends VariantKey = VariantKey>(
             value: TValue | undefined,
             field: any,
             form: any,
-            _report: boolean
+            _report: boolean,
         ): boolean | string => {
             const messages: string[] = [];
 
@@ -362,7 +362,7 @@ export function InputField<K extends VariantKey = VariantKey>(
             if (!messages.length) return true;
             return messages[0] ?? "Invalid value.";
         },
-        [module, required, onValidate, props]
+        [module, required, onValidate, props],
     );
 
     // Hook into the core: register field, track value/error/loading
@@ -427,7 +427,7 @@ export function InputField<K extends VariantKey = VariantKey>(
             // If your setValue only accepts one arg, drop `String(variant)`.
             (setValue as any)(finalValue, String(variant));
         },
-        [onChange, setValue, variant]
+        [onChange, setValue, variant],
     );
 
     const disabledProp = (rest as any).disabled;
@@ -448,7 +448,7 @@ export function InputField<K extends VariantKey = VariantKey>(
         "gap-1",
         contain && !inline && "rounded-xl border border-border bg-background",
         classes?.root,
-        className
+        className,
     );
 
     // Variant-level className merge (host + classes.variant)
@@ -459,7 +459,7 @@ export function InputField<K extends VariantKey = VariantKey>(
             // In compact inline mode, force the control to size to its content
             isCompactInline && "inline-flex w-auto",
             hostVariantClass,
-            classes?.variant
+            classes?.variant,
         ) || undefined;
 
     // Build tags content cluster (individual pills)
@@ -476,7 +476,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                         className={cn(
                             "inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium",
                             tag.className,
-                            classes?.tag
+                            classes?.tag,
                         )}
                         style={{
                             color: tag.color,
@@ -504,7 +504,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                 errorText: visualError || undefined,
                 tags: tagsContent || undefined,
             }),
-        [layout, sublabel, description, helpText, visualError, tagsContent]
+        [layout, sublabel, description, helpText, visualError, tagsContent],
     );
 
     // Detect whether there are any label-root slots so we don't render empty rows/spacing
@@ -552,12 +552,12 @@ export function InputField<K extends VariantKey = VariantKey>(
     const inlineInputColClass = cn(
         "flex flex-col",
         isCompactInline ? "flex-none" : "flex-1 min-w-0",
-        classes?.inlineInputColumn
+        classes?.inlineInputColumn,
     );
 
     const inlineLabelColClass = cn(
         isCompactInline ? "flex-1 min-w-0" : "min-w-0",
-        classes?.inlineLabelColumn
+        classes?.inlineLabelColumn,
     );
 
     const inlineFieldGroupClass = isCompactInline
@@ -567,7 +567,7 @@ export function InputField<K extends VariantKey = VariantKey>(
               // kill the Shadcn container on this group in compact-inline mode
               "[container-type:normal]",
               "[container-name:none]",
-              classes?.group
+              classes?.group,
           )
         : (classes?.group ?? undefined);
 
@@ -582,8 +582,8 @@ export function InputField<K extends VariantKey = VariantKey>(
                 .getSlotsFor("input", "above")
                 .render((slots) =>
                     slots.map((slot) =>
-                        renderHelperSlot("input", slot, classes)
-                    )
+                        renderHelperSlot("input", slot, classes),
+                    ),
                 )}
 
             <FieldGroup className={inlineFieldGroupClass}>
@@ -592,7 +592,6 @@ export function InputField<K extends VariantKey = VariantKey>(
                         {...(rest as any)}
                         name={autoOff ? undefined : name}
                         id={key}
-                        ref={ref as any}
                         value={value}
                         onValue={handleValueChange}
                         error={error}
@@ -611,8 +610,8 @@ export function InputField<K extends VariantKey = VariantKey>(
                 .getSlotsFor("input", "below")
                 .render((slots) =>
                     slots.map((slot) =>
-                        renderHelperSlot("input", slot, classes)
-                    )
+                        renderHelperSlot("input", slot, classes),
+                    ),
                 )}
         </div>
     );
@@ -625,15 +624,15 @@ export function InputField<K extends VariantKey = VariantKey>(
                     .getSlotsFor("label", "above")
                     .render((slots) =>
                         slots.map((slot) =>
-                            renderHelperSlot("label", slot, classes)
-                        )
+                            renderHelperSlot("label", slot, classes),
+                        ),
                     )}
 
                 {hasLabelRowContent && (
                     <div
                         className={cn(
                             "flex items-baseline justify-between gap-1",
-                            classes?.labelRow
+                            classes?.labelRow,
                         )}
                         data-slot="label-row"
                     >
@@ -641,7 +640,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                         {graph.getSlotsFor("label", "left").render((slots) => (
                             <div className="flex items-baseline gap-1">
                                 {slots.map((slot) =>
-                                    renderHelperSlot("label", slot, classes)
+                                    renderHelperSlot("label", slot, classes),
                                 )}
                             </div>
                         ))}
@@ -651,7 +650,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                                 htmlFor={key}
                                 className={cn(
                                     "text-sm font-medium text-foreground",
-                                    classes?.label
+                                    classes?.label,
                                 )}
                             >
                                 <FieldTitle>
@@ -660,7 +659,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                                         <span
                                             className={cn(
                                                 "text-destructive",
-                                                classes?.required
+                                                classes?.required,
                                             )}
                                         >
                                             *
@@ -676,7 +675,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                         {graph.getSlotsFor("label", "right").render((slots) => (
                             <div className="flex items-baseline gap-1">
                                 {slots.map((slot) =>
-                                    renderHelperSlot("label", slot, classes)
+                                    renderHelperSlot("label", slot, classes),
                                 )}
                             </div>
                         ))}
@@ -688,8 +687,8 @@ export function InputField<K extends VariantKey = VariantKey>(
                     .getSlotsFor("label", "below")
                     .render((slots) =>
                         slots.map((slot) =>
-                            renderHelperSlot("label", slot, classes)
-                        )
+                            renderHelperSlot("label", slot, classes),
+                        ),
                     )}
             </div>
         );
@@ -699,7 +698,7 @@ export function InputField<K extends VariantKey = VariantKey>(
         hasLabelAboveSlots || hasLabelBelowSlots
             ? "items-start"
             : "items-center",
-        classes?.inlineRow
+        classes?.inlineRow,
     );
 
     // ─────────────────────────────────────────────────────
@@ -710,7 +709,7 @@ export function InputField<K extends VariantKey = VariantKey>(
 
     const stackedGroupClassName = cn(
         hasStackedLabelBlock && hasLabelRowContent && "mt-0.5",
-        classes?.group
+        classes?.group,
     );
 
     const Element = contain ? "div" : React.Fragment;
@@ -724,6 +723,7 @@ export function InputField<K extends VariantKey = VariantKey>(
     return (
         <UiField
             className={rootClassName}
+            ref={ref as any}
             style={style}
             data-variant={String(variant)}
             data-label-placement={lp ?? undefined}
@@ -762,15 +762,19 @@ export function InputField<K extends VariantKey = VariantKey>(
                                 .getSlotsFor("label", "above")
                                 .render((slots) =>
                                     slots.map((slot) =>
-                                        renderHelperSlot("label", slot, classes)
-                                    )
+                                        renderHelperSlot(
+                                            "label",
+                                            slot,
+                                            classes,
+                                        ),
+                                    ),
                                 )}
 
                             {hasLabelRowContent && (
                                 <div
                                     className={cn(
                                         "flex items-baseline justify-between gap-1",
-                                        classes?.labelRow
+                                        classes?.labelRow,
                                     )}
                                     data-slot="label-row"
                                 >
@@ -783,8 +787,8 @@ export function InputField<K extends VariantKey = VariantKey>(
                                                     renderHelperSlot(
                                                         "label",
                                                         slot,
-                                                        classes
-                                                    )
+                                                        classes,
+                                                    ),
                                                 )}
                                             </div>
                                         ))}
@@ -794,7 +798,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                                             htmlFor={key}
                                             className={cn(
                                                 "text-sm font-medium text-foreground",
-                                                classes?.label
+                                                classes?.label,
                                             )}
                                         >
                                             <FieldTitle>
@@ -803,7 +807,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                                                     <span
                                                         className={cn(
                                                             "text-destructive",
-                                                            classes?.required
+                                                            classes?.required,
                                                         )}
                                                     >
                                                         *
@@ -824,8 +828,8 @@ export function InputField<K extends VariantKey = VariantKey>(
                                                     renderHelperSlot(
                                                         "label",
                                                         slot,
-                                                        classes
-                                                    )
+                                                        classes,
+                                                    ),
                                                 )}
                                             </div>
                                         ))}
@@ -837,8 +841,12 @@ export function InputField<K extends VariantKey = VariantKey>(
                                 .getSlotsFor("label", "below")
                                 .render((slots) =>
                                     slots.map((slot) =>
-                                        renderHelperSlot("label", slot, classes)
-                                    )
+                                        renderHelperSlot(
+                                            "label",
+                                            slot,
+                                            classes,
+                                        ),
+                                    ),
                                 )}
                         </Element>
                     )}
@@ -849,8 +857,8 @@ export function InputField<K extends VariantKey = VariantKey>(
                             .getSlotsFor("input", "above")
                             .render((slots) =>
                                 slots.map((slot) =>
-                                    renderHelperSlot("input", slot, classes)
-                                )
+                                    renderHelperSlot("input", slot, classes),
+                                ),
                             )}
 
                         <FieldGroup className={stackedGroupClassName}>
@@ -861,7 +869,6 @@ export function InputField<K extends VariantKey = VariantKey>(
                                     {...(rest as any)}
                                     name={autoOff ? undefined : name}
                                     id={key}
-                                    ref={ref as any}
                                     value={value}
                                     onValue={handleValueChange}
                                     error={error}
@@ -880,8 +887,8 @@ export function InputField<K extends VariantKey = VariantKey>(
                             .getSlotsFor("input", "below")
                             .render((slots) =>
                                 slots.map((slot) =>
-                                    renderHelperSlot("input", slot, classes)
-                                )
+                                    renderHelperSlot("input", slot, classes),
+                                ),
                             )}
                     </Element>
                 </>

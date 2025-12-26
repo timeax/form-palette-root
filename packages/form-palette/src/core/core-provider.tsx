@@ -12,9 +12,9 @@ import { FieldRegistry } from "@/core/registry/field-registry";
 import type { z } from "zod";
 import type {
     AdapterKey,
+    AdapterProps,
     AdapterResult,
     Method,
-    AdapterProps,
 } from "@/schema/adapter";
 import type {
     CoreContext,
@@ -116,7 +116,7 @@ export function CoreProvider<
 
     // Single input store: FieldRegistry
     const registryRef = React.useRef<FieldRegistry>(new FieldRegistry());
-``
+    ``;
     // bucket, errors, button
     const bucketRef = React.useRef<Dict>({});
     const uncaughtRef = React.useRef<string[]>([]);
@@ -124,6 +124,7 @@ export function CoreProvider<
     const buttonRef = React.useRef<ButtonRef | null>(null);
     const activeButtonNameRef = React.useRef<string | null>(null);
 
+    const [hasUncaughtErrors, setHasUncaughtErrors] = React.useState(0);
     /**
      * Original snapshot used for "dirty" checks.
      * Lazily captured on first dirty-check.
@@ -291,7 +292,7 @@ export function CoreProvider<
                     if (anyErr.issues) {
                         const { fieldErrors, uncaught } = mapZodError(anyErr);
                         for (const [name, message] of Object.entries(
-                            fieldErrors
+                            fieldErrors,
                         )) {
                             setFieldError(name, message);
                         }
@@ -325,7 +326,7 @@ export function CoreProvider<
         extra?: Partial<Values>,
         ignoreForm?: boolean,
         autoErr: boolean = true,
-        autoRun: boolean = true
+        autoRun: boolean = true,
     ): Promise<AdapterResult<any> | undefined> {
         const currentProps = propsRef.current as Props<V, S, K>;
 
@@ -350,6 +351,8 @@ export function CoreProvider<
         const finish = () => {
             if (finished) return;
             finished = true;
+            if (uncaughtRef.current.length)
+                setHasUncaughtErrors(hasUncaughtErrors + 1);
             setButtonLoading(false);
         };
 
@@ -447,14 +450,14 @@ export function CoreProvider<
                     const anyErr = err as any;
                     if (anyErr.errors && typeof anyErr.errors === "object") {
                         const { fieldErrors, uncaught } = mapErrorBag(
-                            anyErr.errors ?? {}
+                            anyErr.errors ?? {},
                         );
 
                         if (updateRef) {
                             errorsRef.current = fieldErrors;
                         } else
                             for (const [name, message] of Object.entries(
-                                fieldErrors
+                                fieldErrors,
                             )) {
                                 setFieldError(name, message);
                             }
@@ -552,7 +555,7 @@ export function CoreProvider<
                     const maybe = valueFeed(
                         base as keyof Values,
                         value as any,
-                        context as any
+                        context as any,
                     );
                     if (typeof maybe !== "undefined") {
                         hydrated = maybe;
@@ -582,7 +585,7 @@ export function CoreProvider<
 
         error(
             nameOrBag: string | Record<string, string>,
-            maybeMsg?: string
+            maybeMsg?: string,
         ): void {
             if (typeof nameOrBag === "string") {
                 if (!maybeMsg) return;
@@ -649,7 +652,7 @@ export function CoreProvider<
             route: string,
             extra?: Partial<Values>,
             ignoreForm?: boolean,
-            autoErr?: boolean
+            autoErr?: boolean,
         ): Promise<AdapterResult<any> | undefined> {
             // Bridge old (method, route) API into adapter config overrides.
             const override: any = {
@@ -661,13 +664,13 @@ export function CoreProvider<
                 extra,
                 ignoreForm,
                 autoErr,
-                false
+                false,
             );
         },
 
         persist(
             data: Partial<Values>,
-            feed?: (name: string, value: unknown, original: unknown) => unknown
+            feed?: (name: string, value: unknown, original: unknown) => unknown,
         ): void {
             const seen: Record<string, number> = {};
             const root = data as any;
@@ -678,13 +681,13 @@ export function CoreProvider<
                     ? (
                           name: string,
                           value: unknown,
-                          original: unknown
+                          original: unknown,
                       ): unknown => {
                           const vf = propsRef.current.valueFeed!;
                           const maybe = vf(
                               name as keyof Values,
                               value as any,
-                              context as any
+                              context as any,
                           );
                           return typeof maybe === "undefined"
                               ? original
@@ -843,6 +846,8 @@ export function CoreProvider<
         setActiveButton(name: string): void {
             activeButtonNameRef.current = name;
         },
+
+        hasUncaughtErrors,
 
         getUncaught(): readonly string[] {
             return uncaughtRef.current;

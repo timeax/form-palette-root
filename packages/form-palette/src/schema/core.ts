@@ -91,7 +91,11 @@ export type SubmitEvent<TValues extends Dict, K extends AdapterKey> = {
  * @template V Shape of the underlying value map (pre-schema).
  * @template S Optional Zod schema type.
  */
-export type BaseProps<V extends Dict, S extends z.ZodType | undefined, K extends AdapterKey> = {
+export type BaseProps<
+    V extends Dict,
+    S extends z.ZodType | undefined,
+    K extends AdapterKey,
+> = {
     /**
      * Field names that should be ignored when building diffs or snapshots.
      * Useful for excluding secrets like passwords from logs.
@@ -123,7 +127,7 @@ export type BaseProps<V extends Dict, S extends z.ZodType | undefined, K extends
     onChange?(
         form: CoreContext<InferFromSchema<S, V>>,
         current: Field,
-        options: Dict
+        options: Dict,
     ): void;
 
     /**
@@ -153,7 +157,7 @@ export type BaseProps<V extends Dict, S extends z.ZodType | undefined, K extends
     valueFeed?: <K extends keyof InferFromSchema<S, V>>(
         name: K,
         value: InferFromSchema<S, V>[K],
-        form: CoreContext<InferFromSchema<S, V>>
+        form: CoreContext<InferFromSchema<S, V>>,
     ) => InferFromSchema<S, V>[K] | undefined;
 
     /**
@@ -177,7 +181,7 @@ export type BaseProps<V extends Dict, S extends z.ZodType | undefined, K extends
      * - abort by setting e.continue = false.
      */
     onSubmit?<T extends Dict = InferFromSchema<S, V>>(
-        e: SubmitEvent<T, K>
+        e: SubmitEvent<T, K>,
     ): Promise<void> | void;
 
     /**
@@ -203,28 +207,29 @@ export type CoreProps<
     V extends Dict,
     S extends z.ZodType | undefined,
     K extends AdapterKey = "local",
-> = BaseProps<V, S, K> & AdapterProps<K> & {
-    /**
-     * Which adapter flavour this core instance should use.
-     *
-     * - 'local' (default) → library-defined local submission (no URL/method semantics).
-     * - extended keys      → host-defined adapters via Adapters augmentation.
-     */
-    adapter?: K;
+> = BaseProps<V, S, K> &
+    AdapterProps<K> & {
+        /**
+         * Which adapter flavour this core instance should use.
+         *
+         * - 'local' (default) → library-defined local submission (no URL/method semantics).
+         * - extended keys      → host-defined adapters via Adapters augmentation.
+         */
+        adapter?: K;
 
-    /**
-     * Called after a submission completes. The payload type is derived from
-     * the selected adapter key via the adapter registry:
-     *
-     *   AdapterSubmit<'local'> → { data: unknown }
-     *   AdapterSubmit<'axios'> → host-defined type, etc.
-     */
-    onSubmitted?(
-        form: CoreContext<InferFromSchema<S, V>>,
-        payload: AdapterSubmit<K>,
-        resolve?: () => void
-    ): void | Promise<void>;
-}
+        /**
+         * Called after a submission completes. The payload type is derived from
+         * the selected adapter key via the adapter registry:
+         *
+         *   AdapterSubmit<'local'> → { data: unknown }
+         *   AdapterSubmit<'axios'> → host-defined type, etc.
+         */
+        onSubmitted?(
+            form: CoreContext<InferFromSchema<S, V>>,
+            payload: AdapterSubmit<K>,
+            resolve?: () => void,
+        ): void | Promise<void>;
+    };
 
 /**
  * Backwards-compatible alias for legacy naming, if you want it.
@@ -328,7 +333,6 @@ export interface CoreContext<V extends Dict> {
      */
     controlButton(): void;
 
-
     /**
      * Prepare an adapter-backed request.
      *
@@ -344,7 +348,7 @@ export interface CoreContext<V extends Dict> {
         route: string,
         extra?: Partial<V>,
         ignoreForm?: boolean,
-        autoErr?: boolean
+        autoErr?: boolean,
     ): Promise<AdapterResult<any> | undefined>;
 
     /**
@@ -353,7 +357,7 @@ export interface CoreContext<V extends Dict> {
      */
     persist(
         data: Partial<V>,
-        feed?: (name: string, value: unknown, original: unknown) => unknown
+        feed?: (name: string, value: unknown, original: unknown) => unknown,
     ): void;
 
     /**
@@ -410,6 +414,7 @@ export interface CoreContext<V extends Dict> {
      */
 
     getUncaught(): readonly string[];
+    hasUncaughtErrors: number;
     /**
      * Field-query "DOM" for this form.
      *
@@ -423,5 +428,5 @@ export interface CoreContext<V extends Dict> {
     /**
      * Checks if the form values have changed
      */
-    isDirty(): boolean
+    isDirty(): boolean;
 }

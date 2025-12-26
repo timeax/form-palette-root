@@ -65,7 +65,7 @@ export function CoreRoot(props: CoreRootProps) {
 
     return (
         <form onSubmit={handleSubmit} {...passThrough}>
-            {!noErrorStrip && <ErrorStrip form={form} />}
+            {!noErrorStrip && <ErrorStrip className={'mb-2'} form={form} />}
             {children}
         </form>
     );
