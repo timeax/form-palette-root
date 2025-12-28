@@ -25,6 +25,9 @@ import type {
     ValuesResult,
 } from "@/schema/core";
 import type { ButtonRef, Field } from "@/schema/field";
+import { getPaletteUtil } from "@/lib/register-global";
+import { toArray } from "@/lib/utils";
+import type { FileItem } from "@/presets/shadcn-variants/file";
 
 type Props<
     V extends Dict,
@@ -209,6 +212,7 @@ export function CoreProvider<
         const exceptions = propsRef.current.exceptions ?? [];
         const list: Dict = {};
         const shared: Dict<Dict> = {};
+        const formatFileValue = getPaletteUtil('formatFileValue')
 
         for (const item of fetchAllNamedFields()) {
             const rawName = item.name;
@@ -240,17 +244,29 @@ export function CoreProvider<
                     ? (anyField.getValue() as unknown)
                     : (anyField.value as unknown);
 
+            const onFormat = (value: any) => {
+                if (anyField.onSubmit) {
+                    return anyField.onSubmit(value);
+                }
+
+                if(formatFileValue && item.variant == 'file') {
+                    return toArray(value as FileItem | FileItem[]).map(formatFileValue);
+                }
+
+                return value;
+            };
+
             if (isArray) {
                 const existing = target[base];
                 if (Array.isArray(existing)) {
-                    target[base] = [...existing, val];
+                    target[base] = onFormat([...existing, val]);
                 } else if (typeof existing === "undefined") {
-                    target[base] = [val];
+                    target[base] = onFormat([val]);
                 } else {
-                    target[base] = [existing, val];
+                    target[base] = onFormat([existing, val]);
                 }
             } else {
-                target[base] = val;
+                target[base] = onFormat(val);
             }
         }
 

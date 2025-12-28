@@ -15,6 +15,8 @@ import {
 } from "@/presets/ui/select";
 import { cn } from "@/lib/utils";
 import { getGlobalCountryList } from "@/lib/get-global-countries";
+import { de } from "date-fns/locale";
+import { getPaletteUtil } from "@/lib/register-global";
 
 type BaseProps = VariantBaseProps<string | undefined>;
 
@@ -481,10 +483,26 @@ export const ShadcnPhoneVariant = React.forwardRef<
    } = props;
 
    let DEFAULT_COUNTRIES = getGlobalCountryList();
-   const countries =
+   const defaultCountries =
       countriesProp && countriesProp.length > 0
          ? countriesProp
          : DEFAULT_COUNTRIES;
+
+   const [loadedCountries, setLoadedCountries] = React.useState<PhoneCountry[]>(defaultCountries);
+
+   React.useEffect(() => {
+      const loader = getPaletteUtil("countries");
+      if (loader) {
+         Promise.resolve(loader).then((list) => {
+            setLoadedCountries(list);
+         });
+      }
+   }, []);
+
+   const countries = React.useMemo(() => {
+      return defaultCountries;
+   }, [loadedCountries, countriesProp]);
+
 
    const [country, setCountry] = React.useState<PhoneCountry>(() => {
       if (defaultCountry) {

@@ -204,6 +204,7 @@ export function InputField<K extends VariantKey = VariantKey>(
 ) {
     const {
         variant,
+        onSubmit,
 
         // Field identity / wiring
         name,
@@ -374,6 +375,8 @@ export function InputField<K extends VariantKey = VariantKey>(
         alias,
         main,
         ignore,
+        onSubmit,
+        variant,
         required,
         defaultValue: defaultValue as TValue | undefined,
         validate,

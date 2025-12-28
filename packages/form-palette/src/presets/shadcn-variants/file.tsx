@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import type { VariantBaseProps, ChangeDetail } from "@/variants/shared";
-import { cn } from "@/lib/utils";
+import { cn, toArray } from "@/lib/utils";
 import { Checkbox } from "@/presets/ui/checkbox";
 import { ScrollArea } from "@/presets/ui/scroll-area";
 import { Button } from "@/presets/ui/button";
@@ -20,6 +20,7 @@ import {
     Plus,
     FolderUp,
 } from "lucide-react";
+import { getPaletteUtil } from "@/lib/register-global";
 
 // ─────────────────────────────────────────────
 // Types
@@ -66,6 +67,7 @@ export type CustomFileLoaderResult = FileLike | FileLike[] | null | undefined;
 export type CustomFileLoader = (ctx: {
     multiple: boolean;
     current: FileItem[];
+    allowedTypes?: string[];
 }) => Promise<CustomFileLoaderResult> | CustomFileLoaderResult;
 
 // ─────────────────────────────────────────────
@@ -120,10 +122,6 @@ function pickerBtnSize(size?: Size) {
     }
 }
 
-function toArray<T>(v: T | T[] | null | undefined): T[] {
-    if (v == null) return [];
-    return Array.isArray(v) ? v : [v];
-}
 
 function normaliseFileLike(input: FileLike): FileItem {
     const asAny: any = input as any;
@@ -231,7 +229,7 @@ function densityTokens(density?: Density) {
 
 function mergeHandlers<E>(
     a: ((e: E) => void) | undefined,
-    b: ((e: E) => void) | undefined
+    b: ((e: E) => void) | undefined,
 ) {
     if (!a) return b;
     if (!b) return a;
@@ -260,7 +258,8 @@ type FileVariantBaseProps = Pick<
     dropIcon?: React.ReactNode;
     dropTitle?: React.ReactNode;
     dropDescription?: React.ReactNode;
-
+    custom?: boolean;
+    asRaw?: boolean;
     renderDropArea?: (ctx: {
         openPicker: () => void;
         isDragging: boolean;
@@ -277,7 +276,7 @@ type FileVariantBaseProps = Pick<
     showCheckboxes?: boolean;
     onFilesAdded?: (
         added: FileItem[],
-        detail: ChangeDetail<{ from: "input" | "drop" | "custom-loader" }>
+        detail: ChangeDetail<{ from: "input" | "drop" | "custom-loader" }>,
     ) => void;
 
     customLoader?: CustomFileLoader;
@@ -432,8 +431,9 @@ export const ShadcnFileVariant = React.forwardRef<
         formatFileName,
         formatFileSize = formatSizeDefault,
         placeholder = "Select file...",
-
+        asRaw,
         className,
+        custom,
         dropAreaClassName,
         listClassName,
         triggerClassName,
@@ -468,12 +468,12 @@ export const ShadcnFileVariant = React.forwardRef<
     // ─────────────────────────────────────────────
     // State
     // ─────────────────────────────────────────────
-    const items = value ?? [];
+    const items = toArray(value) ?? [];
     const isDisabled = Boolean(disabled || readOnly);
 
     const [dragOver, setDragOver] = React.useState(false);
     const [selectedIds, setSelectedIds] = React.useState<Set<string>>(
-        () => new Set()
+        () => new Set(),
     );
     const [popoverOpen, setPopoverOpen] = React.useState(false);
     const fileInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -508,7 +508,7 @@ export const ShadcnFileVariant = React.forwardRef<
                 meta,
             });
         },
-        [onValue]
+        [onValue],
     );
 
     const handleAddItems = React.useCallback(
@@ -523,7 +523,7 @@ export const ShadcnFileVariant = React.forwardRef<
 
                 const currentTotalSize = next.reduce(
                     (acc, i) => acc + (i.size || 0),
-                    0
+                    0,
                 );
                 if (
                     maxTotalSize &&
@@ -553,7 +553,7 @@ export const ShadcnFileVariant = React.forwardRef<
             maxTotalSize,
             multiple,
             onFilesAdded,
-        ]
+        ],
     );
 
     const handleRemove = React.useCallback(
@@ -566,7 +566,7 @@ export const ShadcnFileVariant = React.forwardRef<
                 setSelectedIds(nextSel);
             }
         },
-        [emitChange, items, selectedIds]
+        [emitChange, items, selectedIds],
     );
 
     const handleBulkRemove = React.useCallback(() => {
@@ -581,9 +581,16 @@ export const ShadcnFileVariant = React.forwardRef<
     const openPicker = React.useCallback(async () => {
         if (isDisabled) return;
 
-        if (customLoader) {
+        let resolvedLoader =
+            customLoader ?? (custom && getPaletteUtil("customLoader"));
+
+        if (resolvedLoader) {
             try {
-                const result = await customLoader({ multiple, current: items });
+                const result = await resolvedLoader({
+                    multiple,
+                    current: items,
+                    allowedTypes: toArray(accept),
+                });
                 if (!result) return;
 
                 const normalized = toArray(result).map(normaliseFileLike);
@@ -617,7 +624,7 @@ export const ShadcnFileVariant = React.forwardRef<
             e.preventDefault();
             if (!isDisabled) setDragOver(true);
         },
-        [isDisabled]
+        [isDisabled],
     );
 
     const onDrop = React.useCallback(
@@ -628,7 +635,7 @@ export const ShadcnFileVariant = React.forwardRef<
             const files = normaliseFromFiles(e.dataTransfer.files);
             handleAddItems(files, "drop");
         },
-        [handleAddItems, isDisabled]
+        [handleAddItems, isDisabled],
     );
 
     const onNativeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -684,7 +691,7 @@ export const ShadcnFileVariant = React.forwardRef<
                                 chipHeightCls,
                                 den.chipPad,
                                 den.chipGap,
-                                condensed ? "max-w-30" : "max-w-50"
+                                condensed ? "max-w-30" : "max-w-50",
                             )}
                             onPointerDown={(e) => e.stopPropagation()}
                             onClick={(e) => {
@@ -765,7 +772,7 @@ export const ShadcnFileVariant = React.forwardRef<
             formatFileName,
             formatFileSize,
             handleRemove,
-        ]
+        ],
     );
 
     // ─────────────────────────────────────────────
@@ -802,7 +809,7 @@ export const ShadcnFileVariant = React.forwardRef<
                         "text-[10px] h-5 px-1.5 leading-none",
                         selectedBadgePlacement === "corner" &&
                             "absolute -top-2 -right-2",
-                        selectedBadgeClassName
+                        selectedBadgeClassName,
                     )}
                 >
                     {selectedCount}
@@ -819,7 +826,7 @@ export const ShadcnFileVariant = React.forwardRef<
                     | undefined;
                 const nextClass = cn(
                     existingClass,
-                    selectedBadgePlacement === "corner" && "relative"
+                    selectedBadgePlacement === "corner" && "relative",
                 );
 
                 const child = (el.props as any).children;
@@ -851,11 +858,11 @@ export const ShadcnFileVariant = React.forwardRef<
                 React.cloneElement(el, {
                     onDragOver: mergeHandlers(
                         (el.props as any).onDragOver,
-                        onDragOver
+                        onDragOver,
                     ),
                     onDragLeave: mergeHandlers(
                         (el.props as any).onDragLeave,
-                        () => setDragOver(false)
+                        () => setDragOver(false),
                     ),
                     onDrop: mergeHandlers((el.props as any).onDrop, onDrop),
                 } as any);
@@ -871,7 +878,7 @@ export const ShadcnFileVariant = React.forwardRef<
                     disabled={isDisabled}
                     className={cn(
                         triggerClassName,
-                        selectedBadgePlacement === "corner" && "relative"
+                        selectedBadgePlacement === "corner" && "relative",
                     )}
                     onDragOver={onDragOver}
                     onDragLeave={() => setDragOver(false)}
@@ -947,7 +954,7 @@ export const ShadcnFileVariant = React.forwardRef<
                             : "border-muted-foreground/25 hover:bg-muted/30 hover:border-muted-foreground/50",
                         isDisabled && "cursor-not-allowed opacity-50",
                         error && "border-destructive/50 bg-destructive/5",
-                        dropAreaClassName
+                        dropAreaClassName,
                     )}
                 >
                     <div className="rounded-full bg-surfaces-input p-3 shadow-sm">
@@ -994,7 +1001,7 @@ export const ShadcnFileVariant = React.forwardRef<
                         error &&
                             (!joinControls || !hasExternalControls) &&
                             "border-destructive text-destructive",
-                        triggerClassName
+                        triggerClassName,
                     )}
                     onDragOver={onDragOver}
                     onDragLeave={() => setDragOver(false)}
@@ -1014,7 +1021,7 @@ export const ShadcnFileVariant = React.forwardRef<
                     <div
                         className={cn(
                             "flex flex-1 items-center overflow-hidden",
-                            den.triggerGap
+                            den.triggerGap,
                         )}
                     >
                         {hasItems ? (
@@ -1056,7 +1063,7 @@ export const ShadcnFileVariant = React.forwardRef<
                         size="icon"
                         className={cn(
                             "shrink-0 text-muted-foreground hover:text-foreground",
-                            pickerBtnCls
+                            pickerBtnCls,
                         )}
                         onPointerDown={(e) => e.stopPropagation()}
                         onClick={(e) => {
@@ -1071,7 +1078,7 @@ export const ShadcnFileVariant = React.forwardRef<
                     <ChevronDown
                         className={cn(
                             "h-4 w-4 shrink-0 text-muted-foreground opacity-50 transition-transform duration-200",
-                            popoverOpen && "rotate-180"
+                            popoverOpen && "rotate-180",
                         )}
                     />
                 </div>
@@ -1090,7 +1097,7 @@ export const ShadcnFileVariant = React.forwardRef<
                         <div
                             className={cn(
                                 "flex items-center justify-between border-b text-xs font-medium text-muted-foreground",
-                                den.headerPad
+                                den.headerPad,
                             )}
                         >
                             <span>
@@ -1124,7 +1131,7 @@ export const ShadcnFileVariant = React.forwardRef<
                         <ScrollArea
                             className={cn(
                                 "h-auto max-h-75 w-full",
-                                den.listPad
+                                den.listPad,
                             )}
                         >
                             <div className="flex flex-col gap-1">
@@ -1143,7 +1150,7 @@ export const ShadcnFileVariant = React.forwardRef<
                                             key={item.id}
                                             className={cn(
                                                 "group flex items-center gap-3 rounded-md text-sm transition-colors hover:bg-muted/50",
-                                                den.rowPad
+                                                den.rowPad,
                                             )}
                                         >
                                             {showCheckboxes && multiple && (
@@ -1164,7 +1171,7 @@ export const ShadcnFileVariant = React.forwardRef<
                                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                                     <span>
                                                         {formatFileSize(
-                                                            item.size
+                                                            item.size,
                                                         )}
                                                     </span>
                                                     {item.status ===
@@ -1325,7 +1332,7 @@ export const ShadcnFileVariant = React.forwardRef<
                                         ? "p-2"
                                         : density === "loose"
                                           ? "p-3"
-                                          : "p-2"
+                                          : "p-2",
                                 )}
                             >
                                 {showCheckboxes && (
@@ -1401,7 +1408,7 @@ export const ShadcnFileVariant = React.forwardRef<
                     joinedBox &&
                         dragOver &&
                         "border-primary ring-2 ring-primary/20",
-                    joinedBox && error && "border-destructive"
+                    joinedBox && error && "border-destructive",
                 )}
             >
                 {mode === "default" && leadingControl && (
@@ -1411,7 +1418,7 @@ export const ShadcnFileVariant = React.forwardRef<
                             joinControls &&
                                 !showDropArea &&
                                 "border-r bg-muted/50 px-3",
-                            leadingControlClassName
+                            leadingControlClassName,
                         )}
                     >
                         {leadingControl}
@@ -1427,7 +1434,7 @@ export const ShadcnFileVariant = React.forwardRef<
                             joinControls &&
                                 !showDropArea &&
                                 "border-l bg-muted/50 px-3",
-                            trailingControlClassName
+                            trailingControlClassName,
                         )}
                     >
                         {trailingControl}

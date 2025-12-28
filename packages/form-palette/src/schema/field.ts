@@ -2,6 +2,7 @@
 // noinspection GrazieInspection
 
 import type { RefObject } from "react";
+import { VariantKey } from "@/schema/variant";
 
 /**
  * Imperative handle for a submit button registered with the core.
@@ -221,4 +222,11 @@ export interface Field {
      *                (e.g. "variant", "util", "paste", "programmatic").
      */
     onChange?(value: unknown, old: unknown, source: string): void;
+
+    /**
+     * Optional hook called whenever the field is submitted.
+     * @param e
+     */
+    onSubmit?(e: unknown): any;
+    variant: VariantKey
 }

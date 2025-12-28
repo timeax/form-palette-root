@@ -6,12 +6,13 @@ import * as React from "react";
 import { useCoreContext } from "@/core/hooks/use-core-context";
 import type { CoreContext, Dict } from "@/schema/core";
 import type { Field } from "@/schema/field";
+import { VariantKey } from "@/schema/variant";
 
 export type UseFieldValidate<T> = (
     value: T,
     field?: Field,
     form?: CoreContext<any>,
-    report?: boolean
+    report?: boolean,
 ) => boolean | string;
 
 export interface UseFieldOptions<T = unknown> {
@@ -22,6 +23,8 @@ export interface UseFieldOptions<T = unknown> {
      * error bags (unless mapped via `shared` or `alias`).
      */
     name?: string;
+
+    variant: VariantKey
 
     /**
      * Optional internal binding identifier.
@@ -115,6 +118,8 @@ export interface UseFieldOptions<T = unknown> {
      * This is in addition to the form-level `onChange`.
      */
     onValueChange?(next: T, prev: T, variant: string): void;
+
+    onSubmit?(e: any): any;
 }
 
 export interface UseFieldReturn<T = unknown> {
@@ -176,7 +181,7 @@ export interface UseFieldReturn<T = unknown> {
  *   - `controlButton()` dirty logic
  */
 export function useField<T = unknown>(
-    options: UseFieldOptions<T>
+    options: UseFieldOptions<T>,
 ): UseFieldReturn<T> {
     const form = useCoreContext<Dict>();
 
@@ -196,6 +201,7 @@ export function useField<T = unknown>(
         validate,
         getOriginalValue,
         onValueChange,
+        onSubmit,
     } = options;
 
     const ref = React.useRef<HTMLElement>(null);
@@ -217,22 +223,22 @@ export function useField<T = unknown>(
 
     // React state mirrors (used for rerenders)
     const [value, setValueState] = React.useState<T | undefined>(
-        stateRef.current.value
+        stateRef.current.value,
     );
     const [error, setErrorState] = React.useState<string>(
-        stateRef.current.error
+        stateRef.current.error,
     );
     const [loading, setLoadingState] = React.useState<boolean>(
-        stateRef.current.loading
+        stateRef.current.loading,
     );
     const [required, setRequired] = React.useState<boolean>(
-        Boolean(requiredProp)
+        Boolean(requiredProp),
     );
     const [disabled, setDisabled] = React.useState<boolean>(
-        Boolean(disabledProp)
+        Boolean(disabledProp),
     );
     const [readOnly, setReadOnly] = React.useState<boolean>(
-        Boolean(readOnlyProp)
+        Boolean(readOnlyProp),
     );
 
     const id = React.useId();
@@ -244,11 +250,11 @@ export function useField<T = unknown>(
             if (rawBindId && rawBindId.trim())
                 return `${rawBindId.trim()}-${id}`;
             return `field-${Math.random().toString(36).slice(2)}-${id}`;
-        })()
+        })(),
     ) as React.RefObject<string>;
 
     const bindIdRef = React.useRef<string>(
-        (rawBindId && rawBindId.trim()) || keyRef.current
+        (rawBindId && rawBindId.trim()) || keyRef.current,
     );
 
     const fieldRef = React.useRef<Field | null>(null);
@@ -285,7 +291,7 @@ export function useField<T = unknown>(
                     current,
                     fieldRef.current!,
                     form,
-                    !!report
+                    !!report,
                 );
                 if (typeof result === "string") {
                     ok = false;
@@ -316,6 +322,7 @@ export function useField<T = unknown>(
             main,
             ignore,
             required,
+            onSubmit,
             ref: ref as React.RefObject<HTMLElement>,
             get defaultValue() {
                 return stateRef.current.original;
@@ -350,6 +357,7 @@ export function useField<T = unknown>(
                     onValueChange(value as T, old as T, variant);
                 }
             },
+            variant: options.variant
             // Flags not directly on the Field interface but used via `as any`
             // in core-provider (getValue/setValue/reset).
         } as Field & {
@@ -422,7 +430,7 @@ export function useField<T = unknown>(
                 | ((
                       form: CoreContext<Dict>,
                       current: Field,
-                      options: Dict
+                      options: Dict,
                   ) => void)
                 | undefined;
 

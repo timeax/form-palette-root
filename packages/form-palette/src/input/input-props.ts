@@ -37,12 +37,20 @@ export interface InputFieldBaseProps<TValue = unknown> {
     groupId?: string;
     shared?: string;
     ignore?: boolean;
-    alias?: string
+    alias?: string;
     main?: boolean;
     tags?: FieldTag[];
-    contain?: boolean
-    autoOff?: boolean
+    contain?: boolean;
+    autoOff?: boolean;
 
+    /**
+     * Handles the submission logic for a given form or process.
+     *
+     * @param {TValue} e - The value associated with the submission action.
+     * @return {any} Value to be submitted.
+     */
+    onSubmit?(e: TValue): any;
+    onReset?(e: React.FormEvent<HTMLFormElement>): void;
     // ─────────────────────────────────────────────
     // Chrome / description
     // ─────────────────────────────────────────────
@@ -71,7 +79,7 @@ export interface InputFieldBaseProps<TValue = unknown> {
     descriptionPlacement?: DescriptionPlacement;
     helpTextPlacement?: HelpTextPlacement;
     errorTextPlacement?: ErrorTextPlacement;
-    tagPlacement?: SlotPlacement
+    tagPlacement?: SlotPlacement;
 
     // ─────────────────────────────────────────────
     // State flags
@@ -98,7 +106,7 @@ export interface InputFieldBaseProps<TValue = unknown> {
     onValidate?(
         value: TValue | undefined,
         field: Field,
-        form: CoreContext<Dict>
+        form: CoreContext<Dict>,
     ): ValidateResult;
 
     /**
@@ -111,20 +119,19 @@ export interface InputFieldBaseProps<TValue = unknown> {
      *   in the core (and emitted to the form).
      */
     onChange?(e: {
-        value: TValue | undefined,
+        value: TValue | undefined;
         preventDefault(): void;
         event?: React.SyntheticEvent;
         readonly isDefaultPrevented?: boolean;
-        readonly detail: ChangeDetail
+        readonly detail: ChangeDetail;
     }): void;
 }
-
 
 export type Events<TRaw, TValue, TMeta> = {
     onValidate?(
         value: TValue | undefined,
         field: Field,
-        form: CoreContext<Dict>
+        form: CoreContext<Dict>,
     ): ValidateResult;
 
     /**
@@ -137,13 +144,13 @@ export type Events<TRaw, TValue, TMeta> = {
      *   in the core (and emitted to the form).
      */
     onChange?(e: {
-        value: TValue | undefined,
+        value: TValue | undefined;
         preventDefault(): void;
         event?: React.SyntheticEvent;
         readonly isDefaultPrevented?: boolean;
-        readonly detail: ChangeDetail<TMeta, TRaw>
+        readonly detail: ChangeDetail<TMeta, TRaw>;
     }): void;
-}
+};
 
 /**
  * Public props for <InputField />.
@@ -157,11 +164,11 @@ export type Events<TRaw, TValue, TMeta> = {
  */
 export type InputFieldProps<
     K extends VariantKey = VariantKey,
-    H = unknown
+    H = unknown,
 > = InputFieldBaseProps<VariantValueFor<K, H>> &
     VariantPropsFor<K, H> &
     InputFieldClassNameProps &
-    Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | 'defaultValue'> & {
+    Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> & {
         variant: K;
 
         /**
@@ -202,17 +209,16 @@ export interface InputFieldClassNames {
     group?: string;
     content?: string;
     variant?: string;
-    inlineInputColumn?: string
+    inlineInputColumn?: string;
     inlineLabelColumn?: string;
     required?: string;
-    tag?: string
+    tag?: string;
 }
-
 
 export interface FieldTag {
     label: React.ReactNode;
     icon?: React.ReactNode;
     className?: string;
-    color?: string;   // text color
+    color?: string; // text color
     bgColor?: string; // background color
 }

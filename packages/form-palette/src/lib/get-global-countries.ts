@@ -46,42 +46,34 @@ function isPhoneCountry(value: unknown): value is PhoneCountry {
 }
 
 export function getGlobalCountryList(): PhoneCountry[] {
-   // If we've already validated & cached, just return it.
+   // 1. If we have a cache, return it.
    if (cachedCountries) return cachedCountries;
 
+   // 2. SSR check: return defaults if on server
    if (typeof window === "undefined") {
-      cachedCountries = [];
-      return cachedCountries;
+      return DEFAULT_COUNTRIES;
    }
 
+   // 3. Check window registry
    const raw = window["form-palette"]?.countries;
 
-   if (!Array.isArray(raw)) {
-      if (!validatedOnce && process.env.NODE_ENV !== "production") {
-         console.warn(
-            "['form-palette'] window.'form-palette'.countries is not an array:",
-            raw,
-         );
+   // 4. If window has valid data, use it
+   if (Array.isArray(raw) && raw.length > 0) {
+      const result: PhoneCountry[] = [];
+      for (const item of raw) {
+         if (isPhoneCountry(item)) {
+            result.push(item);
+         }
       }
-      validatedOnce = true;
-      cachedCountries = [];
-      return cachedCountries;
-   }
 
-   const result: PhoneCountry[] = [];
-
-   for (const item of raw) {
-      if (isPhoneCountry(item)) {
-         result.push(item);
-      } else if (process.env.NODE_ENV !== "production") {
-         console.warn(
-            "['form-palette'] Ignoring invalid PhoneCountry entry:",
-            item,
-         );
+      // If we found valid items, cache and return them
+      if (result.length > 0) {
+         cachedCountries = result;
+         return result;
       }
    }
 
-   validatedOnce = true;
-   cachedCountries = result;
-   return result;
+   // 5. Fallback to defaults if window was empty or invalid
+   cachedCountries = DEFAULT_COUNTRIES;
+   return cachedCountries;
 }

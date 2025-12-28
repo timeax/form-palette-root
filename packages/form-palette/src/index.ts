@@ -43,3 +43,5 @@ export { Input } from '@/presets/ui/input';
 // ─────────────────────────────────────────────────────────────
 
 export * from "@/adapters";
+
+export { registerPaletteUtil, getPaletteUtil } from "@/lib/register-global";
