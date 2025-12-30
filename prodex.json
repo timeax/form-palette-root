@@ -10,39 +10,43 @@
     "entry": {
         "files": [],
         "ui": {
-            "roots": [
-                "app",
-                "routes",
-                "resources/js/**"
-            ],
+            "roots": ["app", "routes", "resources/js/**"],
             "scanDepth": 2,
-            "priority": [
-                "**/routes/web.php",
-                "**/app.*"
-            ]
+            "priority": ["**/routes/web.php", "**/app.*"]
         }
     },
     "resolve": {
-        "include": [
-            "**/*.d.ts"
-        ],
+        "include": ["**/*.d.ts"],
         "aliases": {
             "@": "./packages/form-palette/src",
             "@inertiajs": ".scaffold",
             "@toast-ui": "packages/form-palette/src/presets/shadcn-variants"
         },
-        "exclude": [
-            "node_modules/**",
-            "@shadcn/**",
-            "**/components/ui/**"
-        ],
+        "exclude": ["node_modules/**", "@shadcn/**", "**/components/ui/**"],
         "depth": 10,
         "limit": 200
     },
     "shortcuts": {
         "core-provider": {
-            "files": [
-                "./packages/form-palette/src/core/core-provider.tsx"
+            "files": ["packages/form-palette/src/index.ts"],
+            "include": ["./packages/form-palette/src/adapters/**"],
+            "exclude": ["./packages/form-palette/src/presets/**"]
+        },
+        "variants": {
+            "files": [],
+            "include": [
+                "./packages/form-palette/src/presets/shadcn-variants/**/*.tsx",
+                "./packages/form-palette/src/presets/shadcn-variants/**/*.ts",
+                "./packages/form-palette/src/variants/core/**"
+            ]
+        },
+        "lister-and-json": {
+            "files": ["packages/form-palette/src/extra.ts"],
+            "exclude": [
+                "./packages/form-palette/src/core/**",
+                "./packages/form-palette/src/adapters/**",
+                "./packages/form-palette/src/input/**",
+                "./packages/form-palette/src/presets/ui/**"
             ]
         }
     }

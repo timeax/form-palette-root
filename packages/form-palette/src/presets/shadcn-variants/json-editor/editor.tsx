@@ -202,7 +202,7 @@ function callCallbacks(
  * Component
  * ───────────────────────────────────────────────────────────── */
 
-export const JsonEditorEditor = React.forwardRef<
+export const JsonEditor = React.forwardRef<
     JsonEditorHandle,
     JsonEditorEditorProps
 >(function JsonEditorEditor(props, ref) {
@@ -690,4 +690,4 @@ export const JsonEditorEditor = React.forwardRef<
     );
 });
 
-export default JsonEditorEditor;
+export default JsonEditor;

@@ -20,7 +20,7 @@ import type {
     ShadcnJsonEditorProps,
 } from "./types";
 
-import JsonEditorEditor from "./editor";
+import JsonEditor from "./editor";
 
 function isPlainObject(v: unknown): v is JsonObject {
     return typeof v === "object" && v !== null && !Array.isArray(v);
@@ -170,7 +170,7 @@ export const ShadcnJsonEditorVariant = React.forwardRef<
         (mode === "accordion" && viewMode === undefined ? "visual" : undefined);
 
     const editorNode = (
-        <JsonEditorEditor
+        <JsonEditor
             ref={editorRef}
             root={root}
             onRoot={emitRoot}
