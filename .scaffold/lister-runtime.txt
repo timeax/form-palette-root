@@ -1,0 +1,15 @@
+engine/
+  http.ts # request type + client
+  extract.ts # selector extraction
+  map.ts # map raw -> options
+  search.ts # search payload + local filtering helpers
+  details.ts # buildDetails (engine-level)
+  fetch.ts # unified fetch pipeline (build req -> http -> normalize -> extract -> map)
+  engine.ts # createListerEngine (no sessions, no UI baggage)
+  index.ts # exports for engine
+
+session/
+  store.ts # session store (open sessions, activeId, etc.)
+  inflight.ts # abort + request ids + debounce
+  runtime.ts # createListerRuntime (sessions + open/apply/cancel + selection draft)
+  index.ts # exports for session runtime

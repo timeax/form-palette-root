@@ -651,6 +651,90 @@
       "sizeAtCreate": 0,
       "groupName": "variants",
       "groupRoot": "./"
+    },
+    "presets/lister/runtime/engine/http.ts": {
+      "path": "presets/lister/runtime/engine/http.ts",
+      "createdAt": "2026-01-05T02:29:49.899Z",
+      "sizeAtCreate": 0,
+      "groupName": "lister-runtime",
+      "groupRoot": "./presets/lister/runtime"
+    },
+    "presets/lister/runtime/engine/extract.ts": {
+      "path": "presets/lister/runtime/engine/extract.ts",
+      "createdAt": "2026-01-05T02:29:49.904Z",
+      "sizeAtCreate": 0,
+      "groupName": "lister-runtime",
+      "groupRoot": "./presets/lister/runtime"
+    },
+    "presets/lister/runtime/engine/map.ts": {
+      "path": "presets/lister/runtime/engine/map.ts",
+      "createdAt": "2026-01-05T02:29:49.906Z",
+      "sizeAtCreate": 0,
+      "groupName": "lister-runtime",
+      "groupRoot": "./presets/lister/runtime"
+    },
+    "presets/lister/runtime/engine/search.ts": {
+      "path": "presets/lister/runtime/engine/search.ts",
+      "createdAt": "2026-01-05T02:29:49.911Z",
+      "sizeAtCreate": 0,
+      "groupName": "lister-runtime",
+      "groupRoot": "./presets/lister/runtime"
+    },
+    "presets/lister/runtime/engine/details.ts": {
+      "path": "presets/lister/runtime/engine/details.ts",
+      "createdAt": "2026-01-05T02:29:49.912Z",
+      "sizeAtCreate": 0,
+      "groupName": "lister-runtime",
+      "groupRoot": "./presets/lister/runtime"
+    },
+    "presets/lister/runtime/engine/fetch.ts": {
+      "path": "presets/lister/runtime/engine/fetch.ts",
+      "createdAt": "2026-01-05T02:29:49.914Z",
+      "sizeAtCreate": 0,
+      "groupName": "lister-runtime",
+      "groupRoot": "./presets/lister/runtime"
+    },
+    "presets/lister/runtime/engine/engine.ts": {
+      "path": "presets/lister/runtime/engine/engine.ts",
+      "createdAt": "2026-01-05T02:29:49.921Z",
+      "sizeAtCreate": 0,
+      "groupName": "lister-runtime",
+      "groupRoot": "./presets/lister/runtime"
+    },
+    "presets/lister/runtime/engine/index.ts": {
+      "path": "presets/lister/runtime/engine/index.ts",
+      "createdAt": "2026-01-05T02:29:49.924Z",
+      "sizeAtCreate": 0,
+      "groupName": "lister-runtime",
+      "groupRoot": "./presets/lister/runtime"
+    },
+    "presets/lister/runtime/session/store.ts": {
+      "path": "presets/lister/runtime/session/store.ts",
+      "createdAt": "2026-01-05T02:29:49.927Z",
+      "sizeAtCreate": 0,
+      "groupName": "lister-runtime",
+      "groupRoot": "./presets/lister/runtime"
+    },
+    "presets/lister/runtime/session/inflight.ts": {
+      "path": "presets/lister/runtime/session/inflight.ts",
+      "createdAt": "2026-01-05T02:29:49.928Z",
+      "sizeAtCreate": 0,
+      "groupName": "lister-runtime",
+      "groupRoot": "./presets/lister/runtime"
+    },
+    "presets/lister/runtime/session/runtime.ts": {
+      "path": "presets/lister/runtime/session/runtime.ts",
+      "createdAt": "2026-01-05T02:29:49.930Z",
+      "sizeAtCreate": 0,
+      "groupName": "lister-runtime",
+      "groupRoot": "./presets/lister/runtime"
+    },
+    "presets/lister/runtime/session/index.ts": {
+      "path": "presets/lister/runtime/session/index.ts",
+      "createdAt": "2026-01-05T02:29:49.932Z",
+      "sizeAtCreate": 0,
+      "groupName": "lister-runtime",
+      "groupRoot": "./presets/lister/runtime"
     }
   }
 }

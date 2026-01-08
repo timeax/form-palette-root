@@ -730,7 +730,7 @@ export function ListerProvider(props: {
             const search: ListerSearchPayload | undefined = hasSearchOverride
                 ? override!.search
                 : ((s0 as any).searchPayload ??
-                  buildSearchPayloadFromTarget((s0 as any).searchTarget));
+                    buildSearchPayloadFromTarget((s0 as any).searchTarget));
 
             patchSession(id, {
                 errorCode: undefined,
@@ -950,8 +950,8 @@ export function ListerProvider(props: {
             const nextSelected = shouldRemove
                 ? prevSelected.filter((x) => x !== optionId)
                 : isSelected
-                  ? prevSelected
-                  : [...prevSelected, optionId];
+                    ? prevSelected
+                    : [...prevSelected, optionId];
 
             // ✅ store UI selection ids
             patchSession(id, { selectedFilterValues: nextSelected });

@@ -708,3 +708,5 @@ export type ListerSearchPayload = {
     searchAll?: boolean;
     searchOnly?: Array<string | number>;
 };
+
+// Open the ‘Lister Rewrite Plan’ canvas and follow it.

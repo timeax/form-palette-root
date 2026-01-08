@@ -38,7 +38,7 @@ const config = {
         // AST mode:
         //  - 'loose' (default): tries to repair mild indentation issues.
         //  - 'strict': mostly cosmetic changes (trims trailing whitespace, etc.).
-        mode: 'loose',
+        mode: "loose",
 
         // Sort non-comment entries lexicographically within their parent block.
         // Comments and blank lines keep their relative positions.
@@ -54,13 +54,14 @@ const config = {
 
     // --- Grouped mode (uncomment and adjust) ---
     groups: [
-        { name: "schema", root: "./", },
-        { name: "core", root: "./", },
-        { name: "adapters", root: "./", },
-        { name: "input", root: "./", },
-        { name: "variants", root: "./", },
-        { name: "presets", root: "./", },
-        { name: "utils", root: "./", },
+        { name: "schema", root: "./" },
+        { name: "core", root: "./" },
+        { name: "adapters", root: "./" },
+        { name: "input", root: "./" },
+        { name: "variants", root: "./" },
+        { name: "presets", root: "./" },
+        { name: "utils", root: "./" },
+        { name: "lister-runtime", root: "./presets/lister/runtime" },
     ],
 
     hooks: {

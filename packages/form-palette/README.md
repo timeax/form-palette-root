@@ -1,3 +1,125 @@
+# Index
+Included Sections: 119
+- [Form Palette](#form-palette)  123-343
+  - [Quick start](#quick-start)  133-161
+    - [Installation:](#installation)  135-161
+  - [Form](#form)  163-237
+    - [Minimal “local” form](#minimal-local-form)  167-200
+    - [Axios adapter](#axios-adapter)  202-217
+    - [Inertia adapter](#inertia-adapter)  219-237
+  - [InputField](#inputfield)  239-294
+    - [Basic usage](#basic-usage)  252-263
+    - [Helper slots](#helper-slots)  265-277
+    - [Standalone mode](#standalone-mode)  279-294
+  - [Adapters](#adapters)  296-331
+    - [Built-in adapter keys](#built-in-adapter-keys)  300-304
+    - [Registering adapters](#registering-adapters)  306-325
+    - [Adapter-specific props](#adapter-specific-props)  327-331
+  - [Recommended boot order](#recommended-boot-order)  333-343
+- [Variant props + InputField usage](#variant-props-inputfield-usage)  346-1707
+  - [text](#text)  377-434
+    - [Variant props](#variant-props)  379-399
+    - [Sample usage (InputField)](#sample-usage-inputfield)  401-434
+  - [textarea](#textarea)  436-465
+    - [Variant props](#variant-props-1)  438-442
+    - [Sample usage (InputField)](#sample-usage-inputfield-1)  444-465
+  - [toggle-group](#toggle-group)  467-529
+    - [Variant props](#variant-props-2)  469-499
+    - [Sample usage (InputField)](#sample-usage-inputfield-2)  501-529
+  - [number](#number)  531-559
+  - [password](#password)  561-599
+  - [phone](#phone)  601-638
+  - [Slider (`slider`)](#slider-slider)  640-699
+    - [Props](#props)  644-679
+    - [Example](#example)  681-699
+  - [Toggle (`toggle`)](#toggle-toggle)  701-734
+    - [Props](#props-1)  705-719
+    - [Example](#example-1)  721-734
+  - [TreeSelect (`treeselect`)](#treeselect-treeselect)  736-849
+    - [Base props](#base-props)  740-773
+    - [Mode: default (`mode` omitted or "default")](#mode-default-mode-omitted-or-default)  775-793
+    - [Mode: button (`mode="button"`)](#mode-button-modebutton)  795-811
+    - [Example (default mode)](#example-default-mode)  813-833
+    - [Example (multiple + button mode)](#example-multiple-button-mode)  835-849
+  - [multi-select](#multi-select)  851-938
+    - [Variant props](#variant-props-3)  853-884
+    - [Mode and trigger props](#mode-and-trigger-props)  886-908
+    - [Sample usage](#sample-usage)  910-938
+  - [radio](#radio)  940-999
+    - [Variant props](#variant-props-4)  942-967
+    - [Supported option shapes](#supported-option-shapes)  969-972
+    - [Sample usage](#sample-usage-1)  974-999
+  - [select](#select)  1001-1077
+    - [Variant props](#variant-props-5)  1003-1048
+    - [Sample usage](#sample-usage-2)  1050-1077
+  - [checkbox](#checkbox)  1079-1147
+  - [chips](#chips)  1149-1202
+  - [color](#color)  1204-1234
+  - [date](#date)  1236-1283
+    - [Variant props](#variant-props-6)  1238-1256
+    - [Sample usage](#sample-usage-3)  1258-1283
+  - [keyvalue](#keyvalue)  1285-1335
+    - [Variant props](#variant-props-7)  1287-1307
+    - [Sample usage](#sample-usage-4)  1309-1335
+  - [editor](#editor)  1337-1381
+    - [Variant props](#variant-props-8)  1339-1356
+    - [Sample usage](#sample-usage-5)  1358-1381
+  - [file](#file)  1383-1460
+    - [Variant props](#variant-props-9)  1385-1411
+    - [Mode and trigger props](#mode-and-trigger-props-1)  1413-1435
+    - [Sample usage](#sample-usage-6)  1437-1460
+  - [json-editor](#json-editor)  1462-1542
+    - [Wrapper / trigger props](#wrapper-trigger-props)  1464-1482
+    - [Editor props (passed into the JSON editor)](#editor-props-passed-into-the-json-editor)  1484-1504
+    - [Sample usage](#sample-usage-7)  1506-1542
+  - [lister](#lister)  1544-1644
+    - [Data + mapping props](#data-mapping-props)  1546-1563
+    - [Selection + behaviour props](#selection-behaviour-props)  1565-1584
+    - [Trigger styling + container props](#trigger-styling-container-props)  1586-1614
+    - [Sample usage](#sample-usage-8)  1616-1644
+  - [custom](#custom)  1646-1707
+    - [Variant props](#variant-props-10)  1648-1663
+    - [Sample usage](#sample-usage-9)  1665-1707
+- [Form Palette — `extra` entrypoint (v2)](#form-palette-extra-entrypoint-v2)  1709-1723
+- [1) Lister (runtime)](#1-lister-runtime)  1725-1849
+  - [What is Lister?](#what-is-lister)  1727-1738
+  - [Building blocks (what you actually mount/call)](#building-blocks-what-you-actually-mountcall)  1740-1771
+    - [✅ `ListerProvider`](#listerprovider)  1742-1747
+    - [✅ `ListerUI`](#listerui)  1749-1752
+    - [✅ `useLister()`](#uselister)  1754-1764
+    - [✅ `useData()`](#usedata)  1766-1771
+  - [Quick start (recommended)](#quick-start-recommended)  1773-1818
+    - [Step 1 — Mount provider + UI once](#step-1-mount-provider-ui-once)  1775-1794
+    - [Step 2 — Open a picker imperatively](#step-2-open-a-picker-imperatively)  1796-1818
+  - [`ListerProvider` API](#listerprovider-api)  1820-1849
+    - [`ListerProviderHost`](#listerproviderhost)  1832-1842
+    - [Practical usage](#practical-usage)  1844-1849
+- [2) `useData()` — deep dive (extremely important)](#2-usedata-deep-dive-extremely-important)  1851-2247
+  - [What `useData()` returns (mental model)](#what-usedata-returns-mental-model)  1865-1877
+  - [`UseDataOptions` (inputs)](#usedataoptions-inputs)  1879-1910
+    - [Selection config (`selection`)](#selection-config-selection)  1898-1910
+  - [Search modes: remote vs local vs hybrid](#search-modes-remote-vs-local-vs-hybrid)  1912-1935
+    - [✅ `remote` (default)](#remote-default)  1914-1919
+    - [✅ `local`](#local)  1921-1926
+    - [✅ `hybrid`](#hybrid)  1928-1935
+  - [Search targeting (`searchTarget`)](#search-targeting-searchtarget)  1937-1947
+  - [Core returned API (what you’ll use most)](#core-returned-api-what-youll-use-most)  1949-1984
+    - [Data + status](#data-status)  1951-1954
+    - [Search](#search)  1956-1960
+    - [Filters](#filters)  1962-1966
+    - [Fetch](#fetch)  1968-1971
+    - [Selection (when enabled)](#selection-when-enabled)  1973-1984
+  - [`useData()` — practical use cases (full examples)](#usedata-practical-use-cases-full-examples)  1986-2238
+    - [Use case A — Remote search list (simple)](#use-case-a-remote-search-list-simple)  1988-2030
+    - [Use case B — Local mode (fetch once, instant client filtering)](#use-case-b-local-mode-fetch-once-instant-client-filtering)  2032-2066
+    - [Use case C — Filters with `patchFilters` (remote/hybrid auto-fetch)](#use-case-c-filters-with-patchfilters-remotehybrid-auto-fetch)  2068-2121
+    - [Use case D — Constrain to a known allow-list (`searchTarget: mode="only"`)](#use-case-d-constrain-to-a-known-allow-list-searchtarget-modeonly)  2123-2159
+    - [Use case E — Custom multi-select UI (selection enabled)](#use-case-e-custom-multi-select-ui-selection-enabled)  2161-2209
+    - [Use case F — Advanced request shaping (`buildRequest`)](#use-case-f-advanced-request-shaping-buildrequest)  2211-2238
+  - [Practical tips](#practical-tips)  2240-2247
+- [3) JsonEditor (overview)](#3-jsoneditor-overview)  2249-2280
+  - [Standalone usage](#standalone-usage)  2259-2280
+
 # Form Palette
 
 A small but powerful React form runtime built around three ideas:
@@ -49,30 +171,30 @@ Use `adapter="local"` when you want submission to be handled purely in JS.
 ```tsx
 function Example() {
   return (
-    <Form
-      name="profile"
-      adapter="local"
-      onSubmit={(e) => {
-        // Current outbound snapshot
-        console.log(e.formData);
-        // You can also mutate outbound data via e.editData(...)
-      }}
-    >
-      <InputField
-        name="email"
-        variant="text"
-        label="Email"
-        required
-      />
+          <Form
+                  name="profile"
+                  adapter="local"
+                  onSubmit={(e) => {
+                    // Current outbound snapshot
+                    console.log(e.formData);
+                    // You can also mutate outbound data via e.editData(...)
+                  }}
+          >
+            <InputField
+                    name="email"
+                    variant="text"
+                    label="Email"
+                    required
+            />
 
-      <InputField
-        name="age"
-        variant="number"
-        label="Age"
-      />
+            <InputField
+                    name="age"
+                    variant="number"
+                    label="Age"
+            />
 
-      <button type="submit">Save</button>
-    </Form>
+            <button type="submit">Save</button>
+          </Form>
   );
 }
 ```
@@ -81,13 +203,13 @@ function Example() {
 
 ```tsx
 <Form
-  name="profile"
-  adapter="axios"
-  url="/api/profile"
-  method="post"
-  onSubmitted={(form, payload) => {
-    console.log(payload);
-  }}
+        name="profile"
+        adapter="axios"
+        url="/api/profile"
+        method="post"
+        onSubmitted={(form, payload) => {
+          console.log(payload);
+        }}
 >
   <InputField name="email" variant="text" label="Email" required />
   <button type="submit">Save</button>
@@ -98,14 +220,14 @@ function Example() {
 
 ```tsx
 <Form
-  name="profile"
-  adapter="inertia"
-  url="/profile"
-  method="post"
-  onSubmitted={(form, payload) => {
-    // payload is the resolved inertia Page (or normalized error on failure)
-    console.log(payload);
-  }}
+        name="profile"
+        adapter="inertia"
+        url="/profile"
+        method="post"
+        onSubmitted={(form, payload) => {
+          // payload is the resolved inertia Page (or normalized error on failure)
+          console.log(payload);
+        }}
 >
   <InputField name="email" variant="text" label="Email" required />
   <button type="submit">Save</button>
@@ -131,12 +253,12 @@ function Example() {
 
 ```tsx
 <InputField
-  name="username"
-  variant="text"
-  label="Username"
-  description="Public handle"
-  required
-  placeholder="@davy"
+        name="username"
+        variant="text"
+        label="Username"
+        description="Public handle"
+        required
+        placeholder="@davy"
 />
 ```
 
@@ -146,11 +268,11 @@ Most helper UI (description, help text, error text, tags, etc.) is rendered thro
 
 ```tsx
 <InputField
-  name="bio"
-  variant="textarea"
-  label="Bio"
-  helpText="Keep it short"
-  errorText=""
+        name="bio"
+        variant="textarea"
+        label="Bio"
+        helpText="Keep it short"
+        errorText=""
 />
 ```
 
@@ -160,12 +282,12 @@ Most helper UI (description, help text, error text, tags, etc.) is rendered thro
 
 ```tsx
 <InputField
-  variant="text"
-  label="Standalone"
-  defaultValue="Hello"
-  onChange={({ value }) => {
-    console.log(value);
-  }}
+        variant="text"
+        label="Standalone"
+        defaultValue="Hello"
+        onChange={({ value }) => {
+          console.log(value);
+        }}
 />
 ```
 
@@ -283,28 +405,28 @@ import { InputField } from "@timeax/form-palette";
 
 export function ExampleText() {
   return (
-    <InputField
-      variant="text"
-      name="phone"
-      label="Phone number"
-      description="We’ll use this for account recovery."
+          <InputField
+                  variant="text"
+                  name="phone"
+                  label="Phone number"
+                  description="We’ll use this for account recovery."
 
-      // semantic validation flags (core layer)
-      trim
-      minLength={11}
-      maxLength={11}
+                  // semantic validation flags (core layer)
+                  trim
+                  minLength={11}
+                  maxLength={11}
 
-      // mask + UI props (preset layer)
-      prefix="+234 "
-      mask="999 999 9999"
-      unmask="raw"
-      autoClear
+                  // mask + UI props (preset layer)
+                  prefix="+234 "
+                  mask="999 999 9999"
+                  unmask="raw"
+                  autoClear
 
-      // regular input attributes
-      type="tel"
-      inputMode="tel"
-      placeholder="803 123 4567"
-    />
+                  // regular input attributes
+                  type="tel"
+                  inputMode="tel"
+                  placeholder="803 123 4567"
+          />
   );
 }
 ```
@@ -326,16 +448,16 @@ import { InputField } from "@timeax/form-palette";
 
 export function ExampleTextarea() {
   return (
-    <InputField
-      variant="textarea"
-      name="bio"
-      label="About you"
-      helpText="Keep it short and clear."
+          <InputField
+                  variant="textarea"
+                  name="bio"
+                  label="About you"
+                  helpText="Keep it short and clear."
 
-      // typical textarea attributes (usually supported via UiTextareaProps)
-      rows={4}
-      placeholder="Tell us a little about yourself..."
-    />
+                  // typical textarea attributes (usually supported via UiTextareaProps)
+                  rows={4}
+                  placeholder="Tell us a little about yourself..."
+          />
   );
 }
 ```
@@ -383,23 +505,23 @@ import { InputField } from "@timeax/form-palette";
 
 export function ExampleToggleGroup() {
   return (
-    <InputField
-      variant="toggle-group"
-      name="plan"
-      label="Choose a plan"
-      required
+          <InputField
+                  variant="toggle-group"
+                  name="plan"
+                  label="Choose a plan"
+                  required
 
-      options={[
-        { value: "basic", label: "Basic" },
-        { value: "pro", label: "Pro" },
-        { value: "team", label: "Team", disabled: true, tooltip: "Coming soon" },
-      ]}
-      layout="horizontal"
-      variant="outline"
-      fillWidth
-      gap={8}
-      activeClassName="ring-1 ring-primary"
-    />
+                  options={[
+                    { value: "basic", label: "Basic" },
+                    { value: "pro", label: "Pro" },
+                    { value: "team", label: "Team", disabled: true, tooltip: "Coming soon" },
+                  ]}
+                  layout="horizontal"
+                  variant="outline"
+                  fillWidth
+                  gap={8}
+                  activeClassName="ring-1 ring-primary"
+          />
   );
 }
 ```
@@ -422,15 +544,15 @@ export function ExampleToggleGroup() {
 
 ```tsx
 <InputField
-    variant="number"
-    name="quantity"
-    label="Quantity"
-    description="How many items?"
-    min={1}
-    max={99}
-    step={1}
-    showButtons
-    buttonLayout="inline"
+        variant="number"
+        name="quantity"
+        label="Quantity"
+        description="How many items?"
+        min={1}
+        max={99}
+        step={1}
+        showButtons
+        buttonLayout="inline"
 />
 ```
 
@@ -462,15 +584,15 @@ export function ExampleToggleGroup() {
 
 ```tsx
 <InputField
-    variant="password"
-    name="password"
-    label="Password"
-    required
-    minLength={8}
-    autoComplete="new-password"
-    revealToggle
-    strengthMeter
-    ruleUses={["minLen", "upper", "lower", "number", "symbol"]}
+        variant="password"
+        name="password"
+        label="Password"
+        required
+        minLength={8}
+        autoComplete="new-password"
+        revealToggle
+        strengthMeter
+        ruleUses={["minLen", "upper", "lower", "number", "symbol"]}
 />
 ```
 
@@ -502,14 +624,14 @@ export function ExampleToggleGroup() {
 
 ```tsx
 <InputField
-    variant="phone"
-    name="phone"
-    label="Phone number"
-    defaultCountryCode="NG"
-    allowCountrySearch
-    showSelectedDialCode
-    dialCodeDelimiter=" "
-    valueMode="e164"
+        variant="phone"
+        name="phone"
+        label="Phone number"
+        defaultCountryCode="NG"
+        allowCountrySearch
+        showSelectedDialCode
+        dialCodeDelimiter=" "
+        valueMode="e164"
 />
 ```
 
@@ -560,17 +682,17 @@ Value type: `number | undefined`
 
 ```tsx
 <InputField
-  name="rating"
-  label="Rating"
-  variant="slider"
-  min={0}
-  max={100}
-  step={5}
-  showValue
-  valuePlacement="right"
-  formatValue={(v) => `${v}%`}
-  controlVariant="ghost"
-  controlStep={5}
+        name="rating"
+        label="Rating"
+        variant="slider"
+        min={0}
+        max={100}
+        step={5}
+        showValue
+        valuePlacement="right"
+        formatValue={(v) => `${v}%`}
+        controlVariant="ghost"
+        controlStep={5}
 />
 ```
 
@@ -600,12 +722,12 @@ Value type: `boolean | undefined`
 
 ```tsx
 <InputField
-  name="enabled"
-  label="Enabled"
-  variant="toggle"
-  onText="On"
-  offText="Off"
-  density="sm"
+        name="enabled"
+        label="Enabled"
+        variant="toggle"
+        onText="On"
+        offText="Off"
+        density="sm"
 />
 ```
 
@@ -692,21 +814,21 @@ Value type: `TreeKey | TreeKey[] | undefined` (where `TreeKey` is `string | numb
 
 ```tsx
 <InputField
-  name="category"
-  label="Category"
-  variant="treeselect"
-  options={[
-    {
-      key: "social",
-      label: "Social",
-      children: [
-        { key: "twitter", label: "Twitter" },
-        { key: "instagram", label: "Instagram" },
-      ],
-    },
-  ]}
-  searchable
-  placeholder="Pick one…"
+        name="category"
+        label="Category"
+        variant="treeselect"
+        options={[
+          {
+            key: "social",
+            label: "Social",
+            children: [
+              { key: "twitter", label: "Twitter" },
+              { key: "instagram", label: "Instagram" },
+            ],
+          },
+        ]}
+        searchable
+        placeholder="Pick one…"
 />
 ```
 
@@ -714,15 +836,15 @@ Value type: `TreeKey | TreeKey[] | undefined` (where `TreeKey` is `string | numb
 
 ```tsx
 <InputField
-  name="tags"
-  variant="treeselect"
-  mode="button"
-  multiple
-  options={[
-    { key: 1, label: "Starter" },
-    { key: 2, label: "Pro" },
-    { key: 3, label: "Enterprise" },
-  ]}
+        name="tags"
+        variant="treeselect"
+        mode="button"
+        multiple
+        options={[
+          { key: 1, label: "Starter" },
+          { key: 2, label: "Pro" },
+          { key: 3, label: "Enterprise" },
+        ]}
 />
 ```
 
@@ -792,23 +914,23 @@ import { InputField } from "@timeax/form-palette"; // adjust import to your proj
 
 export function MultiSelectExample() {
   return (
-    <InputField
-      variant="multi-select"
-      name="countries"
-      label="Countries"
-      description="Pick one or more countries."
-      options={[
-        { label: "Nigeria", value: "ng" },
-        { label: "Ghana", value: "gh" },
-        { label: "Kenya", value: "ke" },
-      ]}
-      searchable
-      searchPlaceholder="Search countries..."
-      showSelectAll
-      selectAllLabel="Select all"
-      clearable
-      placeholder="Select countries..."
-    />
+          <InputField
+                  variant="multi-select"
+                  name="countries"
+                  label="Countries"
+                  description="Pick one or more countries."
+                  options={[
+                    { label: "Nigeria", value: "ng" },
+                    { label: "Ghana", value: "gh" },
+                    { label: "Kenya", value: "ke" },
+                  ]}
+                  searchable
+                  searchPlaceholder="Search countries..."
+                  showSelectAll
+                  selectAllLabel="Select all"
+                  clearable
+                  placeholder="Select countries..."
+          />
   );
 }
 ```
@@ -856,20 +978,20 @@ import { InputField } from "@timeax/form-palette"; // adjust import to your proj
 
 export function RadioExample() {
   return (
-    <InputField
-      variant="radio"
-      name="plan"
-      label="Plan"
-      description="Choose a plan."
-      items={[
-        { value: "free", label: "Free", description: "Basic features" },
-        { value: "pro", label: "Pro", description: "Everything included" },
-        { value: "team", label: "Team", description: "For small teams" },
-      ]}
-      layout="grid"
-      columns={3}
-      autoCap
-    />
+          <InputField
+                  variant="radio"
+                  name="plan"
+                  label="Plan"
+                  description="Choose a plan."
+                  items={[
+                    { value: "free", label: "Free", description: "Basic features" },
+                    { value: "pro", label: "Pro", description: "Everything included" },
+                    { value: "team", label: "Team", description: "For small teams" },
+                  ]}
+                  layout="grid"
+                  columns={3}
+                  autoCap
+          />
   );
 }
 ```
@@ -932,24 +1054,24 @@ import { InputField } from "@timeax/form-palette"; // adjust import to your proj
 
 export function SelectExample() {
   return (
-    <InputField
-      variant="select"
-      name="country"
-      label="Country"
-      options={[
-        { label: "Nigeria", value: "ng", description: "NG" },
-        { label: "Ghana", value: "gh", description: "GH" },
-        { label: "Kenya", value: "ke", description: "KE" },
-      ]}
-      searchable
-      searchPlaceholder="Search..."
-      clearable
-      emptyLabel="No selection"
-      placeholder="Select a country..."
-      virtualScroll
-      virtualScrollThreshold={80}
-      virtualScrollPageSize={30}
-    />
+          <InputField
+                  variant="select"
+                  name="country"
+                  label="Country"
+                  options={[
+                    { label: "Nigeria", value: "ng", description: "NG" },
+                    { label: "Ghana", value: "gh", description: "GH" },
+                    { label: "Kenya", value: "ke", description: "KE" },
+                  ]}
+                  searchable
+                  searchPlaceholder="Search..."
+                  clearable
+                  emptyLabel="No selection"
+                  placeholder="Select a country..."
+                  virtualScroll
+                  virtualScrollThreshold={80}
+                  virtualScrollPageSize={30}
+          />
   );
 }
 ```
@@ -1001,26 +1123,26 @@ export function SelectExample() {
 ```tsx
 // single (boolean)
 <InputField
-  name="agree_tos"
-  label="Terms"
-  variant="checkbox"
-  single
-  singleLabel="I agree to the Terms of Service"
+        name="agree_tos"
+        label="Terms"
+        variant="checkbox"
+        single
+        singleLabel="I agree to the Terms of Service"
 />
 
 // group (with tri-state)
 <InputField
-  name="notify_prefs"
-  label="Notify me"
-  variant="checkbox"
-  tristate
-  layout="grid"
-  columns={2}
-  options={[
-    { label: "Email", value: "email", description: "Marketing + account alerts" },
-    { label: "SMS", value: "sms" },
-    { label: "Push", value: "push" },
-  ]}
+        name="notify_prefs"
+        label="Notify me"
+        variant="checkbox"
+        tristate
+        layout="grid"
+        columns={2}
+        options={[
+          { label: "Email", value: "email", description: "Marketing + account alerts" },
+          { label: "SMS", value: "sms" },
+          { label: "Push", value: "push" },
+        ]}
 />
 ```
 
@@ -1059,23 +1181,23 @@ export function SelectExample() {
 
 ```tsx
 <InputField
-  name="tags"
-  label="Tags"
-  variant="chips"
-  placeholder="Add tags…"
-  separators={[",", ";"]}
-  maxChips={10}
-  clearable
+        name="tags"
+        label="Tags"
+        variant="chips"
+        placeholder="Add tags…"
+        separators={[",", ";"]}
+        maxChips={10}
+        clearable
 />
 
 <InputField
-  name="emails"
-  label="Allowed emails"
-  variant="chips"
-  textareaMode
-  placement="below"
-  addOnEnter
-  addOnBlur
+        name="emails"
+        label="Allowed emails"
+        variant="chips"
+        textareaMode
+        placement="below"
+        addOnEnter
+        addOnBlur
 />
 ```
 
@@ -1100,14 +1222,14 @@ export function SelectExample() {
 import { Palette } from "lucide-react";
 
 <InputField
-  name="brand_color"
-  label="Brand color"
-  variant="color"
-  placeholder="#1d4ed8"
-  showPreview
-  previewSize={18}
-  showPickerToggle
-  pickerToggleIcon={Palette}
+        name="brand_color"
+        label="Brand color"
+        variant="color"
+        placeholder="#1d4ed8"
+        showPreview
+        previewSize={18}
+        showPickerToggle
+        pickerToggleIcon={Palette}
 />
 ```
 
@@ -1140,20 +1262,20 @@ import { InputField } from "@timeax/form-palette"; // adjust import to your proj
 
 export function DateRangeExample() {
   return (
-    <InputField
-      variant="date"
-      name="period"
-      label="Billing period"
-      description="Select a date range."
-      mode="range"
-      kind="date"
-      placeholder="YYYY-MM-DD – YYYY-MM-DD"
-      clearable
-      minDate={new Date(2025, 0, 1)}
-      maxDate={new Date(2025, 11, 31)}
-      // defaultValue can be a Date or { from?: Date; to?: Date }
-      defaultValue={{ from: new Date(2025, 0, 1), to: new Date(2025, 0, 31) }}
-    />
+          <InputField
+                  variant="date"
+                  name="period"
+                  label="Billing period"
+                  description="Select a date range."
+                  mode="range"
+                  kind="date"
+                  placeholder="YYYY-MM-DD – YYYY-MM-DD"
+                  clearable
+                  minDate={new Date(2025, 0, 1)}
+                  maxDate={new Date(2025, 11, 31)}
+                  // defaultValue can be a Date or { from?: Date; to?: Date }
+                  defaultValue={{ from: new Date(2025, 0, 1), to: new Date(2025, 0, 31) }}
+          />
   );
 }
 ```
@@ -1191,21 +1313,21 @@ import { InputField } from "@timeax/form-palette"; // adjust import to your proj
 
 export function KeyValueExample() {
   return (
-    <InputField
-      variant="keyvalue"
-      name="headers"
-      label="Headers"
-      description="Key-value headers to include in requests."
-      placeholder="No headers"
-      dialogTitle="Edit headers"
-      keyLabel="Header"
-      valueLabel="Value"
-      submitLabel="Save"
-      moreLabel={(count) => `+${count} more`}
-      min={0}
-      max={20}
-      defaultValue={{ "X-Client": "timeax", "X-Mode": "dev" }}
-    />
+          <InputField
+                  variant="keyvalue"
+                  name="headers"
+                  label="Headers"
+                  description="Key-value headers to include in requests."
+                  placeholder="No headers"
+                  dialogTitle="Edit headers"
+                  keyLabel="Header"
+                  valueLabel="Value"
+                  submitLabel="Save"
+                  moreLabel={(count) => `+${count} more`}
+                  min={0}
+                  max={20}
+                  defaultValue={{ "X-Client": "timeax", "X-Mode": "dev" }}
+          />
   );
 }
 ```
@@ -1240,20 +1362,20 @@ import { InputField } from "@timeax/form-palette"; // adjust import to your proj
 
 export function EditorExample() {
   return (
-    <InputField
-      variant="editor"
-      name="bio"
-      label="Bio"
-      description="Write a short bio."
-      placeholder="Start typing..."
-      rows={8}
-      minHeight={160}
-      maxHeight={420}
-      toolbar="default"
-      allowLinks
-      allowLists
-      sanitizeHtml
-    />
+          <InputField
+                  variant="editor"
+                  name="bio"
+                  label="Bio"
+                  description="Write a short bio."
+                  placeholder="Start typing..."
+                  rows={8}
+                  minHeight={160}
+                  maxHeight={420}
+                  toolbar="default"
+                  allowLinks
+                  allowLists
+                  sanitizeHtml
+          />
   );
 }
 ```
@@ -1319,18 +1441,18 @@ import { InputField } from "@timeax/form-palette"; // adjust import to your proj
 
 export function FileExample() {
   return (
-    <InputField
-      variant="file"
-      name="attachments"
-      label="Attachments"
-      description="Upload up to 3 files (max 10MB total)."
-      multiple
-      accept={["image/*", "application/pdf"]}
-      maxFiles={3}
-      maxTotalSize={10 * 1024 * 1024}
-      showDropArea
-      placeholder="Choose files..."
-    />
+          <InputField
+                  variant="file"
+                  name="attachments"
+                  label="Attachments"
+                  description="Upload up to 3 files (max 10MB total)."
+                  multiple
+                  accept={["image/*", "application/pdf"]}
+                  maxFiles={3}
+                  maxTotalSize={10 * 1024 * 1024}
+                  showDropArea
+                  placeholder="Choose files..."
+          />
   );
 }
 ```
@@ -1388,31 +1510,31 @@ import { InputField } from "@timeax/form-palette"; // adjust import to your proj
 
 export function JsonEditorExample() {
   return (
-    <InputField
-      variant="json-editor"
-      name="settings"
-      label="Settings"
-      description="Edit advanced settings as a structured UI."
-      mode="popover"
-      triggerLabel="Edit settings"
-      title="Settings"
-      defaultValue={{
-        projectName: "",
-        config: { apiUrl: "", enabled: true },
-      }}
-      fieldMap={{
-        projectName: { variant: "text", props: { label: "Project name" } },
-        "config.apiUrl": { variant: "text", props: { label: "API URL" } },
-        "config.enabled": { variant: "toggle", props: { label: "Enabled" } },
-        "**.*token*": { variant: "password", props: { label: "Token" } },
-      }}
-      permissions={{
-        canViewRaw: true,
-        canEditRaw: false,
-        canAdd: true,
-        canDelete: true,
-      }}
-    />
+          <InputField
+                  variant="json-editor"
+                  name="settings"
+                  label="Settings"
+                  description="Edit advanced settings as a structured UI."
+                  mode="popover"
+                  triggerLabel="Edit settings"
+                  title="Settings"
+                  defaultValue={{
+                    projectName: "",
+                    config: { apiUrl: "", enabled: true },
+                  }}
+                  fieldMap={{
+                    projectName: { variant: "text", props: { label: "Project name" } },
+                    "config.apiUrl": { variant: "text", props: { label: "API URL" } },
+                    "config.enabled": { variant: "toggle", props: { label: "Enabled" } },
+                    "**.*token*": { variant: "password", props: { label: "Token" } },
+                  }}
+                  permissions={{
+                    canViewRaw: true,
+                    canEditRaw: false,
+                    canAdd: true,
+                    canDelete: true,
+                  }}
+          />
   );
 }
 ```
@@ -1498,25 +1620,25 @@ import { InputField } from "@timeax/form-palette"; // adjust import to your proj
 
 export function ListerExample() {
   return (
-    <InputField
-      variant="lister"
-      name="user_id"
-      label="User"
-      description="Pick a user from a remote list."
+          <InputField
+                  variant="lister"
+                  name="user_id"
+                  label="User"
+                  description="Pick a user from a remote list."
 
-      // standalone inline source (no base `def` required)
-      endpoint="/api/admin/users"
-      method="GET"
-      selector="data" // or (res) => res.data
-      optionValue="id"
-      optionLabel={(u: any) => u.name}
-      optionDescription={(u: any) => u.email}
+                  // standalone inline source (no base `def` required)
+                  endpoint="/api/admin/users"
+                  method="GET"
+                  selector="data" // or (res) => res.data
+                  optionValue="id"
+                  optionLabel={(u: any) => u.name}
+                  optionDescription={(u: any) => u.email}
 
-      searchable
-      clearable
-      placeholder="Select a user..."
-      title="Select user"
-    />
+                  searchable
+                  clearable
+                  placeholder="Select a user..."
+                  title="Select user"
+          />
   );
 }
 ```
@@ -1555,29 +1677,29 @@ function MyToggle(props: {
   const { checked, onCheckedChange, disabled } = props;
 
   return (
-    <button
-      type="button"
-      disabled={disabled}
-      aria-pressed={checked}
-      onClick={() => onCheckedChange?.(!checked)}
-      className="rounded border px-3 py-1"
-    >
-      {checked ? "On" : "Off"}
-    </button>
+          <button
+                  type="button"
+                  disabled={disabled}
+                  aria-pressed={checked}
+                  onClick={() => onCheckedChange?.(!checked)}
+                  className="rounded border px-3 py-1"
+          >
+            {checked ? "On" : "Off"}
+          </button>
   );
 }
 
 export function CustomExample() {
   return (
-    <InputField
-      variant="custom"
-      name="marketing_opt_in"
-      label="Marketing emails"
-      description="Toggle to opt in."
-      component={MyToggle}
-      valueProp="checked"
-      changeProp="onCheckedChange"
-    />
+          <InputField
+                  variant="custom"
+                  name="marketing_opt_in"
+                  label="Marketing emails"
+                  description="Toggle to opt in."
+                  component={MyToggle}
+                  valueProp="checked"
+                  changeProp="onCheckedChange"
+          />
   );
 }
 ```
@@ -1663,10 +1785,10 @@ const host = {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <ListerProvider host={host}>
-      {children}
-      <ListerUI />
-    </ListerProvider>
+          <ListerProvider host={host}>
+            {children}
+            <ListerUI />
+          </ListerProvider>
   );
 }
 ```
@@ -1681,14 +1803,14 @@ export function PickUserButton() {
   const { api } = useLister<any>();
 
   return (
-    <button
-      onClick={() => {
-        // "users" can be a preset key, or you can pass a definition inline
-        api.open("users", { status: "active" }, { title: "Select a user" });
-      }}
-    >
-      Pick user
-    </button>
+          <button
+                  onClick={() => {
+                    // "users" can be a preset key, or you can pass a definition inline
+                    api.open("users", { status: "active" }, { title: "Select a user" });
+                  }}
+          >
+            Pick user
+          </button>
   );
 }
 ```
@@ -1880,27 +2002,27 @@ export function RemoteUserSearch() {
   });
 
   return (
-    <div>
-      <input
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search users…"
-      />
-      <button onClick={refresh} disabled={loading}>
-        Refresh
-      </button>
+          <div>
+            <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search users…"
+            />
+            <button onClick={refresh} disabled={loading}>
+              Refresh
+            </button>
 
-      {loading && <p>Loading…</p>}
-      {error && <p style={{ color: "crimson" }}>{String(error)}</p>}
+            {loading && <p>Loading…</p>}
+            {error && <p style={{ color: "crimson" }}>{String(error)}</p>}
 
-      <ul>
-        {visible.map((u) => (
-          <li key={u.id}>
-            <b>{u.name}</b> <small>{u.email}</small>
-          </li>
-        ))}
-      </ul>
-    </div>
+            <ul>
+              {visible.map((u) => (
+                      <li key={u.id}>
+                        <b>{u.name}</b> <small>{u.email}</small>
+                      </li>
+              ))}
+            </ul>
+          </div>
   );
 }
 ```
@@ -1925,18 +2047,18 @@ export function CountryPickerLocal() {
   });
 
   return (
-    <div>
-      <input
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search countries…"
-      />
-      <ul>
-        {visible.map((c) => (
-          <li key={c.code}>{c.name}</li>
-        ))}
-      </ul>
-    </div>
+          <div>
+            <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search countries…"
+            />
+            <ul>
+              {visible.map((c) => (
+                      <li key={c.code}>{c.name}</li>
+              ))}
+            </ul>
+          </div>
   );
 }
 ```
@@ -1961,37 +2083,37 @@ export function FilteredUsers() {
   });
 
   return (
-    <div>
-      <div style={{ display: "flex", gap: 8 }}>
-        <select
-          value={filters?.status ?? ""}
-          onChange={(e) => patchFilters({ status: e.target.value || undefined })}
-        >
-          <option value="">Any status</option>
-          <option value="active">Active</option>
-          <option value="blocked">Blocked</option>
-        </select>
+          <div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <select
+                      value={filters?.status ?? ""}
+                      onChange={(e) => patchFilters({ status: e.target.value || undefined })}
+              >
+                <option value="">Any status</option>
+                <option value="active">Active</option>
+                <option value="blocked">Blocked</option>
+              </select>
 
-        <select
-          value={filters?.role ?? ""}
-          onChange={(e) => patchFilters({ role: e.target.value || undefined })}
-        >
-          <option value="">Any role</option>
-          <option value="admin">Admin</option>
-          <option value="user">User</option>
-        </select>
+              <select
+                      value={filters?.role ?? ""}
+                      onChange={(e) => patchFilters({ role: e.target.value || undefined })}
+              >
+                <option value="">Any role</option>
+                <option value="admin">Admin</option>
+                <option value="user">User</option>
+              </select>
 
-        <button onClick={clearFilters} disabled={loading}>
-          Clear
-        </button>
-      </div>
+              <button onClick={clearFilters} disabled={loading}>
+                Clear
+              </button>
+            </div>
 
-      <ul>
-        {visible.map((u: any) => (
-          <li key={u.id}>{u.name}</li>
-        ))}
-      </ul>
-    </div>
+            <ul>
+              {visible.map((u: any) => (
+                      <li key={u.id}>{u.name}</li>
+              ))}
+            </ul>
+          </div>
   );
 }
 ```
@@ -2019,17 +2141,17 @@ export function AllowedIdsOnly() {
   }, [allowed, setSearchTarget]);
 
   return (
-    <div>
-      <small>mode: {searchMode}</small>
-      <button onClick={() => setSearchMode("local")}>Local</button>
-      <button onClick={() => setSearchMode("remote")}>Remote</button>
+          <div>
+            <small>mode: {searchMode}</small>
+            <button onClick={() => setSearchMode("local")}>Local</button>
+            <button onClick={() => setSearchMode("remote")}>Remote</button>
 
-      <ul>
-        {visible.map((u: any) => (
-          <li key={u.id}>{u.name}</li>
-        ))}
-      </ul>
-    </div>
+            <ul>
+              {visible.map((u: any) => (
+                      <li key={u.id}>{u.name}</li>
+              ))}
+            </ul>
+          </div>
   );
 }
 ```
@@ -2058,28 +2180,28 @@ export function TagMultiSelect() {
   });
 
   return (
-    <div>
-      <ul>
-        {visible.map((t) => (
-          <li key={t.id}>
-            <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <input
-                type="checkbox"
-                checked={isSelected(t.id)}
-                onChange={() => toggle(t.id)}
-              />
-              {t.name}
-            </label>
-          </li>
-        ))}
-      </ul>
+          <div>
+            <ul>
+              {visible.map((t) => (
+                      <li key={t.id}>
+                        <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                          <input
+                                  type="checkbox"
+                                  checked={isSelected(t.id)}
+                                  onChange={() => toggle(t.id)}
+                          />
+                          {t.name}
+                        </label>
+                      </li>
+              ))}
+            </ul>
 
-      <pre style={{ marginTop: 12 }}>
+            <pre style={{ marginTop: 12 }}>
 selectedIds: {JSON.stringify(selectedIds, null, 2)}
 
-selected objects: {JSON.stringify(selected, null, 2)}
+              selected objects: {JSON.stringify(selected, null, 2)}
       </pre>
-    </div>
+          </div>
   );
 }
 ```
@@ -2146,13 +2268,13 @@ export function JsonEditorStandalone() {
   });
 
   return (
-    <JsonEditor
-      root={root}
-      onRoot={setRoot}
-      open
-      onClose={() => console.log("closed")}
-      title="User JSON"
-    />
+          <JsonEditor
+                  root={root}
+                  onRoot={setRoot}
+                  open
+                  onClose={() => console.log("closed")}
+                  title="User JSON"
+          />
   );
 }
 ```

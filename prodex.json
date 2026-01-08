@@ -48,6 +48,12 @@
                 "./packages/form-palette/src/input/**",
                 "./packages/form-palette/src/presets/ui/**"
             ]
+        },
+
+        "lister": {
+            "files": [""],
+            "include": ["packages/form-palette/src/presets/lister/**"],
+            "prefix": "lister"
         }
     }
 }
