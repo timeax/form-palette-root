@@ -13,3 +13,5 @@ session/
   inflight.ts # abort + request ids + debounce
   runtime.ts # createListerRuntime (sessions + open/apply/cancel + selection draft)
   index.ts # exports for session runtime
+  filters.ts
+  permissions.ts

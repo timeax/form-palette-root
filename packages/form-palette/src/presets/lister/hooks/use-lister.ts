@@ -1,59 +1,48 @@
-/* ────────────────────────────────────────────────────────────── */
-/* Public Hook                                                     */
-/* ────────────────────────────────────────────────────────────── */
+import * as React from "react";
+import type { ListerSessionId, PresetMap } from "@/presets/lister/types";
+import { useListerRuntime } from "@/presets/lister/provider";
 
-import { useListerContext } from "@/presets/lister";
+/**
+ * useLister — stable hook returning { api, store/state, actions, selectors }.
+ *
+ * It directly mirrors the current runtime, with stable reference equality
+ * for top-level properties (api/actions/selectors), while `state` updates on
+ * store changes.
+ */
+export function useLister<P extends PresetMap>() {
+    const runtime = useListerRuntime<P>();
+    const [state, setState] = React.useState(runtime.getState());
 
-export function useLister(ownerKey?: ListerOwnerKey) {
-    const ctx = useListerContext();
+    React.useEffect(() => {
+        return runtime.subscribe(() => {
+            setState(runtime.getState());
+        });
+    }, [runtime]);
 
-    const id = React.useMemo(() => {
-        const key = ownerKey ?? stableId("lister_owner");
-        const existing = ctx.findSessionIdByOwnerKey(key);
-        return existing ?? ctx.createSession(key);
-    }, [ctx, ownerKey]);
-
-    const state = React.useSyncExternalStore(
-        ctx.store.subscribe,
-        () => ctx.getSession(id) ?? ({} as any),
-        () => ctx.getSession(id) ?? ({} as any),
-    );
-
-    const visibleOptionsList = React.useMemo(() => {
-        return state
-            ? (state as any).definition
-                ? (state as any).searchMode === "local" ||
-                  (state as any).searchMode === "hybrid"
-                    ? (state as any).optionsList
-                    : (state as any).optionsList
-                : []
-            : [];
-    }, [state]);
-
-    const api = React.useMemo(
+    // Flatten runtime shape for easy destructuring
+    return React.useMemo(
         () => ({
-            id,
+            api: runtime.api,
+            actions: runtime.actions,
+            selectors: runtime.selectors,
             state,
-            visibleOptionsList,
-            open: ctx.open,
-            refresh: ctx.refresh,
-            setFilters: ctx.setFilters,
-            clearFilters: ctx.clearFilters,
-            setSort: ctx.setSort,
-            setSearchMode: ctx.setSearchMode,
-            setSearchTarget: ctx.setSearchTarget,
-            searchLocal: ctx.searchLocal,
-            searchRemote: ctx.searchRemote,
-            select: ctx.select,
-            selectMany: ctx.selectMany,
-            draftUpdate: ctx.draftUpdate,
-            draftUpdateAll: ctx.draftUpdateAll,
-            draftReset: ctx.draftReset,
-            resolve: (value: any) => ctx.resolveAndDispose(id, value),
-            dispose: () => ctx.disposeSession(id),
+            store: state, // alias for backward compatibility
         }),
-        [ctx, id, state, visibleOptionsList],
+        [runtime, state],
     );
+}
 
-    return api as any;
+/**
+ * useListerSession — convenience hook for one active session.
+ * Example: UI overlays or modals can call this to get the current session.
+ */
+export function useListerSession<P extends PresetMap>(
+    sessionId?: ListerSessionId,
+) {
+    const { state } = useLister<P>();
+
+    const sid = sessionId ?? state.activeId;
+    const session = sid ? state.sessions[sid] : undefined;
+
+    return { session, activeId: sid };
 }

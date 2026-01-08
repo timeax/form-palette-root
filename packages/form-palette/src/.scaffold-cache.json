@@ -735,6 +735,20 @@
       "sizeAtCreate": 0,
       "groupName": "lister-runtime",
       "groupRoot": "./presets/lister/runtime"
+    },
+    "presets/lister/runtime/session/filters.ts": {
+      "path": "presets/lister/runtime/session/filters.ts",
+      "createdAt": "2026-01-08T16:20:04.512Z",
+      "sizeAtCreate": 0,
+      "groupName": "lister-runtime",
+      "groupRoot": "./presets/lister/runtime"
+    },
+    "presets/lister/runtime/session/permissions.ts": {
+      "path": "presets/lister/runtime/session/permissions.ts",
+      "createdAt": "2026-01-08T16:20:04.516Z",
+      "sizeAtCreate": 0,
+      "groupName": "lister-runtime",
+      "groupRoot": "./presets/lister/runtime"
     }
   }
 }

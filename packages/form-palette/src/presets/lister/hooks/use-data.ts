@@ -1,14 +1,20 @@
 // packages/form-palette/src/presets/lister/hooks/use-data.ts
 
 import * as React from "react";
-import { Ctx, buildSearchPayloadFromTarget } from "@/presets/lister";
-import { makeInlineDef } from "@/presets/shadcn-variants/lister/patch";
 
 import type {
     ListerSearchMode,
     ListerSearchPayload,
     ListerSearchTarget,
 } from "@/presets/lister/types";
+
+import { extractArray } from "@/presets/lister/runtime/engine/extract";
+import {
+    defaultHttpClient,
+    type ListerHttpClient,
+} from "@/presets/lister/runtime/engine/http";
+import { createRequestId } from "@/presets/lister/runtime/engine/engine";
+import { buildSearchPayloadFromTarget } from "@/presets/lister/runtime/engine/search";
 
 /**
  * Minimal selector contract (matches extractArray contract used by lister)
@@ -67,7 +73,7 @@ export type UseDataOptions<TItem = any, TFilters = Record<string, any>> = {
     selector?: DataSelector<TItem>;
 
     /**
-     * Passed through into the inline def source.buildRequest (same signature as provider)
+     * Passed through into request builder (same signature shape as legacy provider)
      */
     buildRequest?: (
         ctx: DataBuildRequestCtx<TFilters>,
@@ -97,6 +103,11 @@ export type UseDataOptions<TItem = any, TFilters = Record<string, any>> = {
      * Optional selection support (by stable item key)
      */
     selection?: DataSelectionConfig<TItem>;
+
+    /**
+     * Optional override: custom http client (otherwise uses global axios / axios import)
+     */
+    http?: ListerHttpClient;
 };
 
 export type UseDataResult<TItem = any, TFilters = Record<string, any>> = {
@@ -140,6 +151,7 @@ export type UseDataResult<TItem = any, TFilters = Record<string, any>> = {
         query?: string;
         filters?: TFilters;
         searchTarget?: ListerSearchTarget;
+        search?: ListerSearchPayload;
     }) => Promise<TItem[]>;
 };
 
@@ -152,6 +164,17 @@ function defaultSearchTarget(
 
 function isKey(x: any): x is DataKey {
     return typeof x === "string" || typeof x === "number";
+}
+
+function isAbortError(e: any): boolean {
+    const name = String(e?.name ?? "");
+    const msg = String(e?.message ?? "");
+    return (
+        name === "AbortError" ||
+        name === "CanceledError" ||
+        name === "CancelError" ||
+        /aborted|canceled|cancelled/i.test(msg)
+    );
 }
 
 function stringifyForSearch(v: any): string {
@@ -183,11 +206,10 @@ function stringifyForSearch(v: any): string {
 export function useData<TItem = any, TFilters = Record<string, any>>(
     opts: UseDataOptions<TItem, TFilters>,
 ): UseDataResult<TItem, TFilters> {
-    const ctx = React.useContext(Ctx);
-    if (!ctx) throw new Error("useData must be used within <ListerProvider />");
-
     const enabled = opts.enabled ?? true;
     const debounceMs = opts.debounceMs ?? 300;
+
+    const http = opts.http ?? defaultHttpClient;
 
     const [data, setData] = React.useState<TItem[]>(() => opts.initial ?? []);
     const [loading, setLoading] = React.useState(false);
@@ -243,15 +265,17 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
     /**
      * IMPORTANT:
      * Keep internal selection state as an array ALWAYS.
-     * This avoids TS union issues (DataKey | DataKey[] | null) in setState callbacks.
      */
     const [selectedIdsArr, setSelectedIdsArr] = React.useState<DataKey[]>([]);
 
-    // cache id -> latest known item (so selection can return objects even after list changes)
+    // cache id -> latest known item
     const selectedCacheRef = React.useRef<Map<DataKey, TItem>>(new Map());
 
     // last-request-wins
     const reqIdRef = React.useRef(0);
+
+    // abort in-flight request
+    const abortRef = React.useRef<AbortController | null>(null);
 
     // debounce timer (remote/hybrid typing)
     const timerRef = React.useRef<any>(null);
@@ -259,34 +283,21 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
     // avoid effect double-fetch
     const didMountRef = React.useRef(false);
 
-    // prevent mode switch immediate-fetch from also triggering the debounce effect fetch
+    // prevent mode switch immediate-fetch from also triggering debounce fetch
     const skipNextModeEffectRef = React.useRef(false);
 
     React.useEffect(() => {
         return () => {
             if (timerRef.current) clearTimeout(timerRef.current);
+            if (abortRef.current) {
+                try {
+                    abortRef.current.abort();
+                } catch {
+                    // ignore
+                }
+            }
         };
     }, []);
-
-    // ✅ inline def built from minimal inputs
-    const inlineDef = React.useMemo(() => {
-        return makeInlineDef({
-            id: opts.id,
-            endpoint: opts.endpoint,
-            method: (opts.method ?? "GET") as any,
-            selector: opts.selector,
-            buildRequest: opts.buildRequest,
-            search: opts.search,
-        } as any);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-        opts.id,
-        opts.endpoint,
-        opts.method,
-        opts.selector,
-        opts.buildRequest,
-        opts.search,
-    ]);
 
     const dataById = React.useMemo(() => {
         const map = new Map<DataKey, TItem>();
@@ -317,11 +328,6 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
         [getItemKey, selectionMode],
     );
 
-    /**
-     * Fetch from provider using same semantics as Lister:
-     * - payload derived from searchTarget (or override)
-     * - filters passed through buildRequest/params
-     */
     const fetchImpl = React.useCallback(
         async (override?: {
             query?: string;
@@ -337,6 +343,19 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
 
             const myReq = ++reqIdRef.current;
 
+            if (abortRef.current) {
+                try {
+                    abortRef.current.abort();
+                } catch {
+                    // ignore
+                }
+            }
+            const controller =
+                typeof AbortController !== "undefined"
+                    ? new AbortController()
+                    : null;
+            abortRef.current = controller;
+
             setLoading(true);
             setError(undefined);
 
@@ -344,20 +363,43 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
                 const payload: ListerSearchPayload | undefined =
                     override?.search ?? buildSearchPayloadFromTarget(t);
 
-                const res = await ctx.apiFetchAny(inlineDef as any, f, {
-                    query: q,
-                    search: payload,
+                const built =
+                    opts.buildRequest?.({
+                        filters: f,
+                        query: q,
+                        cursor: null,
+                    }) ?? {};
+
+                // Compatibility: default query key is "search"
+                const baseParams = built.params ?? {
+                    ...(f ?? ({} as any)),
+                    search: q,
+                };
+
+                const params = payload
+                    ? { ...baseParams, ...payload }
+                    : baseParams;
+
+                const body = built.body ?? {};
+                const headers = built.headers;
+
+                const resBody = await http({
+                    endpoint: opts.endpoint,
+                    method: (opts.method ?? "GET") as any,
+                    params,
+                    body,
+                    headers,
+                    signal: controller?.signal,
+                    requestId: createRequestId(),
                 });
 
-                const list = (res?.rawList ?? res?.raw ?? []) as TItem[];
+                const list = extractArray<TItem>(resBody, opts.selector as any);
 
-                // last-request-wins (DON'T update state if stale)
+                // last-request-wins
                 if (reqIdRef.current !== myReq) return list;
 
-                // cache items for selection lookup (latest request only)
                 commitSelectedCache(list);
 
-                // optional prune (latest request only)
                 if (selectionMode !== "none" && selectionPrune === "missing") {
                     const nextIds = new Set<DataKey>();
                     for (const item of list) {
@@ -374,6 +416,13 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
                 return list;
             } catch (e: any) {
                 if (reqIdRef.current !== myReq) return dataRef.current;
+
+                if (isAbortError(e)) {
+                    // keep prior data; clear loading
+                    setLoading(false);
+                    return dataRef.current;
+                }
+
                 setError(e);
                 setLoading(false);
                 return dataRef.current;
@@ -384,8 +433,11 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
             query,
             filters,
             searchTarget,
-            ctx,
-            inlineDef,
+            http,
+            opts.endpoint,
+            opts.method,
+            opts.selector,
+            opts.buildRequest,
             commitSelectedCache,
             selectionMode,
             selectionPrune,
@@ -429,7 +481,7 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
 
     const setSearchTarget = React.useCallback((t: ListerSearchTarget) => {
         _setSearchTarget(t);
-        // debounced fetch is handled by the query/searchTarget effect
+        // debounced fetch handled by effect
     }, []);
 
     const setFilters = React.useCallback(
@@ -501,7 +553,6 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
 
     /**
      * Visible list (local/hybrid):
-     * Uses provider payload shape:
      * - subject => search only that field
      * - searchAll => search stringify
      * - searchOnly => restrict to IDs
@@ -512,7 +563,6 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
         const payload = buildSearchPayloadFromTarget(searchTarget);
         let list = data;
 
-        // apply "only" restriction (if provided)
         if (payload?.searchOnly && payload.searchOnly.length) {
             const allow = new Set(payload.searchOnly as any[]);
             list = list.filter((item) => {
@@ -526,7 +576,6 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
 
         const ql = q.toLowerCase();
 
-        // subject search
         if (payload?.subject) {
             const key = payload.subject;
             return list.filter((item: any) =>
@@ -536,14 +585,13 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
             );
         }
 
-        // all / fallback
         return list.filter((item: any) =>
             stringifyForSearch(item).toLowerCase().includes(ql),
         );
     }, [data, getItemKey, query, searchMode, searchTarget]);
 
     // ─────────────────────────────────────────────
-    // Selection API (internal array, derived outward shape)
+    // Selection API
     // ─────────────────────────────────────────────
 
     const selectedIds: DataKey | DataKey[] | null = React.useMemo(() => {
@@ -572,7 +620,6 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
             const ids = normalizeIds(idOrIds).filter(isKey);
             if (!ids.length) return;
 
-            // hydrate cache if we already have the object
             for (const id of ids) {
                 const hit = dataById.get(id);
                 if (hit) selectedCacheRef.current.set(id, hit);
@@ -650,7 +697,6 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
 
     const getSelection = React.useCallback(() => selected, [selected]);
 
-    // keep internal array shape aligned with mode
     React.useEffect(() => {
         if (selectionMode === "none") {
             setSelectedIdsArr([]);
