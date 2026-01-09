@@ -16,6 +16,10 @@ import {
 import { createRequestId } from "@/presets/lister/runtime/engine/engine";
 import { buildSearchPayloadFromTarget } from "@/presets/lister/runtime/engine/search";
 
+// ✅ NEW: runtime inflight (abort + debounce + latest)
+import { createInFlight } from "@/presets/lister/runtime/session/inflight";
+import { createRuntimeKey } from "@/presets/lister/runtime/session/key";
+
 /**
  * Minimal selector contract (matches extractArray contract used by lister)
  * - function: (body) => array
@@ -233,6 +237,28 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
         opts.filters,
     );
 
+    // ✅ NEW: runtime inflight (per hook instance)
+    const inflight = React.useMemo(
+        () => createInFlight(debounceMs),
+        [debounceMs],
+    );
+
+    // ✅ stable key for inflight map (not tied to lister context)
+    const inflightKeyRef = React.useRef<string>(
+        opts.id ?? createRuntimeKey('data'),
+    );
+    React.useEffect(() => {
+        // if user provides an id later, adopt it
+        if (opts.id) inflightKeyRef.current = opts.id;
+    }, [opts.id]);
+
+    React.useEffect(() => {
+        return () => {
+            // cancel timers + abort requests
+            inflight.clear(inflightKeyRef.current as any);
+        };
+    }, [inflight]);
+
     // selection config
     const selectionMode: DataSelectionMode = opts.selection?.mode ?? "none";
     const selectionPrune = opts.selection?.prune ?? "never";
@@ -271,33 +297,11 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
     // cache id -> latest known item
     const selectedCacheRef = React.useRef<Map<DataKey, TItem>>(new Map());
 
-    // last-request-wins
-    const reqIdRef = React.useRef(0);
-
-    // abort in-flight request
-    const abortRef = React.useRef<AbortController | null>(null);
-
-    // debounce timer (remote/hybrid typing)
-    const timerRef = React.useRef<any>(null);
-
     // avoid effect double-fetch
     const didMountRef = React.useRef(false);
 
     // prevent mode switch immediate-fetch from also triggering debounce fetch
     const skipNextModeEffectRef = React.useRef(false);
-
-    React.useEffect(() => {
-        return () => {
-            if (timerRef.current) clearTimeout(timerRef.current);
-            if (abortRef.current) {
-                try {
-                    abortRef.current.abort();
-                } catch {
-                    // ignore
-                }
-            }
-        };
-    }, []);
 
     const dataById = React.useMemo(() => {
         const map = new Map<DataKey, TItem>();
@@ -341,20 +345,9 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
             const f = override?.filters ?? filters;
             const t = override?.searchTarget ?? searchTarget;
 
-            const myReq = ++reqIdRef.current;
-
-            if (abortRef.current) {
-                try {
-                    abortRef.current.abort();
-                } catch {
-                    // ignore
-                }
-            }
-            const controller =
-                typeof AbortController !== "undefined"
-                    ? new AbortController()
-                    : null;
-            abortRef.current = controller;
+            const requestId = createRequestId();
+            const inflightKey = inflightKeyRef.current as any;
+            const { signal } = inflight.begin(inflightKey, requestId);
 
             setLoading(true);
             setError(undefined);
@@ -389,14 +382,14 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
                     params,
                     body,
                     headers,
-                    signal: controller?.signal,
-                    requestId: createRequestId(),
+                    signal,
+                    requestId,
                 });
 
                 const list = extractArray<TItem>(resBody, opts.selector as any);
 
-                // last-request-wins
-                if (reqIdRef.current !== myReq) return list;
+                // ✅ last-request-wins
+                if (!inflight.isLatest(inflightKey, requestId)) return list;
 
                 commitSelectedCache(list);
 
@@ -415,10 +408,14 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
                 setLoading(false);
                 return list;
             } catch (e: any) {
-                if (reqIdRef.current !== myReq) return dataRef.current;
+                const inflightKey = inflightKeyRef.current as any;
+
+                // ✅ last-request-wins
+                if (!inflight.isLatest(inflightKey, requestId)) {
+                    return dataRef.current;
+                }
 
                 if (isAbortError(e)) {
-                    // keep prior data; clear loading
                     setLoading(false);
                     return dataRef.current;
                 }
@@ -433,6 +430,7 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
             query,
             filters,
             searchTarget,
+            inflight,
             http,
             opts.endpoint,
             opts.method,
@@ -458,7 +456,8 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
      */
     const setSearchMode = React.useCallback(
         (m: ListerSearchMode) => {
-            if (timerRef.current) clearTimeout(timerRef.current);
+            // cancel pending debounce + abort in-flight
+            inflight.abort(inflightKeyRef.current as any);
 
             if (m === "remote" || m === "hybrid") {
                 skipNextModeEffectRef.current = true;
@@ -476,7 +475,7 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
                 });
             }
         },
-        [fetchImpl],
+        [fetchImpl, inflight],
     );
 
     const setSearchTarget = React.useCallback((t: ListerSearchTarget) => {
@@ -525,16 +524,18 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
             return;
         }
 
-        if (timerRef.current) clearTimeout(timerRef.current);
+        const key = inflightKeyRef.current as any;
 
-        timerRef.current = setTimeout(() => {
+        // ✅ runtime debounce scheduler
+        inflight.schedule(key, createRequestId(), () => {
             void fetchImpl();
-        }, debounceMs);
+        });
 
         return () => {
-            if (timerRef.current) clearTimeout(timerRef.current);
+            // cancel pending debounce only (and abort any in-flight)
+            inflight.abort(key);
         };
-    }, [debounceMs, enabled, fetchImpl, query, searchMode, searchTarget]);
+    }, [enabled, fetchImpl, inflight, query, searchMode, searchTarget]);
 
     /**
      * Filter changes:

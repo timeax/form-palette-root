@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 
 import type {
-    ListerSearchPayload,
     ListerSearchTarget,
     ListerSessionId,
     ListerStoreState,
@@ -21,11 +20,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/presets/ui/popover";
 import { Input } from "@/presets/ui/input";
 import { Button } from "@/presets/ui/button";
 
-// ✅ NEW: use our custom filter UI button
 import { ListerFiltersButton } from "./filter-ui";
 
 type AnyPresetMap = any;
-
 type FilterValue = string | number;
 
 function asArray(v: any): FilterValue[] {
@@ -35,28 +32,30 @@ function asArray(v: any): FilterValue[] {
 
 /**
  * Search bar + trailing controls:
- * - Search target (all/subject/only) popover (leading control)
+ * - Search target popover (all/subject/only)
  * - Search mode toggle (remote/local/hybrid)
- * - Filters UI (custom popover button)
+ * - Filters button
  *
- * Notes:
- * - Search mode is bound to session.searchMode via actions.setSearchMode(id, mode)
- * - Search target is bound to session.searchTarget via actions.setSearchTarget(id, target)
- * - Filters live in session.filtersSpec?.options and session.selectedFilterValues
+ * Runtime responsibilities:
+ * - actions.setQuery schedules remote refresh for remote/hybrid; local doesn't fetch
+ * - actions.setSearchTarget schedules remote refresh for remote/hybrid
+ * - selectors.visibleOptions handles local/hybrid client filtering
  */
 export function SearchBar(props: {
     id: ListerSessionId;
-    store: ListerStoreState;
+    store?: ListerStoreState;
 }) {
-    const { id, store } = props;
-    const { actions } = useLister<AnyPresetMap>();
+    const { id } = props;
 
-    const session = store.sessions[id] as any;
+    const { actions, state } = useLister<AnyPresetMap>();
+    const store = (props.store ?? (state as any)) as ListerStoreState;
 
-    const searchMode: "local" | "remote" | "hybrid" = (session?.searchMode ??
+    const session = (store.sessions as any)?.[id] as any;
+    if (!session) return null;
+
+    const searchMode: "local" | "remote" | "hybrid" = (session.searchMode ??
         "remote") as any;
-
-    const query = session?.query ?? "";
+    const query = String(session.query ?? "");
 
     const hasFilters = !!session?.filtersSpec?.options?.length;
 
@@ -78,7 +77,7 @@ export function SearchBar(props: {
     const allowCustomSubject = !!searchSpec?.allowCustomSubject;
     const allowCustomOnly = !!searchSpec?.allowCustomOnly;
 
-    // persisted target (like searchMode)
+    // Persisted target, with sane defaults
     const target: ListerSearchTarget =
         (session?.searchTarget as any) ??
         (searchSpec?.default
@@ -87,8 +86,7 @@ export function SearchBar(props: {
               ? { mode: "all" }
               : { mode: "subject", subject: specSubjects[0] ?? null });
 
-    // UI helper: when subject is not in the list, treat as "custom"
-    const subjectValue = (target?.subject ?? "") as string;
+    const subjectValue = String((target as any)?.subject ?? "");
     const isCustomSubject =
         !!subjectValue &&
         specSubjects.length > 0 &&
@@ -97,69 +95,33 @@ export function SearchBar(props: {
     const subjectSelectValue =
         isCustomSubject && allowCustomSubject ? "__custom__" : subjectValue;
 
-    const onlyValue = asArray(target?.only);
+    const onlyValue = asArray((target as any)?.only);
 
-    const buildSearchPayload = (t: ListerSearchTarget): ListerSearchPayload => {
-        if (t.mode === "all") return { searchAll: true };
+    const commitSearchTarget = (next: ListerSearchTarget) => {
+        actions.setSearchTarget(id, next);
 
-        if (t.mode === "only") {
-            const only = asArray(t.only)
-                .map((x) => String(x).trim())
-                .filter(Boolean);
-
-            return only.length ? { searchOnly: only } : {};
+        // local/hybrid UI should feel immediate; state change triggers re-render anyway
+        if (searchMode === "local") {
+            queueMicrotask(() => {
+                // no fetch needed; visibleOptions should respect target+query if selector does
+                // (see note below)
+            });
         }
-
-        const subject = (t.subject ?? "").trim();
-        return subject ? { subject } : {};
-    };
-
-    /**
-     * IMPORTANT:
-     * - remote => call searchRemote (provider debounces + fetches)
-     * - local  => call searchLocal (no fetch)
-     * - hybrid => call searchLocal ONLY (provider's hybrid logic schedules remote fetch)
-     */
-    const runSearch = (mode: "local" | "remote" | "hybrid", q: string) => {
-        const latestTarget = ((store.sessions[id] as any)?.searchTarget ??
-            target) as ListerSearchTarget;
-
-        const payload = buildSearchPayload(latestTarget);
-
-        if (mode === "remote") return actions.searchRemote(id, q, payload);
-        if (mode === "local") return actions.searchLocal(id, q, payload);
-
-        // hybrid: local now, remote is scheduled by provider
-        return actions.searchLocal(id, q, payload);
     };
 
     const onQueryChange = (q: string) => {
-        runSearch(searchMode, q);
+        actions.setQuery(id, q);
     };
 
     const onSearchModeChange = (mode: "local" | "remote" | "hybrid") => {
-        actions.setSearchMode(id, mode);
+        // runtime should expose this; keep call flexible until you add it
+        (actions as any).setSearchMode?.(id, mode);
 
-        // make behavior feel immediate when switching
+        // make switching feel immediate for remote/hybrid
         queueMicrotask(() => {
-            const s = (store.sessions[id] as any) ?? session;
-            const q = s?.query ?? "";
-            runSearch(mode, q);
+            if (mode === "remote" || mode === "hybrid") actions.refresh(id);
+            // local: no fetch
         });
-    };
-
-    const commitSearchTarget = (next: ListerSearchTarget) => {
-        // Provider will persist it and (for remote/hybrid) schedule a refetch based on session.searchTarget
-        actions.setSearchTarget(id, next);
-
-        // For local mode, "refetch" isn't a thing, but we still want the UI to feel immediate.
-        if (searchMode === "local") {
-            queueMicrotask(() => {
-                const s = (store.sessions[id] as any) ?? session;
-                const q = s?.query ?? "";
-                runSearch("local", q);
-            });
-        }
     };
 
     const hasSearchTargetUI =
@@ -168,7 +130,6 @@ export function SearchBar(props: {
             specSubjects.length > 0 ||
             specOnly.length > 0 ||
             allowCustomSubject);
-
 
     return (
         <div className="px-3 py-2" onMouseDown={() => actions.focus(id)}>
@@ -197,7 +158,7 @@ export function SearchBar(props: {
                                 </Button>
                             </PopoverTrigger>
 
-                            <PopoverContent align="start" className="w-80 p-3">
+                            <PopoverContent className="w-80 p-3">
                                 <div className="space-y-3">
                                     <div className="text-xs opacity-70">
                                         Search target
@@ -206,7 +167,7 @@ export function SearchBar(props: {
                                     <InputField
                                         variant="select"
                                         mode="button"
-                                        value={target.mode}
+                                        value={(target as any).mode}
                                         options={[
                                             ...(allowAll
                                                 ? [
@@ -229,7 +190,7 @@ export function SearchBar(props: {
                                             if (mode === "all") {
                                                 commitSearchTarget({
                                                     mode: "all",
-                                                });
+                                                } as any);
                                                 return;
                                             }
 
@@ -241,7 +202,7 @@ export function SearchBar(props: {
                                                         : specOnly.length
                                                           ? [specOnly[0]]
                                                           : [],
-                                                });
+                                                } as any);
                                                 return;
                                             }
 
@@ -252,11 +213,11 @@ export function SearchBar(props: {
                                                     searchSpec?.default ||
                                                     specSubjects[0] ||
                                                     null,
-                                            });
+                                            } as any);
                                         }}
                                     />
 
-                                    {target.mode === "subject" ? (
+                                    {(target as any).mode === "subject" ? (
                                         <div className="space-y-2">
                                             {specSubjects.length ? (
                                                 <InputField
@@ -291,14 +252,14 @@ export function SearchBar(props: {
                                                                 subject:
                                                                     subjectValue ||
                                                                     "",
-                                                            });
+                                                            } as any);
                                                             return;
                                                         }
 
                                                         commitSearchTarget({
                                                             mode: "subject",
                                                             subject: v,
-                                                        });
+                                                        } as any);
                                                     }}
                                                 />
                                             ) : null}
@@ -318,7 +279,7 @@ export function SearchBar(props: {
                                                                 subject:
                                                                     e.target
                                                                         .value,
-                                                            })
+                                                            } as any)
                                                         }
                                                         placeholder="e.g. email"
                                                         className="h-9 w-full rounded-md border px-3 text-sm"
@@ -328,7 +289,7 @@ export function SearchBar(props: {
                                         </div>
                                     ) : null}
 
-                                    {target.mode === "only" ? (
+                                    {(target as any).mode === "only" ? (
                                         <div className="space-y-2">
                                             <InputField
                                                 variant="multi-select"
@@ -342,7 +303,7 @@ export function SearchBar(props: {
                                                     commitSearchTarget({
                                                         mode: "only",
                                                         only: asArray(e?.value),
-                                                    })
+                                                    } as any)
                                                 }
                                             />
 
@@ -385,7 +346,7 @@ export function SearchBar(props: {
                                                             commitSearchTarget({
                                                                 mode: "only",
                                                                 only: next,
-                                                            });
+                                                            } as any);
                                                         }}
                                                     />
                                                 </div>
@@ -402,8 +363,8 @@ export function SearchBar(props: {
                         <InputField
                             variant="select"
                             mode="button"
-                            defaultValue={searchMode}
-                            triggerClassName={'border-none ring-0 shadow-none! px-1! cursor-pointer'}
+                            value={searchMode}
+                            triggerClassName="border-none ring-0 shadow-none! px-1! cursor-pointer"
                             options={[
                                 {
                                     label: "Remote search",
@@ -425,10 +386,11 @@ export function SearchBar(props: {
                                     ),
                                 },
                             ]}
-                            onChange={(e: any) => onSearchModeChange(e?.value)}
+                            onChange={(e: any) =>
+                                onSearchModeChange(e?.value as any)
+                            }
                         />
 
-                        {/* ✅ NEW: filters UI */}
                         {hasFilters ? (
                             <ListerFiltersButton id={id} store={store} />
                         ) : null}

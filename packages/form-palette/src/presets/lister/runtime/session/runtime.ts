@@ -5,7 +5,9 @@ import type {
     ListerChangeEvent,
     ListerDefinition,
     ListerDetails,
-    ListerId,
+    ListerFilterCtx,
+    ListerFilterOption,
+    ListerFilterSpec,
     ListerMode,
     ListerOpenOptions,
     ListerOpenReason,
@@ -35,6 +37,7 @@ import {
     buildSearchPayloadFromTarget,
     filterOptionsLocal,
 } from "../engine/search";
+import { indexFilterOptions } from "./filter-options";
 
 export type CreateListerRuntimeOptions<P extends PresetMap> = {
     host: ListerProviderHost;
@@ -79,6 +82,8 @@ export type ListerRuntime<P extends PresetMap> = {
 
         setFiltersPatch(sessionId: ListerSessionId, patch: any): void;
         mergeFiltersPatch(sessionId: ListerSessionId, patch: any): void;
+        getFilterCtx<TFilters>(id: ListerSessionId): ListerFilterCtx<TFilters>;
+        applyFilterOption(id: ListerSessionId, optionId: string | number): void;
 
         refresh(sessionId: ListerSessionId): void;
     };
@@ -117,9 +122,45 @@ function makeChangeEvent(): ListerChangeEvent {
     };
 }
 
+type OwnerPrefs = {
+    filtersPatch: any;
+    selectedFilterValues: any[];
+};
+
 export function createListerRuntime<P extends PresetMap>(
     opts: CreateListerRuntimeOptions<P>,
 ): ListerRuntime<P> {
+    const ownerPrefs = new Map<string, OwnerPrefs>();
+
+    function prefsKey(ownerKey?: string, kind?: string, endpoint?: string) {
+        if (!ownerKey) return null;
+        // avoid collisions if you reuse ownerKey across different listers
+        return `${ownerKey}::${kind ?? ""}::${endpoint ?? ""}`;
+    }
+
+    function readPrefs(key: string | null): OwnerPrefs | undefined {
+        if (!key) return undefined;
+        return ownerPrefs.get(key);
+    }
+
+    function writePrefs(key: string | null, next: Partial<OwnerPrefs>) {
+        if (!key) return;
+        const prev = ownerPrefs.get(key) ?? {
+            filtersPatch: {},
+            selectedFilterValues: [],
+        };
+
+        ownerPrefs.set(key, {
+            filtersPatch:
+                next.filtersPatch !== undefined
+                    ? next.filtersPatch
+                    : prev.filtersPatch,
+            selectedFilterValues:
+                next.selectedFilterValues !== undefined
+                    ? next.selectedFilterValues
+                    : prev.selectedFilterValues,
+        });
+    }
     const now = opts.now ?? (() => Date.now());
     const makeSessionId =
         opts.makeSessionId ??
@@ -132,16 +173,13 @@ export function createListerRuntime<P extends PresetMap>(
     const engine = opts.engine ?? createListerEngine();
 
     // preset registry (kind -> def)
-    const presetMap: Record<
-        string,
-        ListerDefinition<any, any, any, any, any>
-    > = {
+    const presetMap: Record<string, ListerDefinition<any, any, any, any>> = {
         ...(opts.presets ?? ({} as any)),
     };
 
     function getDef(defOrKind: any) {
         if (typeof defOrKind === "string") return presetMap[defOrKind];
-        return defOrKind as ListerDefinition<any, any, any, any, any>;
+        return defOrKind as ListerDefinition<any, any, any, any>;
     }
 
     function getSession(sessionId: ListerSessionId) {
@@ -149,7 +187,16 @@ export function createListerRuntime<P extends PresetMap>(
             | ListerRuntimeState<any, any, any, any, any>
             | undefined;
     }
+    function patchSession(sessionId: ListerSessionId, patch: any) {
+        store.setSession(sessionId, (prev) => ({ ...prev, ...(patch ?? {}) }));
+    }
 
+    function updateSession(
+        sessionId: ListerSessionId,
+        mutator: (prev: any) => any,
+    ) {
+        store.setSession(sessionId, mutator);
+    }
     async function refreshSession(sessionId: ListerSessionId) {
         const s = getSession(sessionId);
         if (!s?.definition) return;
@@ -258,6 +305,13 @@ export function createListerRuntime<P extends PresetMap>(
             s._resolve?.(res as any);
         } finally {
             inflight.clear(sessionId);
+            writePrefs(
+                prefsKey(s.ownerKey, s.kind, s.definition?.source?.endpoint),
+                {
+                    filtersPatch: s.filtersPatch ?? {},
+                    selectedFilterValues: s.selectedFilterValues ?? [],
+                },
+            );
             store.remove(sessionId);
         }
     }
@@ -359,12 +413,20 @@ export function createListerRuntime<P extends PresetMap>(
                     : Boolean(openOpts?.confirm ?? false);
 
             const sessionId = makeSessionId();
+            const ownerKey = (openOpts as any)?.ownerKey as string | undefined;
+
+            const pKey = prefsKey(ownerKey, kind, def.source?.endpoint);
+            const prefs = readPrefs(pKey);
+
+            const seedFiltersPatch = prefs?.filtersPatch ?? {};
+            const seedSelected = prefs?.selectedFilterValues ?? [];
 
             const permCtx: ListerPermissionCtx = {
                 kind,
                 endpoint: def.source?.endpoint,
                 filters,
                 sessionId,
+                ownerKey,
             };
 
             if (!canOpenLister(opts.host, openOpts?.permissions, permCtx)) {
@@ -390,7 +452,7 @@ export function createListerRuntime<P extends PresetMap>(
             const session: ListerRuntimeState<any, any, any, any, any> = {
                 sessionId,
                 createdAt: now(),
-
+                ownerKey,
                 // identity
                 isOpen: true,
                 kind,
@@ -399,7 +461,7 @@ export function createListerRuntime<P extends PresetMap>(
                 // config
                 mode: mode as any,
                 confirm: confirm as any,
-                title: openOpts?.title,
+                title: def.title ?? openOpts?.title,
 
                 // search
                 searchMode: (openOpts?.searchMode ??
@@ -412,8 +474,10 @@ export function createListerRuntime<P extends PresetMap>(
                 // filters
                 filters,
                 filtersSpec: openOpts?.filtersSpec,
-                filtersPatch: {},
+                filtersPatch: seedFiltersPatch, // ✅ was {}
                 effectiveFilters: undefined,
+
+                selectedFilterValues: seedSelected, // ✅ add this field if not present
 
                 // data
                 loading: false,
@@ -450,7 +514,177 @@ export function createListerRuntime<P extends PresetMap>(
         },
     } as any;
 
+    const getFilterCtx = <TFilters>(
+        id: ListerSessionId,
+    ): ListerFilterCtx<TFilters> => {
+        const refresh = () => void refreshSession(id);
+
+        const get = (key: any) => {
+            const s = getSession(id) as any;
+            const cur = (s?.effectiveFilters ?? s?.filters) as any;
+            return cur?.[key];
+        };
+
+        const commitPatch = (
+            updater: (prev: Partial<TFilters>) => Partial<TFilters>,
+        ) => {
+            let shouldFetch = true;
+
+            updateSession(id, (s: any) => {
+                const spec: ListerFilterSpec<TFilters> | undefined =
+                    s.filtersSpec;
+                const base: TFilters | undefined = s.filters;
+
+                const nextPatch = updater(
+                    (s.filtersPatch ?? {}) as Partial<TFilters>,
+                );
+                const nextEffective = computeEffectiveFilters<TFilters>(
+                    base,
+                    nextPatch,
+                    spec,
+                );
+
+                shouldFetch =
+                    spec?.autoFetch !== false && s.searchMode !== "local";
+
+                return {
+                    ...s,
+                    filtersPatch: nextPatch,
+                    effectiveFilters: nextEffective,
+                };
+            });
+
+            const sNow = getSession(id) as any;
+            writePrefs(
+                prefsKey(
+                    sNow?.ownerKey,
+                    sNow?.kind,
+                    sNow?.definition?.source?.endpoint,
+                ),
+                { filtersPatch: sNow?.filtersPatch ?? {} },
+            );
+            if (shouldFetch) queueMicrotask(refresh);
+        };
+
+        const s = getSession(id) as any;
+
+        return {
+            base: s?.filters as any,
+            patch: ((s?.filtersPatch as any) ?? {}) as any,
+            effective: (s?.effectiveFilters ?? s?.filters) as any,
+
+            set(key: any, value: any) {
+                commitPatch((p) => ({ ...(p as any), [key]: value }));
+            },
+
+            merge(patch: any) {
+                commitPatch((p) => ({ ...(p as any), ...(patch as any) }));
+            },
+
+            unset(key: any) {
+                commitPatch((p) => {
+                    const next = { ...(p as any) };
+                    delete next[key];
+                    return next;
+                });
+            },
+
+            clear() {
+                patchSession(id, { selectedFilterValues: [] as any });
+                commitPatch(() => ({}) as any);
+            },
+
+            refresh,
+            get,
+        };
+    };
+
+    const applyFilterOption = (
+        id: ListerSessionId,
+        optionId: string | number,
+    ) => {
+        const s = getSession(id) as any;
+        const spec: ListerFilterSpec<any> | undefined = s?.filtersSpec;
+        if (!s || !spec?.options?.length) return;
+
+        const index = indexFilterOptions<any>(
+            spec.options as Array<ListerFilterOption<any>>,
+        );
+        const node = index[String(optionId)];
+        if (!node || node.disabled) return;
+
+        const isValueKind = node.kind === "value";
+        const hasApply = !!node.apply;
+        if (!isValueKind && !hasApply) return;
+
+        const key = (node.bindKey ?? node.apply?.key) as string | undefined;
+        if (!key) return;
+
+        const ctx = getFilterCtx<any>(id);
+
+        const mode = (node.apply?.mode ?? "replace") as
+            | "replace"
+            | "merge"
+            | "unset";
+        const toggleable = node.apply?.toggleable ?? true;
+
+        const prevSelected: Array<string | number> = Array.isArray(
+            s.selectedFilterValues,
+        )
+            ? [...(s.selectedFilterValues as any)]
+            : [];
+
+        const isSelected = prevSelected.includes(optionId);
+        const shouldRemove = mode === "unset" || (toggleable && isSelected);
+
+        const nextSelected = shouldRemove
+            ? prevSelected.filter((x) => x !== optionId)
+            : isSelected
+              ? prevSelected
+              : [...prevSelected, optionId];
+
+        patchSession(id, { selectedFilterValues: nextSelected });
+        const sNow = getSession(id) as any;
+        writePrefs(
+            prefsKey(
+                sNow?.ownerKey,
+                sNow?.kind,
+                sNow?.definition?.source?.endpoint,
+            ),
+            { selectedFilterValues: nextSelected },
+        );
+
+        const valuesForKey: any[] = [];
+        for (const sid of nextSelected) {
+            const n = index[String(sid)];
+            if (!n || n.disabled) continue;
+
+            const nKey = (n.bindKey ?? n.apply?.key) as string | undefined;
+            if (!nKey || nKey !== key) continue;
+
+            const v =
+                n.apply && (n.apply as any).value !== undefined
+                    ? (n.apply as any).value
+                    : n.dbValue;
+
+            if (v === undefined) continue;
+            valuesForKey.push(v);
+        }
+
+        if (!valuesForKey.length) {
+            ctx.unset(key as any);
+            return;
+        }
+
+        const nextVal =
+            valuesForKey.length === 1 ? valuesForKey[0] : valuesForKey;
+        if (mode === "merge") ctx.merge({ [key]: nextVal } as any);
+        else ctx.set(key as any, nextVal);
+    };
+    // then expose on actions
     const actions: ListerRuntime<P>["actions"] = {
+        getFilterCtx,
+        applyFilterOption,
         focus(sessionId) {
             store.focus(sessionId);
         },
@@ -614,7 +848,8 @@ export function createListerRuntime<P extends PresetMap>(
             const list = s.optionsList ?? [];
 
             if (s.searchMode === "local" || s.searchMode === "hybrid") {
-                return filterOptionsLocal(list as any, s.query);
+                const payload = buildSearchPayloadFromTarget(s.searchTarget);
+                return filterOptionsLocal(list as any, s.query, payload as any);
             }
 
             return list as any;

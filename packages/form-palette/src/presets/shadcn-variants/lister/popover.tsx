@@ -1,38 +1,35 @@
-import type { ListerMode, ListerSessionId, ListerStoreState } from "@/presets/lister/types";
+// resources/js/presets/shadcn-variants/lister/popover.tsx
+
+import type { ListerMode, ListerSessionId } from "@/presets/lister/types";
 import { useLister } from "@/presets/lister";
 import { cn } from "@/lib/utils";
-import { FooterBar, OptionList, SearchBar } from "@/presets/lister/lister-ui";
 import { Separator } from "@/presets/ui/separator";
 import * as React from "react";
+import { SearchBar } from "@/presets/lister/ui/search";
+import { OptionList } from "@/presets/lister/ui/option-list";
+import { FooterBar } from "@/presets/lister/ui/footer-bar";
 
 export function ListerPopoverPanel(props: {
     className?: string;
     id: ListerSessionId;
-    store: ListerStoreState;
     mode: ListerMode;
     confirm: boolean;
 }) {
-    const { className, id, store, mode, confirm } = props;
+    const { className, id, mode, confirm } = props;
 
-    const { actions } = useLister<any>();
+    const { actions, store } = useLister<any>() as any;
 
     return (
         <div
             className={cn(
                 "flex flex-col overflow-hidden",
-
-                // ✅ width: match trigger width (Radix popover var)
                 "w-(--radix-popover-trigger-width)",
-
-                // ✅ height: scale from trigger height, but keep sane bounds
-                // (pick one: fixed max, or available-height aware)
                 "min-h-[calc(var(--radix-popover-trigger-height)*8)]",
                 "max-h-[min(520px,var(--radix-popover-content-available-height))]",
-
                 className,
             )}
         >
-            <div className="">
+            <div>
                 <SearchBar id={id} store={store} />
             </div>
 
@@ -44,7 +41,7 @@ export function ListerPopoverPanel(props: {
 
             <Separator />
 
-            <div className="">
+            <div>
                 <FooterBar
                     id={id}
                     mode={mode}

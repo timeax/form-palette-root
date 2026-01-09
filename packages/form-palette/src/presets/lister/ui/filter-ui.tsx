@@ -39,9 +39,8 @@ function extractValueFromInputFieldEvent(e: any) {
 }
 
 /**
- * IMPORTANT:
- * Must match provider indexing:
- * provider uses opt.id ?? opt.value as the optionId
+ * Option id used by runtime applyFilterOption:
+ * prefer explicit opt.id; fallback for legacy shapes.
  */
 function getOptionId(opt: any): FilterValue {
     if (opt?.id != null) return opt.id as FilterValue;
@@ -52,7 +51,7 @@ function getOptionId(opt: any): FilterValue {
 export function ListerFiltersButton<TFilters>(props: {
     id: ListerSessionId;
 
-    /** kept for compatibility, but we use live store from useLister() */
+    /** kept for compatibility, but we use live state from useLister() */
     store: ListerStoreState;
 
     icon?: React.ReactNode;
@@ -60,10 +59,9 @@ export function ListerFiltersButton<TFilters>(props: {
 }) {
     const { id } = props;
 
-    // ✅ live store/actions
-    const { actions, store } = useLister<AnyPresetMap>();
+    const { actions, state } = useLister<AnyPresetMap>();
 
-    const session = store.sessions[id] as any;
+    const session = (state.sessions as any)[id] as any;
 
     const spec = session?.filtersSpec as
         | undefined
@@ -210,14 +208,12 @@ function FilterNode<TFilters>(props: {
     const groupKey = `group:${String(nodeId)}`;
     const groupOpen = Boolean(props.openGroups[groupKey]);
 
-    // ✅ THIS IS THE KEY FIX:
-    // value nodes should be clickable even without option.apply
+    // value nodes are clickable (also allow apply presence)
     const isValueKind = optAny?.kind === "value";
-    const hasApply = !!option.apply;
+    const hasApply = !!optAny?.apply;
     const isClickableToggle = isValueKind || hasApply;
 
     const isInput = !!optAny.input;
-
     const isSelected = selectedIds.includes(nodeId);
 
     const resolvedInputBindKey = (optAny.input?.bindKey ?? optAny.bindKey) as
@@ -267,7 +263,7 @@ function FilterNode<TFilters>(props: {
                     >
                         <div className="min-w-0">
                             <div className="truncate text-sm">
-                                {option.label ?? String(option.value)}
+                                {option.label ?? String((option as any).value)}
                             </div>
                             {option.description ? (
                                 <div className="truncate text-xs opacity-70">
@@ -287,7 +283,7 @@ function FilterNode<TFilters>(props: {
                 ) : (
                     <div className="flex-1 min-w-0">
                         <div className="truncate text-sm">
-                            {option.label ?? String(option.value)}
+                            {option.label ?? String((option as any).value)}
                         </div>
                         {option.description ? (
                             <div className="truncate text-xs opacity-70">
@@ -306,7 +302,6 @@ function FilterNode<TFilters>(props: {
 
         const currentValue = ctx.get(resolvedInputBindKey as any);
         const variant = optAny.input.variant as VariantKey;
-
         const extraProps = (optAny.input.props ?? {}) as VariantPropsFor<any>;
 
         return (

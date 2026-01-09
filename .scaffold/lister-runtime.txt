@@ -5,6 +5,7 @@ engine/
   search.ts # search payload + local filtering helpers
   details.ts # buildDetails (engine-level)
   fetch.ts # unified fetch pipeline (build req -> http -> normalize -> extract -> map)
+  filters.ts
   engine.ts # createListerEngine (no sessions, no UI baggage)
   index.ts # exports for engine
 
@@ -14,4 +15,6 @@ session/
   runtime.ts # createListerRuntime (sessions + open/apply/cancel + selection draft)
   index.ts # exports for session runtime
   filters.ts
+  filter-options.ts
   permissions.ts
+  key.ts

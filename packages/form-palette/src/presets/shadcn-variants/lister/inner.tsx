@@ -21,6 +21,7 @@ import type {
 
 import { ListerPopoverPanel } from "./popover";
 import { buildLabelsFromOptions, isSameValue } from "./utils";
+import { createRuntimeKey } from "@/presets/lister/runtime/session/key";
 
 type Size = "sm" | "md" | "lg";
 type Density = "compact" | "comfortable" | "loose";
@@ -48,17 +49,10 @@ function triggerPadding(density?: Density) {
     }
 }
 
-// ✅ NEW: stable owner key generator (per component mount)
-function makeOwnerKey() {
-    const anyCrypto = (globalThis as any)?.crypto;
-    if (anyCrypto?.randomUUID) return `lister_owner_${anyCrypto.randomUUID()}`;
-    return `lister_owner_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-}
-
 export type ListerTriggerRenderCtx<
-    TRaw extends Record<string, any>,
-    TValue extends ListerId,
-    TMeta,
+    _TRaw extends Record<string, any>,
+    _TValue extends ListerId,
+    _TMeta,
     TMode extends ListerMode,
 > = {
     mode: TMode;
@@ -82,7 +76,7 @@ export type ListerTriggerRenderCtx<
 };
 
 export type ListerInnerProps<
-    P extends PresetMap = PresetMap,
+    _P extends PresetMap = PresetMap,
     TRaw extends Record<string, any> = any,
     TValue extends ListerId = any,
     TFilters = any,
@@ -104,16 +98,11 @@ export type ListerInnerProps<
     disabled?: boolean;
     readOnly?: boolean;
 
-    /**
-     * Extra open options (everything except the things inner controls).
-     * Inner always sets: mode, confirm, defaultValue, permissions.
-     */
     openOptions?: Omit<
         ListerOpenOptions<TRaw, TValue, TFilters, TMeta, TMode>,
         "mode" | "confirm" | "defaultValue" | "permissions"
     >;
 
-    /** Trigger renderer (custom). */
     renderTrigger?: (
         ctx: ListerTriggerRenderCtx<TRaw, TValue, TMeta, TMode>,
     ) => React.ReactElement;
@@ -121,14 +110,9 @@ export type ListerInnerProps<
     placeholder?: string;
     maxDisplayItems?: number;
 
-    // ─────────────────────────────────────────────
-    // Trigger styling + controls (mirrors multi-select)
-    // ─────────────────────────────────────────────
-
     size?: Size;
     density?: Density;
 
-    /** Small clear button in trigger when value is non-empty */
     clearable?: boolean;
 
     leadingIcons?: React.ReactNode[];
@@ -147,16 +131,38 @@ export type ListerInnerProps<
     joinControls?: boolean;
     extendBoxToControls?: boolean;
 
-    /**
-     * NOTE:
-     * - className is used for the overall field wrapper when controls exist.
-     * - otherwise it's applied to the trigger.
-     */
     className?: string;
 
     contentClassName?: string;
     panelClassName?: string;
 };
+
+function findSessionByOwner(store: any, ownerKey: string): any | null {
+    const sessions = store?.sessions;
+    if (!sessions) return null;
+
+    // prefer active session if it matches
+    const activeId = store?.activeId;
+    if (activeId != null) {
+        const s = sessions[activeId];
+        if (s?.ownerKey === ownerKey && s?.isOpen) return s;
+    }
+
+    // otherwise scan order (stable stacking)
+    const order: any[] = Array.isArray(store?.order) ? store.order : [];
+    for (const id of order) {
+        const s = sessions[id];
+        if (s?.ownerKey === ownerKey && s?.isOpen) return s;
+    }
+
+    // fallback scan (just in case)
+    for (const k of Object.keys(sessions)) {
+        const s = sessions[k];
+        if (s?.ownerKey === ownerKey && s?.isOpen) return s;
+    }
+
+    return null;
+}
 
 export function ListerInner<
     P extends PresetMap = PresetMap,
@@ -204,20 +210,21 @@ export function ListerInner<
         panelClassName,
     } = props;
 
-    const { api, actions, state, store } = useLister<P>();
-    const sessionId = state?.sessionId as ListerSessionId | undefined;
-    const isOpen = !!state?.isOpen;
+    const { api, actions, store } = useLister<P>() as any;
 
-    // ✅ NEW: stable owner key (one per mounted input)
-    // If you ever decide to allow passing a custom ownerKey from outside, you can set it on openOptions
-    // and we’ll adopt it. Otherwise we generate one once.
+    // ✅ stable owner key per input mount
     const ownerKeyRef = React.useRef<string>(
-        (openOptions as any)?.ownerKey ?? makeOwnerKey(),
+        (openOptions as any)?.ownerKey ?? createRuntimeKey('lister_owner'),
     );
     React.useEffect(() => {
         const next = (openOptions as any)?.ownerKey as string | undefined;
         if (next) ownerKeyRef.current = next;
     }, [openOptions]);
+
+    // derive current session from global store by ownerKey
+    const session = findSessionByOwner(store, ownerKeyRef.current);
+    const sessionId = session?.sessionId as ListerSessionId | undefined;
+    const isOpen = !!session?.isOpen;
 
     // Used ONLY for trigger display when closed.
     const [selectedOptions, setSelectedOptions] = React.useState<any[] | null>(
@@ -249,7 +256,7 @@ export function ListerInner<
             const res = await (api as ListerApi<P>).fetch(
                 def as any,
                 filters as any,
-                { query: "", permissions } as any,
+                { query: "" } as any,
             );
 
             if (!alive) return;
@@ -271,7 +278,6 @@ export function ListerInner<
                       ? [byValue.get(value)].filter(Boolean)
                       : [];
 
-            // avoid churn
             setSelectedOptions((prev) => {
                 const p = prev ?? [];
                 const n = nextSelected ?? [];
@@ -286,9 +292,10 @@ export function ListerInner<
         return () => {
             alive = false;
         };
-    }, [api, def, filters, permissions, mode, value, hasValue]);
+    }, [api, def, filters, mode, value, hasValue]);
 
     const openSession = React.useCallback(async () => {
+        console.log(openingRef.current);
         if (disabledTrigger) return;
         if (openingRef.current) return;
 
@@ -304,7 +311,7 @@ export function ListerInner<
             > = {
                 ...(openOptions as any),
 
-                // ✅ NEW: stable owner/session key so provider can reuse session
+                // ✅ stable owner key so runtime can reuse session
                 ownerKey: ownerKeyRef.current as any,
 
                 mode,
@@ -320,11 +327,8 @@ export function ListerInner<
             )) as unknown as ListerOpenResult<TRaw, TValue, TMeta, TMode>;
 
             if (res?.reason === "apply") {
-                // cache for trigger display
                 const snap = (res.details?.options as any[]) ?? null;
                 setSelectedOptions(snap);
-
-                // propagate chosen value
                 onValue(res.value as any, res.details);
             }
         } finally {
@@ -346,16 +350,13 @@ export function ListerInner<
     const clear = React.useCallback(() => {
         if (disabledTrigger) return;
 
-        const next =
-            mode === "multiple" ? (undefined as any) : (undefined as any);
-
-        onValue(next, {
+        onValue(undefined as any, {
             action: "clear",
             source: "variant",
         });
 
         setSelectedOptions(null);
-    }, [disabledTrigger, mode, onValue]);
+    }, [disabledTrigger, onValue]);
 
     const display = React.useMemo(() => {
         return buildLabelsFromOptions({
@@ -454,7 +455,6 @@ export function ListerInner<
             )}
         >
             <div className="flex w-full items-center justify-between gap-2">
-                {/* Left: icons + display */}
                 <div className="flex min-w-0 items-center grow gap-2">
                     {hasLeadingIcons && (
                         <span
@@ -476,7 +476,6 @@ export function ListerInner<
                     <div className="min-w-0 flex-1 truncate">{display}</div>
                 </div>
 
-                {/* Right: clear + trailing icons + chevron */}
                 <div className="flex items-center gap-1 shrink-0">
                     {showClear && (
                         <span
@@ -516,7 +515,6 @@ export function ListerInner<
         </button>
     );
 
-    // user trigger
     const userTriggerEl = renderTrigger ? renderTrigger(triggerCtx) : null;
 
     const TriggerNode =
@@ -528,10 +526,6 @@ export function ListerInner<
                   ),
               })
             : DefaultTriggerButton;
-
-    // ─────────────────────────────────────────────
-    // Popover core
-    // ─────────────────────────────────────────────
 
     const PopoverCore = (
         <Popover
@@ -560,7 +554,6 @@ export function ListerInner<
                 {sessionId ? (
                     <ListerPopoverPanel
                         id={sessionId}
-                        store={store}
                         mode={mode as any}
                         confirm={!!confirm}
                         className={cn("h-full w-full", panelClassName)}
@@ -570,11 +563,6 @@ export function ListerInner<
         </Popover>
     );
 
-    // ─────────────────────────────────────────────
-    // Layout modes (mirrors multi-select)
-    // ─────────────────────────────────────────────
-
-    // If user fully custom-renders trigger, we won’t force controls layout around it.
     if (renderTrigger) {
         return (
             <div
@@ -587,7 +575,6 @@ export function ListerInner<
         );
     }
 
-    // CASE 1: no controls → just the popover core
     if (!hasControls) {
         return (
             <div
@@ -603,7 +590,6 @@ export function ListerInner<
         );
     }
 
-    // CASE 2: controls + joinControls → shared single box
     if (joinControls) {
         const groupClassName = cn(
             "flex items-stretch w-full",
@@ -659,7 +645,6 @@ export function ListerInner<
         );
     }
 
-    // CASE 3: controls present, but separate (no joined box)
     return (
         <div
             data-slot="lister-field"

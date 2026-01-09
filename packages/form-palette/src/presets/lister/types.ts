@@ -80,6 +80,7 @@ export type ListerPermissionCtx = {
     endpoint?: string;
     filters?: any;
     sessionId?: ListerSessionId;
+    ownerKey?: string
 };
 
 export interface ListerProviderHost {
@@ -196,7 +197,7 @@ export type ListerDefinition<
 > = {
     /** optional stable id used by presets */
     id?: string;
-
+    title?: string;
     source: ListerSource<TFilters>;
 
     /** If missing: default extraction uses body.data (runtime). Must produce an array. */
@@ -459,6 +460,8 @@ export type ListerOpenOptions<
         details: ListerDetails<TRaw, TValue, TMeta, TMode>,
         e: ListerChangeEvent,
     ) => void;
+
+    ownerKey?: string;
 };
 
 export type ListerOpenResult<
@@ -675,6 +678,7 @@ export type ListerRuntimeState<
 
     /** Persisted user selection (subject/all/only) */
     searchTarget?: ListerSearchTarget;
+    ownerKey?: string
 };
 
 export type ListerStoreState = {
