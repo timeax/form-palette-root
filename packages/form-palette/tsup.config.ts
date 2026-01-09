@@ -37,5 +37,6 @@ export default defineConfig({
         "@radix-ui/react-toggle-group",
         "@radix-ui/react-tooltip",
         "react-virtuosp",
+        "react-draggable"
     ],
 });
