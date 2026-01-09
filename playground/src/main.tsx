@@ -9,6 +9,6 @@ import { ListerProviderDemo } from "@app/ListerProviderDemo";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <ListerProviderDemo />
+    <App />
   </React.StrictMode>
 );

@@ -31,6 +31,13 @@ type Density = "compact" | "comfortable" | "loose";
 
 export type FileSourceKind = "native" | "path" | "url" | "custom";
 
+/**
+ * ✅ What the form receives on submit:
+ * - native picker -> File
+ * - custom pickers -> string (url/path)
+ */
+export type FileValue = File | string;
+
 export interface FileItem {
     id: string;
     kind: FileSourceKind;
@@ -122,7 +129,6 @@ function pickerBtnSize(size?: Size) {
     }
 }
 
-
 function normaliseFileLike(input: FileLike): FileItem {
     const asAny: any = input as any;
     const existingId = asAny.id as string | undefined;
@@ -183,6 +189,11 @@ function normaliseFromFiles(list: FileList | File[]): FileItem[] {
     return arr.map(normaliseFileLike);
 }
 
+function fileItemToValue(item: FileItem): FileValue {
+    if (item.file) return item.file;
+    return (item.url ?? item.path ?? item.name) as string;
+}
+
 function densityTokens(density?: Density) {
     switch (density) {
         case "compact":
@@ -213,7 +224,7 @@ function densityTokens(density?: Density) {
             };
         default:
             return {
-                triggerPadX: "px-3",
+                triggerPadX: "px-2",
                 triggerGap: "gap-2",
                 headerPad: "px-3 py-2",
                 listPad: "p-1",
@@ -240,16 +251,12 @@ function mergeHandlers<E>(
 }
 
 // ─────────────────────────────────────────────
-// Props (with mode discriminator)
+// Props (value is scalar when multiple=false)
 // ─────────────────────────────────────────────
 
 type BadgeVariant = React.ComponentProps<typeof Badge>["variant"];
 
-type FileVariantBaseProps = Pick<
-    VariantBaseProps<FileItem[]>,
-    "value" | "onValue" | "error" | "disabled" | "readOnly" | "size" | "density"
-> & {
-    multiple?: boolean;
+type FileVariantExtras = {
     accept?: string | string[];
     maxFiles?: number;
     maxTotalSize?: number;
@@ -259,7 +266,13 @@ type FileVariantBaseProps = Pick<
     dropTitle?: React.ReactNode;
     dropDescription?: React.ReactNode;
     custom?: boolean;
+
+    /**
+     * Kept for compatibility; we now always submit File|string.
+     * (Raw FileItem[] is available in ChangeDetail.meta.items)
+     */
     asRaw?: boolean;
+
     renderDropArea?: (ctx: {
         openPicker: () => void;
         isDragging: boolean;
@@ -290,6 +303,25 @@ type FileVariantBaseProps = Pick<
     dropAreaClassName?: string;
     listClassName?: string;
     triggerClassName?: string;
+};
+
+type FileSingleValueProps = Omit<
+    VariantBaseProps<FileValue | null>,
+    "value"
+> & {
+    multiple?: false;
+    /**
+     * Accepts File | string | FileLike-object (url/path/file/name/etc)
+     */
+    value?: FileLike | null;
+};
+
+type FileMultiValueProps = Omit<VariantBaseProps<FileValue[]>, "value"> & {
+    multiple: true;
+    /**
+     * Accepts (File | string | FileLike-object)[]
+     */
+    value?: FileLike[] | null;
 };
 
 type FileDefaultModeProps = {
@@ -353,7 +385,8 @@ type FileButtonModeProps = {
     extendBoxToControls?: never;
 };
 
-export type ShadcnFileVariantProps = FileVariantBaseProps &
+export type ShadcnFileVariantProps = FileVariantExtras &
+    (FileSingleValueProps | FileMultiValueProps) &
     (FileDefaultModeProps | FileButtonModeProps);
 
 // ─────────────────────────────────────────────
@@ -431,7 +464,7 @@ export const ShadcnFileVariant = React.forwardRef<
         formatFileName,
         formatFileSize = formatSizeDefault,
         placeholder = "Select file...",
-        asRaw,
+        asRaw: _asRaw,
         className,
         custom,
         dropAreaClassName,
@@ -468,7 +501,13 @@ export const ShadcnFileVariant = React.forwardRef<
     // ─────────────────────────────────────────────
     // State
     // ─────────────────────────────────────────────
-    const items = toArray(value) ?? [];
+
+    // UI always runs on FileItem[] internally
+    const items = React.useMemo(() => {
+        const raw = toArray(value) ?? [];
+        return raw.map(normaliseFileLike);
+    }, [value]);
+
     const isDisabled = Boolean(disabled || readOnly);
 
     const [dragOver, setDragOver] = React.useState(false);
@@ -500,15 +539,19 @@ export const ShadcnFileVariant = React.forwardRef<
     // ─────────────────────────────────────────────
 
     const emitChange = React.useCallback(
-        (next: FileItem[], meta: any) => {
-            onValue?.(next, {
+        (nextItems: FileItem[], meta: any) => {
+            const nextValues = nextItems.map(fileItemToValue);
+            const outValue = multiple ? nextValues : (nextValues[0] ?? null);
+
+            // raw aligns to the submitted value type; rich UI items are in meta.items
+            onValue?.(outValue as any, {
                 source: "variant",
-                raw: next,
+                raw: outValue as any,
                 nativeEvent: undefined,
-                meta,
+                meta: { ...meta, items: nextItems },
             });
         },
-        [onValue],
+        [multiple, onValue],
     );
 
     const handleAddItems = React.useCallback(
@@ -519,6 +562,9 @@ export const ShadcnFileVariant = React.forwardRef<
             const added: FileItem[] = [];
 
             for (const item of incoming) {
+                // ✅ single mode always takes only 1
+                if (!multiple && next.length >= 1) break;
+
                 if (multiple && maxFiles && next.length >= maxFiles) break;
 
                 const currentTotalSize = next.reduce(
@@ -593,7 +639,11 @@ export const ShadcnFileVariant = React.forwardRef<
                 });
                 if (!result) return;
 
-                const normalized = toArray(result).map(normaliseFileLike);
+                let normalized = toArray(result).map(normaliseFileLike);
+
+                // ✅ single mode always takes only 1
+                if (!multiple) normalized = normalized.slice(0, 1);
+
                 if (mergeMode === "replace" || !multiple) {
                     emitChange(normalized, {
                         action: "set",
@@ -610,6 +660,8 @@ export const ShadcnFileVariant = React.forwardRef<
 
         fileInputRef.current?.click();
     }, [
+        accept,
+        custom,
         customLoader,
         emitChange,
         handleAddItems,
@@ -816,8 +868,6 @@ export const ShadcnFileVariant = React.forwardRef<
                 </Badge>
             ) : null;
 
-            // Note: Using broader typings and `as any` in cloneElement prop bags to avoid TS complaining
-            // when enhancing arbitrary custom components that may not declare DOM event props.
             const injectBadgeIntoElement = (el: React.ReactElement<any>) => {
                 if (!badgeEl) return el;
 
@@ -871,7 +921,6 @@ export const ShadcnFileVariant = React.forwardRef<
                 return withDnD(injectBadgeIntoElement(rawNode));
             }
 
-            // fallback trigger (no input styles; just whatever you passed + optional badge)
             const fallback = (
                 <button
                     type="button"
@@ -889,7 +938,6 @@ export const ShadcnFileVariant = React.forwardRef<
                 </button>
             );
 
-            // end placement needs an inline flex wrapper (fallback only)
             if (badgeEl && selectedBadgePlacement === "end") {
                 return (
                     <button
@@ -934,7 +982,6 @@ export const ShadcnFileVariant = React.forwardRef<
     // ─────────────────────────────────────────────
 
     const TriggerRegion = React.useMemo(() => {
-        // A) Drop Zone Mode (Big Box) - No Popover, the list is external
         if (showDropArea) {
             if (renderDropArea)
                 return renderDropArea({ openPicker, isDragging: dragOver });
@@ -975,7 +1022,6 @@ export const ShadcnFileVariant = React.forwardRef<
             );
         }
 
-        // B) Select-like mode: uses Popover
         const hasItems = items.length > 0;
         const visibleItems = items.slice(0, COLLAPSE_LIMIT);
         const hiddenCount = items.length - COLLAPSE_LIMIT;
@@ -1007,7 +1053,6 @@ export const ShadcnFileVariant = React.forwardRef<
                     onDragLeave={() => setDragOver(false)}
                     onDrop={onDrop}
                 >
-                    {/* Leading Icons */}
                     {resolvedLeadingIcons.map((ico, i) => (
                         <span
                             key={i}
@@ -1017,7 +1062,6 @@ export const ShadcnFileVariant = React.forwardRef<
                         </span>
                     ))}
 
-                    {/* Content: Chips or Placeholder */}
                     <div
                         className={cn(
                             "flex flex-1 items-center overflow-hidden",
@@ -1046,7 +1090,6 @@ export const ShadcnFileVariant = React.forwardRef<
                         )}
                     </div>
 
-                    {/* Trailing Icons */}
                     {resolvedTrailingIcons.map((ico, i) => (
                         <span
                             key={i}
@@ -1056,7 +1099,6 @@ export const ShadcnFileVariant = React.forwardRef<
                         </span>
                     ))}
 
-                    {/* Dedicated File Picker Button */}
                     <Button
                         type="button"
                         variant="ghost"
@@ -1074,7 +1116,6 @@ export const ShadcnFileVariant = React.forwardRef<
                         <FolderUp className="h-4 w-4" />
                     </Button>
 
-                    {/* Chevron (for Popover) */}
                     <ChevronDown
                         className={cn(
                             "h-4 w-4 shrink-0 text-muted-foreground opacity-50 transition-transform duration-200",
@@ -1093,7 +1134,6 @@ export const ShadcnFileVariant = React.forwardRef<
                     align="start"
                 >
                     <div className="flex flex-col">
-                        {/* Header */}
                         <div
                             className={cn(
                                 "flex items-center justify-between border-b text-xs font-medium text-muted-foreground",
@@ -1127,7 +1167,6 @@ export const ShadcnFileVariant = React.forwardRef<
                             ) : null}
                         </div>
 
-                        {/* Scrollable List */}
                         <ScrollArea
                             className={cn(
                                 "h-auto max-h-75 w-full",
@@ -1206,7 +1245,6 @@ export const ShadcnFileVariant = React.forwardRef<
                             </div>
                         </ScrollArea>
 
-                        {/* Footer Add Button */}
                         <div className={cn("border-t", den.footerPad)}>
                             <Button
                                 variant="secondary"

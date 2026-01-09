@@ -79,6 +79,7 @@ export type ListerRuntime<P extends PresetMap> = {
             sessionId: ListerSessionId,
             target?: ListerSearchTarget,
         ): void;
+        setSearchMode(sessionId: ListerSessionId, mode: ListerSearchMode): void;
 
         setFiltersPatch(sessionId: ListerSessionId, patch: any): void;
         mergeFiltersPatch(sessionId: ListerSessionId, patch: any): void;
@@ -161,6 +162,7 @@ export function createListerRuntime<P extends PresetMap>(
                     : prev.selectedFilterValues,
         });
     }
+
     const now = opts.now ?? (() => Date.now());
     const makeSessionId =
         opts.makeSessionId ??
@@ -187,7 +189,11 @@ export function createListerRuntime<P extends PresetMap>(
             | ListerRuntimeState<any, any, any, any, any>
             | undefined;
     }
-    function patchSession(sessionId: ListerSessionId, patch: any) {
+
+    function patchSession(
+        sessionId: ListerSessionId,
+        patch: Partial<ListerRuntimeState<any, any, any, any, any>>,
+    ) {
         store.setSession(sessionId, (prev) => ({ ...prev, ...(patch ?? {}) }));
     }
 
@@ -197,6 +203,7 @@ export function createListerRuntime<P extends PresetMap>(
     ) {
         store.setSession(sessionId, mutator);
     }
+
     async function refreshSession(sessionId: ListerSessionId) {
         const s = getSession(sessionId);
         if (!s?.definition) return;
@@ -640,8 +647,8 @@ export function createListerRuntime<P extends PresetMap>(
         const nextSelected = shouldRemove
             ? prevSelected.filter((x) => x !== optionId)
             : isSelected
-              ? prevSelected
-              : [...prevSelected, optionId];
+                ? prevSelected
+                : [...prevSelected, optionId];
 
         patchSession(id, { selectedFilterValues: nextSelected });
         const sNow = getSession(id) as any;
@@ -790,6 +797,10 @@ export function createListerRuntime<P extends PresetMap>(
             if (next.searchMode === "remote" || next.searchMode === "hybrid") {
                 scheduleRemoteRefresh(sessionId);
             }
+        },
+
+        setSearchMode(sessionId: ListerSessionId, mode: ListerSearchMode) {
+            patchSession(sessionId, { searchMode: mode });
         },
 
         setFiltersPatch(sessionId, patch) {

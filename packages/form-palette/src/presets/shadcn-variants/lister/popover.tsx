@@ -24,24 +24,30 @@ export function ListerPopoverPanel(props: {
             className={cn(
                 "flex flex-col overflow-hidden",
                 "w-(--radix-popover-trigger-width)",
-                "min-h-[calc(var(--radix-popover-trigger-height)*8)]",
-                "max-h-[min(520px,var(--radix-popover-content-available-height))]",
+
+                // ✅ IMPORTANT: give the panel a REAL height, not only max-height
+                "h-[min(520px,var(--radix-popover-content-available-height))]",
+
+                // ✅ real fallback min-height (don’t depend on trigger-height var)
+                "min-h-80",
+
                 className,
             )}
         >
-            <div>
+            <div className="shrink-0">
                 <SearchBar id={id} store={store} />
             </div>
 
             <Separator />
 
-            <div className="min-h-0 flex-1 relative overflow-y-auto">
-                <OptionList id={id} className="h-full max-h-full" />
+            {/* ✅ this now has a real height because parent has real height */}
+            <div className="min-h-0 flex-1 overflow-hidden flex flex-col relative">
+                <OptionList id={id} className="h-full absolute left-0 w-full top-0" />
             </div>
 
             <Separator />
 
-            <div>
+            <div className="shrink-0">
                 <FooterBar
                     id={id}
                     mode={mode}

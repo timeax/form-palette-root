@@ -115,7 +115,7 @@ export function SearchBar(props: {
 
     const onSearchModeChange = (mode: "local" | "remote" | "hybrid") => {
         // runtime should expose this; keep call flexible until you add it
-        (actions as any).setSearchMode?.(id, mode);
+        actions.setSearchMode(id, mode);
 
         // make switching feel immediate for remote/hybrid
         queueMicrotask(() => {
