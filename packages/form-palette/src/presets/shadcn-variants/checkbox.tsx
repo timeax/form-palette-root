@@ -209,7 +209,7 @@ export interface ShadcnCheckboxUiProps<TItem, TValue> {
     /**
      * Wrapper class for the entire group (or single field).
      */
-    groupClassName?: string;
+    optGroupClassName?: string;
 
     /**
      * Extra classes for each option row (group mode).
@@ -448,7 +448,7 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
         "aria-describedby": ariaDescribedBy,
         name,
 
-        groupClassName,
+        optGroupClassName,
         optionClassName,
         labelClassName,
         optionLabelClassName,
@@ -534,7 +534,7 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
                 className={cn(
                     "flex items-start gap-3",
                     paddingForDensity(density),
-                    groupClassName ?? className
+                    optGroupClassName ?? className
                 )}
                 {...restProps}
             >
@@ -589,7 +589,7 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
         layout,
         columns,
         itemGapPx,
-        groupClassName,
+        groupClassName: optGroupClassName,
         className,
         optionClassName,
         labelClassName,

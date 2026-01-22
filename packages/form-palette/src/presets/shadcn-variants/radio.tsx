@@ -178,7 +178,7 @@ export interface ShadcnRadioUiProps<TItem, TValue> {
     /**
      * Wrapper class for the whole radio group.
      */
-    groupClassName?: string;
+    optGroupClassName?: string;
 
     /**
      * Extra classes for each radio option row.
@@ -374,7 +374,7 @@ const InnerShadcnRadioVariant = <TValue, TItem = RadioItem<TValue>>(
         "aria-describedby": ariaDescribedBy,
         name,
 
-        groupClassName,
+        optGroupClassName,
         optionClassName,
         labelClassName,
         descriptionClassName,
@@ -444,7 +444,7 @@ const InnerShadcnRadioVariant = <TValue, TItem = RadioItem<TValue>>(
         layout,
         columns,
         itemGapPx,
-        groupClassName,
+        groupClassName: optGroupClassName,
         className,
         optionClassName,
         labelClassName,

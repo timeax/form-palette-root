@@ -466,6 +466,9 @@ export const ShadcnSelectVariant = React.forwardRef<
         ],
     );
 
+    const normalizedValue: SelectPrimitive | undefined =
+        value === "" || value == null ? undefined : (value as SelectPrimitive);
+
     const valueMap = React.useMemo(() => {
         const map = new Map<string, SelectPrimitive>();
         for (const item of items) {
@@ -475,7 +478,12 @@ export const ShadcnSelectVariant = React.forwardRef<
     }, [items]);
 
     const selectedItem =
-        value == null ? null : (items.find((it) => it.value === value) ?? null);
+        normalizedValue == null
+            ? null
+            : (items.find(
+                  (it) => String(it.value) === String(normalizedValue),
+              ) ?? null);
+
 
     const filteredItems = React.useMemo(() => {
         if (!query) return items;
@@ -537,7 +545,7 @@ export const ShadcnSelectVariant = React.forwardRef<
 
     const handleChange = React.useCallback(
         (rawKey: string) => {
-            if (!onValue) return;
+            if (!onValue || rawKey === "") return;
 
             const primitive =
                 valueMap.get(rawKey) ?? (rawKey as unknown as SelectPrimitive);

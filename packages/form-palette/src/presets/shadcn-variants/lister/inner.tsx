@@ -214,7 +214,7 @@ export function ListerInner<
 
     // ✅ stable owner key per input mount
     const ownerKeyRef = React.useRef<string>(
-        (openOptions as any)?.ownerKey ?? createRuntimeKey('lister_owner'),
+        (openOptions as any)?.ownerKey ?? createRuntimeKey("lister_owner"),
     );
     React.useEffect(() => {
         const next = (openOptions as any)?.ownerKey as string | undefined;
@@ -279,6 +279,8 @@ export function ListerInner<
                       : [];
 
             setSelectedOptions((prev) => {
+                if (mode == "single" && prev && !Array.isArray(prev))
+                    prev = [prev];
                 const p = prev ?? [];
                 const n = nextSelected ?? [];
                 const pv = p.map((o) => o?.value);

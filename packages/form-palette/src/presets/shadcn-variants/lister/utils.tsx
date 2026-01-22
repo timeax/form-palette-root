@@ -139,21 +139,22 @@ function buildLabelsFromOptions(args: {
         ).trim();
 
     const labels = (() => {
-        if (mode === "multiple") {
-            const arr = Array.isArray(value) ? value : [];
-            const map = new Map<any, string>();
-            for (const o of selectedOptions ?? []) {
-                if (o?.value == null) continue;
-                const lbl = labelFor(o);
-                if (lbl) map.set(o.value, lbl);
-            }
-            return arr.map((v) => map.get(v) ?? String(v));
+        let options =
+            mode !== "multiple"
+                ? Array.isArray(selectedOptions)
+                    ? selectedOptions
+                    : selectedOptions
+                      ? [selectedOptions]
+                      : []
+                : selectedOptions;
+        const arr = Array.isArray(value) ? value : value ? [value] : [];
+        const map = new Map<any, string>();
+        for (const o of options ?? []) {
+            if (o?.value == null) continue;
+            const lbl = labelFor(o);
+            if (lbl) map.set(o.value, lbl);
         }
-
-        if (value == null || value === "") return [];
-        const opt = selectedOptions;
-        const lbl = opt ? labelFor(opt) : "";
-        return [lbl || String(value)];
+        return arr.map((v) => map.get(v) ?? String(v));
     })();
 
     if (!labels.length) {

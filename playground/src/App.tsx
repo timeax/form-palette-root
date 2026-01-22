@@ -145,12 +145,12 @@ export const App: React.FC = () => {
                 </button>
             </div>
             <InputField variant={"checkbox"} label={"Remember me"} single />
-            <InputField
-                variant={"select"}
-                label={"Remember me"}
-                mode={"button"}
-                options={["name", "email", "value"]}
-            />
+            {/*<InputField*/}
+            {/*    variant={"select"}*/}
+            {/*    label={"Remember me"}*/}
+            {/*    mode={"button"}*/}
+            {/*    options={["name", "email", "value"]}*/}
+            {/*/>*/}
             <HeadlessResponsiveDialog
                 open={openDialog}
                 onOpenChange={setOpenDialog}
@@ -671,10 +671,26 @@ export const App: React.FC = () => {
                     JSON Editor Samples (Outside Dialog)
                 </h2>
                 <Form
+                    valueBag={{status: 'disabled', statuses: ['disabled']}}
                     onSubmit={(e) =>
                         console.log("Outside form submit", e.formData)
                     }
                 >
+                    <InputField
+                        variant={"select"}
+                        name={"status"}
+                        autoCap
+                        label={"Status"}
+                        options={["active", "inactive", "disabled"]}
+                    />
+
+                    <InputField
+                        variant={"multi-select"}
+                        name={"statuses"}
+                        autoCap
+                        label={"Status"}
+                        options={["active", "inactive", "disabled"]}
+                    />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-4">
                             <h3 className="font-semibold">Accordion Mode</h3>

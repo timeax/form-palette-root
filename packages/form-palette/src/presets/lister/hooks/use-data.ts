@@ -150,6 +150,7 @@ export type UseDataResult<TItem = any, TFilters = Record<string, any>> = {
     getSelection: () => TItem | TItem[] | null;
 
     refresh: () => void;
+    override(data: TItem[]): void
 
     fetch: (override?: {
         query?: string;
@@ -208,7 +209,7 @@ function stringifyForSearch(v: any): string {
 }
 
 export function useData<TItem = any, TFilters = Record<string, any>>(
-    opts: UseDataOptions<TItem, TFilters>,
+    opts: UseDataOptions<TItem, TFilters>, deps: any[] = []
 ): UseDataResult<TItem, TFilters> {
     const enabled = opts.enabled ?? true;
     const debounceMs = opts.debounceMs ?? 300;
@@ -447,6 +448,10 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
         void fetchImpl();
     }, [fetchImpl]);
 
+    const override = React.useCallback((newData: TItem[]) => {
+        setData(newData);
+    }, []);
+
     const setQuery = React.useCallback((q: string) => _setQuery(q), []);
 
     /**
@@ -504,7 +509,7 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
         if (!fetchOnMount) return;
         void fetchImpl();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, deps);
 
     /**
      * Debounced fetch on query/searchTarget changes (remote/hybrid only)
@@ -743,6 +748,7 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
         getSelection,
 
         refresh,
+        override,
         fetch: fetchImpl,
     };
 }
