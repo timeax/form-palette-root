@@ -28,10 +28,10 @@ import type {
     FileSourceKind,
 } from "@/presets/shadcn-variants/file";
 import {
+    DEFAULT_GROUPS,
+    DEFAULT_ICONIFY_URL,
     type IconGroup,
     IconPickerPanel,
-    DEFAULT_GROUPS,
-    DEFAULT_ICONIFY_URL
 } from "@/presets/shadcn-variants/icon";
 
 // ─────────────────────────────────────────────
@@ -271,7 +271,7 @@ type ImageIconVariantBaseProps = Pick<
     accept?: string | string[];
     maxFiles?: number;
     maxTotalSize?: number;
-    customLoader?: CustomFileLoader;
+    customLoader?: CustomFileLoader | boolean;
     mergeMode?: "append" | "replace";
     formatFileName?: (item: FileItem) => React.ReactNode;
     formatFileSize?: (size?: number) => React.ReactNode;
@@ -908,7 +908,12 @@ export const ShadcnImageIconVariant = React.forwardRef<
     const openImagePicker = React.useCallback(async () => {
         if (isDisabled) return;
 
-        const resolvedLoader = customLoader ?? getPaletteUtil("customLoader");
+        const resolvedLoader =
+            typeof customLoader == "function"
+                ? customLoader
+                : customLoader
+                  ? getPaletteUtil("customLoader")
+                  : undefined;
 
         if (resolvedLoader) {
             try {
@@ -1178,10 +1183,7 @@ export const ShadcnImageIconVariant = React.forwardRef<
                         {/* Body */}
                         {tab === "icon" ? (
                             <IconPickerPanel
-                                url={
-                                    resolvedIconUrl ??
-                                    DEFAULT_ICONIFY_URL
-                                }
+                                url={resolvedIconUrl ?? DEFAULT_ICONIFY_URL}
                                 groups={effectiveIconGroups ?? []}
                                 allowedGroupIds={allowedIconGroupIds}
                                 multiple={multiple}

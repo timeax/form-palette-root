@@ -306,25 +306,25 @@ Below are the **variant-specific props** you can pass to `<InputField />` for:
 
 ### Variant props
 
-| Prop                                       | Description                                                                                                                                        |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `trim?: boolean`                           | **boolean** â€” If `true`, the value is trimmed **before validation** (visual input stays as typed).                                                 |
-| `minLength?: number`                       | **number** â€” Minimum allowed length (after optional trimming).                                                                                     |
-| `maxLength?: number`                       | **number** â€” Maximum allowed length (after optional trimming).                                                                                     |
-| `joinControls?: boolean`                   | **boolean** â€” If `true` and there are controls, the input + controls share one box (border/radius/focus).                                          |
+| Prop                                       | Description                                                                                                                                              |
+|--------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `trim?: boolean`                           | **boolean** â€” If `true`, the value is trimmed **before validation** (visual input stays as typed).                                                     |
+| `minLength?: number`                       | **number** â€” Minimum allowed length (after optional trimming).                                                                                         |
+| `maxLength?: number`                       | **number** â€” Maximum allowed length (after optional trimming).                                                                                         |
+| `joinControls?: boolean`                   | **boolean** â€” If `true` and there are controls, the input + controls share one box (border/radius/focus).                                              |
 | `extendBoxToControls?: boolean`            | **boolean** â€” When `joinControls` is true, controls are either visually â€œinsideâ€ the same box (`true`) or separate (`false`).                      |
-| `inputClassName?: string`                  | **string** â€” Extra classes for the **inner** `<input>` element (not the wrapper).                                                                  |
-| `prefix?: string`                          | **string** â€” Fixed prefix rendered as part of the visible input string (e.g. `â‚¦`, `ID: `).                                                         |
-| `suffix?: string`                          | **string** â€” Fixed suffix rendered as part of the visible input string (e.g. `%`, `kg`).                                                           |
-| `stripPrefix?: boolean`                    | **boolean** â€” If `true` (default), the prefix is stripped from the emitted model value before calling `onValue` internally.                        |
-| `stripSuffix?: boolean`                    | **boolean** â€” If `true` (default), the suffix is stripped from the emitted model value before calling `onValue` internally.                        |
-| `mask?: string`                            | **string** â€” Mask pattern (PrimeReact style), e.g. `"99/99/9999"`, `"(999) 999-9999"`.                                                             |
-| `maskDefinitions?: Record<string, RegExp>` | **Record** â€” Per-symbol slot definitions (kept for future custom engine; unused by current implementation).                                        |
-| `slotChar?: string`                        | **string** â€” Placeholder slot character (default `_`).                                                                                             |
+| `inputClassName?: string`                  | **string** â€” Extra classes for the **inner** `<input>` element (not the wrapper).                                                                      |
+| `prefix?: string`                          | **string** â€” Fixed prefix rendered as part of the visible input string (e.g. `â‚¦`, `ID: `).                                                           |
+| `suffix?: string`                          | **string** â€” Fixed suffix rendered as part of the visible input string (e.g. `%`, `kg`).                                                               |
+| `stripPrefix?: boolean`                    | **boolean** â€” If `true` (default), the prefix is stripped from the emitted model value before calling `onValue` internally.                            |
+| `stripSuffix?: boolean`                    | **boolean** â€” If `true` (default), the suffix is stripped from the emitted model value before calling `onValue` internally.                            |
+| `mask?: string`                            | **string** â€” Mask pattern (PrimeReact style), e.g. `"99/99/9999"`, `"(999) 999-9999"`.                                                                 |
+| `maskDefinitions?: Record<string, RegExp>` | **Record** â€” Per-symbol slot definitions (kept for future custom engine; unused by current implementation).                                            |
+| `slotChar?: string`                        | **string** â€” Placeholder slot character (default `_`).                                                                                                 |
 | `autoClear?: boolean`                      | **boolean** â€” If `true`, â€œemptyâ€ masked values emit `""` instead of a fully-masked placeholder string.                                             |
 | `unmask?: "raw" \| "masked" \| boolean`    | **union** â€” Controls whether the **model value** is raw vs masked. (`"raw"`/`true` â‡’ emit unmasked; `"masked"`/`false`/`undefined` â‡’ emit masked). |
-| `maskInsertMode?: "stream" \| "caret"`     | **union** â€” Reserved for future caret-mode logic (currently unused; kept for API compatibility).                                                   |
-| `...inputProps`                            | All other standard `React.InputHTMLAttributes<HTMLInputElement>` (except `value`, `defaultValue`, `onChange`, `size`) are forwarded.               |
+| `maskInsertMode?: "stream" \| "caret"`     | **union** â€” Reserved for future caret-mode logic (currently unused; kept for API compatibility).                                                       |
+| `...inputProps`                            | All other standard `React.InputHTMLAttributes<HTMLInputElement>` (except `value`, `defaultValue`, `onChange`, `size`) are forwarded.                     |
 
 ### Sample usage (InputField)
 
@@ -366,7 +366,7 @@ export function ExampleText() {
 ### Variant props
 
 | Prop               | Description                                                                                                                                                                                                              |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+|--------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `...textareaProps` | The textarea variant primarily forwards props from the underlying UI `Textarea` component (`UiTextareaProps`), excluding `value`, `defaultValue`, and `onChange` because the variant emits changes via the form runtime. |
 
 ### Sample usage (InputField)
@@ -397,19 +397,19 @@ export function ExampleTextarea() {
 ### Variant props
 
 | Prop                                                       | Description                                                                                                                                                    |
-| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `options: (ToggleOption \| string \| number \| boolean)[]` | Options for the toggle group. You can pass full option objects or primitive shorthand (primitives are normalized to `{ value: String(x), label: String(x) }`). |
-| `multiple?: boolean`                                       | **boolean** â€” If `true`, enables multi-select (value becomes an array of strings internally).                                                                  |
-| `variant?: "default" \| "outline"`                         | **union** â€” Visual style passed to the underlying ToggleGroup.                                                                                                 |
-| `layout?: "horizontal" \| "vertical" \| "grid"`            | **union** â€” Layout mode.                                                                                                                                       |
-| `gridCols?: number`                                        | **number** â€” Column count when `layout="grid"` (defaults to `2` in the component).                                                                             |
-| `fillWidth?: boolean`                                      | **boolean** â€” If `true`, makes the group/items stretch to fill available width (adds `w-full` and related item sizing).                                        |
-| `optionValue?: string`                                     | **string** â€” When `options` are custom objects, the property name to read `value` from (fallback: `obj.value`).                                                |
-| `optionLabel?: string`                                     | **string** â€” When `options` are custom objects, the property name to read `label` from (fallback: `obj.label` or `String(value)`).                             |
-| `optionIcon?: string`                                      | **string** â€” When `options` are custom objects, the property name to read `icon` from (fallback: `obj.icon`).                                                  |
-| `optionDisabled?: string`                                  | **string** â€” When `options` are custom objects, the property name to read disabled flag from (fallback: `obj.disabled`).                                       |
-| `optionTooltip?: string`                                   | **string** â€” When `options` are custom objects, the property name to read tooltip content from (fallback: `obj.tooltip`).                                      |
-| `optionMeta?: string`                                      | **string** â€” When `options` are custom objects, the property name to read meta from (fallback: `obj.meta`).                                                    |
+| `multiple?: boolean`                                       | **boolean** â€” If `true`, enables multi-select (value becomes an array of strings internally).                                                                |
+| `variant?: "default" \| "outline"`                         | **union** â€” Visual style passed to the underlying ToggleGroup.                                                                                               |
+| `layout?: "horizontal" \| "vertical" \| "grid"`            | **union** â€” Layout mode.                                                                                                                                     |
+| `gridCols?: number`                                        | **number** â€” Column count when `layout="grid"` (defaults to `2` in the component).                                                                           |
+| `fillWidth?: boolean`                                      | **boolean** â€” If `true`, makes the group/items stretch to fill available width (adds `w-full` and related item sizing).                                      |
+| `optionValue?: string`                                     | **string** â€” When `options` are custom objects, the property name to read `value` from (fallback: `obj.value`).                                              |
+| `optionLabel?: string`                                     | **string** â€” When `options` are custom objects, the property name to read `label` from (fallback: `obj.label` or `String(value)`).                           |
+| `optionIcon?: string`                                      | **string** â€” When `options` are custom objects, the property name to read `icon` from (fallback: `obj.icon`).                                                |
+| `optionDisabled?: string`                                  | **string** â€” When `options` are custom objects, the property name to read disabled flag from (fallback: `obj.disabled`).                                     |
+| `optionTooltip?: string`                                   | **string** â€” When `options` are custom objects, the property name to read tooltip content from (fallback: `obj.tooltip`).                                    |
+| `optionMeta?: string`                                      | **string** â€” When `options` are custom objects, the property name to read meta from (fallback: `obj.meta`).                                                  |
 | `renderOption?: (option, isSelected) => React.ReactNode`   | Custom renderer per option (receives normalized option + selected state).                                                                                      |
 | `className?: string`                                       | Class for the toggle group container.                                                                                                                          |
 | `itemClassName?: string`                                   | Base class applied to **all** toggle items.                                                                                                                    |
@@ -459,8 +459,8 @@ export function ExampleToggleGroup() {
 ## number
 
 | Prop           | Description                                                                                                                                              |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `showButtons`  | When `true`, renders built-in step controls (Â±) alongside the number input.                                                                              |
+|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `showButtons`  | When `true`, renders built-in step controls (Â±) alongside the number input.                                                                             |
 | `buttonLayout` | Layout for the step controls when `showButtons` is enabled. Supported layouts: `"stacked"` (vertical on the right) and `"inline"` (`-` left, `+` right). |
 | `step`         | Step amount used by the built-in controls and stepping logic (forwarded to the underlying number input).                                                 |
 | `min`          | Minimum numeric value constraint (used by the stepping logic and forwarded to the underlying number input).                                              |
@@ -489,7 +489,7 @@ export function ExampleToggleGroup() {
 ## password
 
 | Prop                    | Description                                               |
-| ----------------------- | --------------------------------------------------------- |
+|-------------------------|-----------------------------------------------------------|
 | `autoComplete`          | Sets the input `autoComplete` hint for password managers. |
 | `minLength`             | Minimum allowed length (HTML constraint).                 |
 | `maxLength`             | Maximum allowed length (HTML constraint).                 |
@@ -529,7 +529,7 @@ export function ExampleToggleGroup() {
 ## phone
 
 | Prop                   | Description                                                                     |
-| ---------------------- | ------------------------------------------------------------------------------- |
+|------------------------|---------------------------------------------------------------------------------|
 | `countries`            | List of allowed countries (and their dial codes) shown in the country selector. |
 | `defaultCountryCode`   | The default selected country code (e.g. `"NG"`).                                |
 | `allowCountrySearch`   | Enable searching in the country list.                                           |
@@ -542,7 +542,7 @@ export function ExampleToggleGroup() {
 | `dialCodeDelimiter`    | Delimiter between dial code and the input number (e.g. `" "`, `"-"`).           |
 | `valueMode`            | Controls how the field value is emitted (e.g. E.164 vs local formats).          |
 | `mask`                 | Optional input mask (string or resolver function).                              |
-| `lazy`                 | IMask â€œlazyâ€ mode (placeholder chars hidden until typed).                       |
+| `lazy`                 | IMask â€œlazyâ€ mode (placeholder chars hidden until typed).                   |
 | `keepCharPositions`    | IMask option to keep character positions stable.                                |
 | `unmask`               | How the underlying mask value is emitted (IMask option).                        |
 
@@ -572,7 +572,7 @@ Value type: `number | undefined`
 ### Props
 
 | Prop                       | Description                                            |
-| -------------------------- | ------------------------------------------------------ |
+|----------------------------|--------------------------------------------------------|
 | `value`                    | Current slider value (number).                         |
 | `onValue`                  | Called when the value changes.                         |
 | `error`                    | Validation/error message for the field.                |
@@ -600,7 +600,7 @@ Value type: `number | undefined`
 | `leadingControlClassName`  | Wrapper className for the leading control.             |
 | `trailingControlClassName` | Wrapper className for the trailing control.            |
 | `joinControls`             | Join controls visually to the slider box.              |
-| `extendBoxToControls`      | Extend slider â€œboxâ€ background behind controls.        |
+| `extendBoxToControls`      | Extend slider â€œboxâ€ background behind controls.    |
 | `controlVariant`           | Variant for the +/- controls (if shown).               |
 | `controlStep`              | Step used by +/- controls (falls back to `step`).      |
 | `controlDecrementIcon`     | Custom icon node for decrement control.                |
@@ -633,7 +633,7 @@ Value type: `boolean | undefined`
 ### Props
 
 | Prop                   | Description                                |
-| ---------------------- | ------------------------------------------ |
+|------------------------|--------------------------------------------|
 | `value`                | Current toggle value (boolean).            |
 | `onValue`              | Called when the value changes.             |
 | `error`                | Validation/error message for the field.    |
@@ -668,7 +668,7 @@ Value type: `TreeKey | TreeKey[] | undefined` (where `TreeKey` is `string | numb
 ### Base props
 
 | Prop                    | Description                                                                    |
-| ----------------------- | ------------------------------------------------------------------------------ |
+|-------------------------|--------------------------------------------------------------------------------|
 | `value`                 | Selected key(s). Single value is a key; multi is an array of keys.             |
 | `onValue`               | Called when selection changes.                                                 |
 | `error`                 | Validation/error message for the field.                                        |
@@ -703,7 +703,7 @@ Value type: `TreeKey | TreeKey[] | undefined` (where `TreeKey` is `string | numb
 ### Mode: default (`mode` omitted or "default")
 
 | Prop                       | Description                                                     |
-| -------------------------- | --------------------------------------------------------------- |
+|----------------------------|-----------------------------------------------------------------|
 | `mode`                     | Omit or set to `'default'` to use the standard field trigger.   |
 | `button`                   | Optional custom trigger button renderer.                        |
 | `selectedBadge`            | Optional selected-count badge renderer.                         |
@@ -718,12 +718,12 @@ Value type: `TreeKey | TreeKey[] | undefined` (where `TreeKey` is `string | numb
 | `joinControls`             | Visually join controls to the trigger box (shared border).      |
 | `extendBoxToControls`      | Extend trigger background behind controls.                      |
 | `rootClassName`            | Wrapper className around controls + trigger.                    |
-| `triggerInnerClassName`    | ClassName for the triggerâ€™s inner content.                      |
+| `triggerInnerClassName`    | ClassName for the triggerâ€™s inner content.                    |
 
 ### Mode: button (`mode="button"`)
 
 | Prop                       | Description                                                     |
-| -------------------------- | --------------------------------------------------------------- |
+|----------------------------|-----------------------------------------------------------------|
 | `mode`                     | Set to `'button'` to render a button-style trigger.             |
 | `button`                   | (mode='button') If provided, this is the trigger renderer.      |
 | `selectedBadge`            | (mode='button') Selected-count badge renderer.                  |
@@ -781,7 +781,7 @@ Value type: `TreeKey | TreeKey[] | undefined` (where `TreeKey` is `string | numb
 ### Variant props
 
 | Prop                | Description                                                                                                                     |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+|---------------------|---------------------------------------------------------------------------------------------------------------------------------|
 | `options`           | Options for the multi-select. Accepts primitives or objects.                                                                    |
 | `autoCap`           | Capitalise the first letter of the label (when the resolved label is a string).                                                 |
 | `optionLabel`       | How to read the label from each option (string key or mapper function). If omitted: uses `label`, else `String(value)`.         |
@@ -793,9 +793,9 @@ Value type: `TreeKey | TreeKey[] | undefined` (where `TreeKey` is `string | numb
 | `searchable`        | Enable search field in the list.                                                                                                |
 | `searchPlaceholder` | Placeholder for the search field.                                                                                               |
 | `emptySearchText`   | Text when there are no matches for the current search.                                                                          |
-| `showSelectAll`     | Show a â€œSelect allâ€ row.                                                                                                        |
-| `selectAllLabel`    | Label for the â€œSelect allâ€ row.                                                                                                 |
-| `selectAllPosition` | Where to render the â€œSelect allâ€ row.                                                                                           |
+| `showSelectAll`     | Show a â€œSelect allâ€ row.                                                                                                    |
+| `selectAllLabel`    | Label for the â€œSelect allâ€ row.                                                                                             |
+| `selectAllPosition` | Where to render the â€œSelect allâ€ row.                                                                                       |
 | `clearable`         | Show a clear action when there is at least one selection.                                                                       |
 | `placeholder`       | Placeholder when nothing is selected.                                                                                           |
 | `renderOption`      | Optional global renderer for an option row. (An option may also provide its own per-option `render`.)                           |
@@ -814,7 +814,7 @@ Value type: `TreeKey | TreeKey[] | undefined` (where `TreeKey` is `string | numb
 ### Mode and trigger props
 
 | Prop                          | Description                                                                                          |
-| ----------------------------- | ---------------------------------------------------------------------------------------------------- |
+|-------------------------------|------------------------------------------------------------------------------------------------------|
 | `mode`                        | Choose trigger style: `"default"` (standard input-like trigger) or `"button"` (custom trigger node). |
 | `leadingIcons`                | Icons shown before the summary text inside the trigger (default mode).                               |
 | `trailingIcons`               | Icons shown after the summary / clear button inside the trigger.                                     |
@@ -869,30 +869,30 @@ export function MultiSelectExample() {
 
 ### Variant props
 
-| Prop                   | Description                                                                                                         |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `items`                | Alias of `options` (list of items to render).                                                                       |
-| `options`              | Options to render. Supports `RadioItem` objects or custom items via mappers.                                        |
+| Prop                   | Description                                                                                                           |
+|------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| `items`                | Alias of `options` (list of items to render).                                                                         |
+| `options`              | Options to render. Supports `RadioItem` objects or custom items via mappers.                                          |
 | `mappers`              | Mapping functions for `TItem â†’ value/label/description/disabled/key/render`. Takes precedence over `option*` props. |
-| `optionValue`          | Shortcut mapping for **value** (used only if `mappers` is not provided).                                            |
-| `optionLabel`          | Shortcut mapping for **label** (used only if `mappers` is not provided).                                            |
-| `renderOption`         | Global option renderer (can be overridden per item via `item.render`).                                              |
-| `layout`               | Layout mode: `"stack"` or `"grid"`.                                                                                 |
-| `columns`              | Number of columns when `layout="grid"`.                                                                             |
-| `itemGapPx`            | Gap (px) between items.                                                                                             |
-| `size`                 | Variant size override for the radio control.                                                                        |
-| `density`              | Variant density override for spacing.                                                                               |
-| `autoCap`              | Auto-capitalise labels when the resolved label is a string.                                                         |
-| `aria-label`           | ARIA label forwarded to the radio group wrapper.                                                                    |
-| `aria-labelledby`      | ARIA `aria-labelledby` forwarded to the radio group wrapper.                                                        |
-| `aria-describedby`     | ARIA `aria-describedby` forwarded to the radio group wrapper.                                                       |
-| `groupClassName`       | ClassName for the group wrapper.                                                                                    |
-| `optionClassName`      | ClassName for each option container.                                                                                |
-| `labelClassName`       | ClassName for the option label.                                                                                     |
-| `descriptionClassName` | ClassName for the option description.                                                                               |
-| `id`                   | Optional `id` for the group wrapper.                                                                                |
-| `name`                 | HTML `name` attribute to group radio inputs.                                                                        |
-| `className`            | Alias for `groupClassName`.                                                                                         |
+| `optionValue`          | Shortcut mapping for **value** (used only if `mappers` is not provided).                                              |
+| `optionLabel`          | Shortcut mapping for **label** (used only if `mappers` is not provided).                                              |
+| `renderOption`         | Global option renderer (can be overridden per item via `item.render`).                                                |
+| `layout`               | Layout mode: `"stack"` or `"grid"`.                                                                                   |
+| `columns`              | Number of columns when `layout="grid"`.                                                                               |
+| `itemGapPx`            | Gap (px) between items.                                                                                               |
+| `size`                 | Variant size override for the radio control.                                                                          |
+| `density`              | Variant density override for spacing.                                                                                 |
+| `autoCap`              | Auto-capitalise labels when the resolved label is a string.                                                           |
+| `aria-label`           | ARIA label forwarded to the radio group wrapper.                                                                      |
+| `aria-labelledby`      | ARIA `aria-labelledby` forwarded to the radio group wrapper.                                                          |
+| `aria-describedby`     | ARIA `aria-describedby` forwarded to the radio group wrapper.                                                         |
+| `groupClassName`       | ClassName for the group wrapper.                                                                                      |
+| `optionClassName`      | ClassName for each option container.                                                                                  |
+| `labelClassName`       | ClassName for the option label.                                                                                       |
+| `descriptionClassName` | ClassName for the option description.                                                                                 |
+| `id`                   | Optional `id` for the group wrapper.                                                                                  |
+| `name`                 | HTML `name` attribute to group radio inputs.                                                                          |
+| `className`            | Alias for `groupClassName`.                                                                                           |
 
 ### Supported option shapes
 
@@ -931,7 +931,7 @@ export function RadioExample() {
 ### Variant props
 
 | Prop                       | Description                                                                                                                     |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+|----------------------------|---------------------------------------------------------------------------------------------------------------------------------|
 | `options`                  | Options for the select. Accepts primitives or objects.                                                                          |
 | `autoCap`                  | Capitalise the first letter of the label (when the resolved label is a string).                                                 |
 | `optionLabel`              | How to read the label from each option (string key or mapper function). If omitted: uses `label`, else `String(value)`.         |
@@ -944,7 +944,7 @@ export function RadioExample() {
 | `searchPlaceholder`        | Placeholder for the search field.                                                                                               |
 | `emptySearchText`          | Text shown when there are no matches for the current search.                                                                    |
 | `clearable`                | Show a clear action (x) when a value is selected.                                                                               |
-| `emptyLabel`               | Label to show when no value is selected (acts like â€œnoneâ€).                                                                     |
+| `emptyLabel`               | Label to show when no value is selected (acts like â€œnoneâ€).                                                                 |
 | `placeholder`              | Placeholder when no value is selected (and `emptyLabel` not shown).                                                             |
 | `renderOption`             | Optional global renderer for a list option. (An option may also provide its own per-option `render`.)                           |
 | `renderValue`              | Custom renderer for the trigger display (selected option).                                                                      |
@@ -1007,20 +1007,20 @@ export function SelectExample() {
 ## checkbox
 
 | Prop                   | Description                                                                                                                        |                                |                        |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | ---------------------- |
+|------------------------|------------------------------------------------------------------------------------------------------------------------------------|--------------------------------|------------------------|
 | `single`               | Render a single boolean checkbox instead of an option group.                                                                       |                                |                        |
 | `singleLabel`          | Label text shown next to the checkbox in single mode.                                                                              |                                |                        |
 | `singleDescription`    | Optional helper text shown under the single checkbox label.                                                                        |                                |                        |
 | `options`              | Option list for group mode. Accepts primitives or objects (normalized to `{ value, label, description?, disabled?, key? }`).       |                                |                        |
 | `items`                | Alias for `options` (alternate naming).                                                                                            |                                |                        |
 | `mappers`              | Override normalization: `{ mapValue?, mapLabel?, mapDescription?, mapDisabled?, mapKey? }`.                                        |                                |                        |
-| `optionValue`          | Map item â†’ option value (overrides `mappers.mapValue`).                                                                            |                                |                        |
-| `optionLabel`          | Map item â†’ option label (overrides `mappers.mapLabel`).                                                                            |                                |                        |
-| `optionDescription`    | Map item â†’ option description (overrides `mappers.mapDescription`).                                                                |                                |                        |
-| `optionDisabled`       | Map item â†’ disabled boolean (overrides `mappers.mapDisabled`).                                                                     |                                |                        |
-| `optionKey`            | Map item â†’ stable React key (overrides `mappers.mapKey`).                                                                          |                                |                        |
+| `optionValue`          | Map item â†’ option value (overrides `mappers.mapValue`).                                                                          |                                |                        |
+| `optionLabel`          | Map item â†’ option label (overrides `mappers.mapLabel`).                                                                          |                                |                        |
+| `optionDescription`    | Map item â†’ option description (overrides `mappers.mapDescription`).                                                              |                                |                        |
+| `optionDisabled`       | Map item â†’ disabled boolean (overrides `mappers.mapDisabled`).                                                                   |                                |                        |
+| `optionKey`            | Map item â†’ stable React key (overrides `mappers.mapKey`).                                                                        |                                |                        |
 | `renderOption`         | Custom option renderer (gets `{ item, index, state, effectiveTristate, disabled, size, density, checkboxId, click(), checkbox }`). |                                |                        |
-| `tristate`             | Enable tri-state cycling for group options (`none â†’ true â†’ false â†’ none`).                                                         |                                |                        |
+| `tristate`             | Enable tri-state cycling for group options (`none â†’ true â†’ false â†’ none`).                                                   |                                |                        |
 | `layout`               | Group layout: `"list"` or `"grid"`.                                                                                                |                                |                        |
 | `columns`              | Grid columns when `layout="grid"` (default: `2`).                                                                                  |                                |                        |
 | `itemGapPx`            | Gap between options in px (defaults vary by layout).                                                                               |                                |                        |
@@ -1077,14 +1077,14 @@ export function SelectExample() {
 ## chips
 
 | Prop                   | Description                                                              |                               |
-| ---------------------- | ------------------------------------------------------------------------ | ----------------------------- |
+|------------------------|--------------------------------------------------------------------------|-------------------------------|
 | `placeholder`          | Placeholder shown when there are no chips and input is empty.            |                               |
 | `separators`           | Separators used to split raw input into chips. Default: `[",", ";"]`.    |                               |
 | `addOnEnter`           | Commit chips on **Enter**. Default: `true`.                              |                               |
 | `addOnTab`             | Commit chips on **Tab**. Default: `true`.                                |                               |
 | `addOnBlur`            | Commit chips on **blur**. Default: `true`.                               |                               |
 | `allowDuplicates`      | When `false`, duplicate chips are ignored. Default: `false`.             |                               |
-| `maxChips`             | Maximum number of chips allowed (`undefined` â†’ unlimited).               |                               |
+| `maxChips`             | Maximum number of chips allowed (`undefined` â†’ unlimited).             |                               |
 | `backspaceRemovesLast` | Remove last chip on Backspace when input is empty. Default: `true`.      |                               |
 | `clearable`            | Show a clear-all button. Default: `false`.                               |                               |
 | `onAddChips`           | Callback: `(added, next) => void` after chips are added.                 |                               |
@@ -1132,7 +1132,7 @@ export function SelectExample() {
 ## color
 
 | Prop                     | Description                                                                |
-| ------------------------ | -------------------------------------------------------------------------- |
+|--------------------------|----------------------------------------------------------------------------|
 | `showPreview`            | Show a color preview button / swatch. Default: `true`.                     |
 | `showPickerToggle`       | Show the small picker toggle icon. Default: `true`.                        |
 | `previewSize`            | Preview swatch size in px. Default: `16`.                                  |
@@ -1166,16 +1166,16 @@ import { Palette } from "lucide-react";
 ### Variant props
 
 | Prop               | Description                                                                                                                                                |                                           |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+|--------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------|
 | `mode`             | Selection mode: `"single"` or `"range"`.                                                                                                                   |                                           |
-| `placeholder`      | Placeholder content shown when thereâ€™s no selection.                                                                                                       |                                           |
+| `placeholder`      | Placeholder content shown when thereâ€™s no selection.                                                                                                     |                                           |
 | `clearable`        | If `true`, shows a clear action when a value is set.                                                                                                       |                                           |
 | `minDate`          | Minimum selectable date (inclusive).                                                                                                                       |                                           |
 | `maxDate`          | Maximum selectable date (inclusive).                                                                                                                       |                                           |
 | `disabledDays`     | Disabled-day matcher forwarded to the calendar wrapper (`Calendar["disabled"]`).                                                                           |                                           |
 | `formatSingle`     | Display pattern for single values. Supports tokens: `yyyy`, `MM`, `dd`, `HH`, `mm`. Defaults depend on `kind`.                                             |                                           |
 | `formatRange`      | Range display formatter: either a pattern string (same tokens as `formatSingle`) or a custom `(range) => string` formatter.                                |                                           |
-| `rangeSeparator`   | Separator used between `from` and `to` when `formatRange` is a string pattern. Default: `" â€“ "`.                                                           |                                           |
+| `rangeSeparator`   | Separator used between `from` and `to` when `formatRange` is a string pattern. Default: `" â€“ "`.                                                         |                                           |
 | `stayOpenOnSelect` | If `true`, keeps the popover open after selecting. In range mode, stays open until both ends are chosen.                                                   |                                           |
 | `open`             | Controlled open state for the popover.                                                                                                                     |                                           |
 | `onOpenChange`     | Called when the popover open state changes.                                                                                                                |                                           |
@@ -1215,19 +1215,19 @@ export function DateRangeExample() {
 ### Variant props
 
 | Prop             | Description                                                                                                      |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------- |
+|------------------|------------------------------------------------------------------------------------------------------------------|
 | `min`            | Minimum number of pairs allowed (enforced by the UI controls).                                                   |
 | `max`            | Maximum number of pairs allowed.                                                                                 |
-| `minVisible`     | Minimum number of chips to show before collapsing into a â€œmoreâ€ indicator.                                       |
-| `maxVisible`     | Maximum number of chips to show before collapsing into a â€œmoreâ€ indicator.                                       |
-| `showAddButton`  | Toggle visibility of the â€œAddâ€ action.                                                                           |
+| `minVisible`     | Minimum number of chips to show before collapsing into a â€œmoreâ€ indicator.                                   |
+| `maxVisible`     | Maximum number of chips to show before collapsing into a â€œmoreâ€ indicator.                                   |
+| `showAddButton`  | Toggle visibility of the â€œAddâ€ action.                                                                       |
 | `showMenuButton` | Toggle visibility of the overflow/menu action (if supported by the preset).                                      |
 | `placeholder`    | Placeholder shown when there are no items.                                                                       |
 | `dialogTitle`    | Title for the edit/add dialog UI.                                                                                |
-| `keyLabel`       | Label used for the â€œkeyâ€ input.                                                                                  |
-| `valueLabel`     | Label used for the â€œvalueâ€ input.                                                                                |
+| `keyLabel`       | Label used for the â€œkeyâ€ input.                                                                              |
+| `valueLabel`     | Label used for the â€œvalueâ€ input.                                                                            |
 | `submitLabel`    | Text for the dialog submit button.                                                                               |
-| `moreLabel`      | Label renderer for the collapsed â€œmoreâ€ indicator: `(count) => ReactNode`.                                       |
+| `moreLabel`      | Label renderer for the collapsed â€œmoreâ€ indicator: `(count) => ReactNode`.                                   |
 | `emptyLabel`     | Label shown when there are no entries (fallback text).                                                           |
 | `className`      | Wrapper class for the whole variant.                                                                             |
 | `chipsClassName` | Class for the chips container.                                                                                   |
@@ -1267,7 +1267,7 @@ export function KeyValueExample() {
 ### Variant props
 
 | Prop               | Description                                                       |
-| ------------------ | ----------------------------------------------------------------- |
+|--------------------|-------------------------------------------------------------------|
 | `placeholder`      | Placeholder content when the editor is empty.                     |
 | `minHeight`        | Minimum height (px) for the editor surface.                       |
 | `maxHeight`        | Maximum height (px) for the editor surface (scrolls beyond this). |
@@ -1312,36 +1312,36 @@ export function EditorExample() {
 
 ### Variant props
 
-| Prop                | Description                                                          |
-| ------------------- | -------------------------------------------------------------------- |
-| `multiple`          | Allow selecting multiple files.                                      |
-| `accept`            | Accepted file types (input accept string / list).                    |
-| `maxFiles`          | Max number of files allowed.                                         |
-| `maxTotalSize`      | Max total size allowed for all files (bytes).                        |
-| `showDropArea`      | Show the drop-area UI section.                                       |
-| `dropIcon`          | Optional icon shown in the drop area.                                |
-| `dropTitle`         | Title text shown in the drop area.                                   |
-| `dropDescription`   | Helper text shown in the drop area.                                  |
+| Prop                | Description                                                              |
+|---------------------|--------------------------------------------------------------------------|
+| `multiple`          | Allow selecting multiple files.                                          |
+| `accept`            | Accepted file types (input accept string / list).                        |
+| `maxFiles`          | Max number of files allowed.                                             |
+| `maxTotalSize`      | Max total size allowed for all files (bytes).                            |
+| `showDropArea`      | Show the drop-area UI section.                                           |
+| `dropIcon`          | Optional icon shown in the drop area.                                    |
+| `dropTitle`         | Title text shown in the drop area.                                       |
+| `dropDescription`   | Helper text shown in the drop area.                                      |
 | `custom`            | Use a fully custom â€œpickerâ€ UI instead of the built-in drop/trigger. |
-| `asRaw`             | Treat values as raw `File` objects (native picker flow).             |
-| `renderDropArea`    | Custom renderer for the drop area section.                           |
-| `renderFileItem`    | Custom renderer for each file item row.                              |
-| `showCheckboxes`    | Show checkboxes next to file items (when supported by the UI).       |
-| `onFilesAdded`      | Callback fired when files are added.                                 |
-| `customLoader`      | Provide your own file loader (e.g. resolve URLs â†’ metadata).         |
-| `mergeMode`         | Merge strategy when adding files (e.g. append/replace/dedupe).       |
-| `formatFileName`    | Custom formatter for displaying a file name.                         |
-| `formatFileSize`    | Custom formatter for displaying a file size.                         |
-| `placeholder`       | Placeholder text when nothing is selected.                           |
-| `className`         | Wrapper class for the whole variant.                                 |
-| `dropAreaClassName` | ClassName for the drop-area wrapper.                                 |
-| `listClassName`     | ClassName for the file list container.                               |
-| `triggerClassName`  | ClassName for the trigger (when using the built-in trigger).         |
+| `asRaw`             | Treat values as raw `File` objects (native picker flow).                 |
+| `renderDropArea`    | Custom renderer for the drop area section.                               |
+| `renderFileItem`    | Custom renderer for each file item row.                                  |
+| `showCheckboxes`    | Show checkboxes next to file items (when supported by the UI).           |
+| `onFilesAdded`      | Callback fired when files are added.                                     |
+| `customLoader`      | Provide your own file loader (e.g. resolve URLs â†’ metadata).           |
+| `mergeMode`         | Merge strategy when adding files (e.g. append/replace/dedupe).           |
+| `formatFileName`    | Custom formatter for displaying a file name.                             |
+| `formatFileSize`    | Custom formatter for displaying a file size.                             |
+| `placeholder`       | Placeholder text when nothing is selected.                               |
+| `className`         | Wrapper class for the whole variant.                                     |
+| `dropAreaClassName` | ClassName for the drop-area wrapper.                                     |
+| `listClassName`     | ClassName for the file list container.                                   |
+| `triggerClassName`  | ClassName for the trigger (when using the built-in trigger).             |
 
 ### Mode and trigger props
 
 | Prop                          | Description                                                             |
-| ----------------------------- | ----------------------------------------------------------------------- |
+|-------------------------------|-------------------------------------------------------------------------|
 | `mode`                        | Trigger style: `"default"` (input-like) or `"button"` (custom trigger). |
 | `leadingIcons`                | Icons shown before the summary (default mode).                          |
 | `trailingIcons`               | Icons shown after the summary / clear action.                           |
@@ -1353,7 +1353,7 @@ export function EditorExample() {
 | `trailingControl`             | Custom node on the far-right *outside* the trigger.                     |
 | `leadingControlClassName`     | ClassName for the leading control wrapper.                              |
 | `trailingControlClassName`    | ClassName for the trailing control wrapper.                             |
-| `joinControls`                | Visually â€œjoinsâ€ leading/trailing controls with the trigger.            |
+| `joinControls`                | Visually â€œjoinsâ€ leading/trailing controls with the trigger.        |
 | `extendBoxToControls`         | Extends the input box styling around joined controls.                   |
 | `button`                      | When `mode="button"`: explicit trigger node.                            |
 | `children`                    | When `mode="button"` and `button` is not provided: trigger content.     |
@@ -1391,22 +1391,22 @@ export function FileExample() {
 
 ### Variant props
 
-| Prop               | Description                                                                 |
-| ------------------ | --------------------------------------------------------------------------- |
-| `multiple`         | Allow selecting multiple icons (value becomes `string[]`).                  |
-| `url`              | Iconify API base URL (defaults to registry `iconPicker.url`).               |
-| `groups`           | Icon groups to display (defaults to registry `iconPicker.groups`).          |
-| `allowedGroupIds`  | Restrict selectable groups by group id.                                     |
-| `maxRender`        | Max icons rendered in the grid (safety cap for large sets).                 |
-| `placeholder`      | Placeholder text when nothing is selected.                                 |
-| `className`        | Wrapper class for the whole variant.                                       |
-| `triggerClassName` | ClassName for the trigger (default mode).                                  |
-| `popoverClassName` | ClassName for the popover content wrapper.                                 |
+| Prop               | Description                                                        |
+|--------------------|--------------------------------------------------------------------|
+| `multiple`         | Allow selecting multiple icons (value becomes `string[]`).         |
+| `url`              | Iconify API base URL (defaults to registry `iconPicker.url`).      |
+| `groups`           | Icon groups to display (defaults to registry `iconPicker.groups`). |
+| `allowedGroupIds`  | Restrict selectable groups by group id.                            |
+| `maxRender`        | Max icons rendered in the grid (safety cap for large sets).        |
+| `placeholder`      | Placeholder text when nothing is selected.                         |
+| `className`        | Wrapper class for the whole variant.                               |
+| `triggerClassName` | ClassName for the trigger (default mode).                          |
+| `popoverClassName` | ClassName for the popover content wrapper.                         |
 
 ### Mode and trigger props
 
 | Prop                          | Description                                                             |
-| ----------------------------- | ----------------------------------------------------------------------- |
+|-------------------------------|-------------------------------------------------------------------------|
 | `mode`                        | Trigger style: `"default"` (input-like) or `"button"` (custom trigger). |
 | `leadingIcons`                | Icons shown before the selection (default mode).                        |
 | `trailingIcons`               | Icons shown after the selection.                                        |
@@ -1452,31 +1452,31 @@ export function IconExample() {
 
 ### Variant props
 
-| Prop                  | Description                                                                                       |
-| --------------------- | ------------------------------------------------------------------------------------------------- |
-| `multiple`            | Allow selecting multiple items (icons and/or images).                                             |
-| `iconUrl`             | Iconify API base URL for the icon picker (defaults to registry `iconPicker.url`).               |
-| `iconGroups`          | Icon groups to display (defaults to registry `iconPicker.groups`).                                |
-| `allowedIconGroupIds` | Restrict selectable icon groups by id.                                                            |
-| `iconMaxRender`       | Max icons rendered in the grid (safety cap for large sets).                                       |
-| `accept`              | Accepted file types (input accept string / list).                                                 |
-| `maxFiles`            | Max number of files allowed.                                                                      |
-| `maxTotalSize`        | Max total size allowed for all files (bytes).                                                     |
-| `customLoader`        | Provide your own file loader (e.g. resolve URLs -> metadata).                                     |
-| `mergeMode`           | Merge strategy when adding files (`"append"` or `"replace"`).                                     |
-| `formatFileName`      | Custom formatter for displaying a file name.                                                      |
-| `formatFileSize`      | Custom formatter for displaying a file size.                                                      |
-| `formatFileValue`     | Convert a `FileItem` into a persisted string value (falls back to `url`, `path`, or native file). |
-| `placeholder`         | Placeholder text when nothing is selected.                                                        |
-| `className`           | Wrapper class for the whole variant.                                                              |
-| `triggerClassName`    | ClassName for the trigger (default mode).                                                         |
-| `popoverClassName`    | ClassName for the popover content wrapper.                                                        |
-| `showCheckboxes`      | Show checkboxes next to items in the list (when supported by the UI).                              |
+| Prop                  | Description                                                                                                   |
+|-----------------------|---------------------------------------------------------------------------------------------------------------|
+| `multiple`            | Allow selecting multiple items (icons and/or images).                                                         |
+| `iconUrl`             | Iconify API base URL for the icon picker (defaults to registry `iconPicker.url`).                             |
+| `iconGroups`          | Icon groups to display (defaults to registry `iconPicker.groups`).                                            |
+| `allowedIconGroupIds` | Restrict selectable icon groups by id.                                                                        |
+| `iconMaxRender`       | Max icons rendered in the grid (safety cap for large sets).                                                   |
+| `accept`              | Accepted file types (input accept string / list).                                                             |
+| `maxFiles`            | Max number of files allowed.                                                                                  |
+| `maxTotalSize`        | Max total size allowed for all files (bytes).                                                                 |
+| `customLoader`        | Provide your own file loader or pass true to use your global built-in loader (e.g. resolve URLs -> metadata). |
+| `mergeMode`           | Merge strategy when adding files (`"append"` or `"replace"`).                                                 |
+| `formatFileName`      | Custom formatter for displaying a file name.                                                                  |
+| `formatFileSize`      | Custom formatter for displaying a file size.                                                                  |
+| `formatFileValue`     | Convert a `FileItem` into a persisted string value (falls back to `url`, `path`, or native file).             |
+| `placeholder`         | Placeholder text when nothing is selected.                                                                    |
+| `className`           | Wrapper class for the whole variant.                                                                          |
+| `triggerClassName`    | ClassName for the trigger (default mode).                                                                     |
+| `popoverClassName`    | ClassName for the popover content wrapper.                                                                    |
+| `showCheckboxes`      | Show checkboxes next to items in the list (when supported by the UI).                                         |
 
 ### Mode and trigger props
 
 | Prop                          | Description                                                             |
-| ----------------------------- | ----------------------------------------------------------------------- |
+|-------------------------------|-------------------------------------------------------------------------|
 | `mode`                        | Trigger style: `"default"` (input-like) or `"button"` (custom trigger). |
 | `leadingIcons`                | Icons shown before the summary (default mode).                          |
 | `trailingIcons`               | Icons shown after the summary / clear action.                           |
@@ -1527,7 +1527,7 @@ export function ImageIconExample() {
 ### Wrapper / trigger props
 
 | Prop               | Description                                               |
-| ------------------ | --------------------------------------------------------- |
+|--------------------|-----------------------------------------------------------|
 | `mode`             | Display mode: `"popover"` or `"accordion"`.               |
 | `trigger`          | Custom trigger node (popover mode).                       |
 | `triggerLabel`     | Default trigger label text (popover mode).                |
@@ -1546,25 +1546,25 @@ export function ImageIconExample() {
 
 ### Editor props (passed into the JSON editor)
 
-| Prop               | Description                                                                         |
-| ------------------ | ----------------------------------------------------------------------------------- |
-| `title`            | Title displayed in the editor header.                                               |
+| Prop               | Description                                                                           |
+|--------------------|---------------------------------------------------------------------------------------|
+| `title`            | Title displayed in the editor header.                                                 |
 | `fieldMap`         | Field mapping rules (wildcards supported) â†’ picks a field variant + props per path. |
-| `layout`           | Layout rules (grid/rows + route/page rules).                                        |
-| `defaults`         | Default values / behaviours for missing keys and created fields.                    |
-| `filters`          | Include/exclude filters for routes/fields.                                          |
-| `permissions`      | Permissions (add/delete/view/edit raw, etc.).                                       |
-| `callbacks`        | Hooks for events like add/delete/edit / route changes.                              |
-| `route`            | Controlled â€œpage routeâ€ (e.g. `"config.headers"`).                                  |
-| `defaultRoute`     | Starting route when uncontrolled.                                                   |
-| `onRouteChange`    | Route change callback.                                                              |
-| `viewMode`         | Controlled view mode (e.g. raw vs structured UI).                                   |
-| `defaultViewMode`  | Default view mode when uncontrolled.                                                |
-| `onViewModeChange` | View mode change callback.                                                          |
-| `className`        | Root class for the editor.                                                          |
-| `contentClassName` | Class for the main content region.                                                  |
-| `navClassName`     | Class for the navigation region.                                                    |
-| `bodyClassName`    | Class for the body region.                                                          |
+| `layout`           | Layout rules (grid/rows + route/page rules).                                          |
+| `defaults`         | Default values / behaviours for missing keys and created fields.                      |
+| `filters`          | Include/exclude filters for routes/fields.                                            |
+| `permissions`      | Permissions (add/delete/view/edit raw, etc.).                                         |
+| `callbacks`        | Hooks for events like add/delete/edit / route changes.                                |
+| `route`            | Controlled â€œpage routeâ€ (e.g. `"config.headers"`).                                |
+| `defaultRoute`     | Starting route when uncontrolled.                                                     |
+| `onRouteChange`    | Route change callback.                                                                |
+| `viewMode`         | Controlled view mode (e.g. raw vs structured UI).                                     |
+| `defaultViewMode`  | Default view mode when uncontrolled.                                                  |
+| `onViewModeChange` | View mode change callback.                                                            |
+| `className`        | Root class for the editor.                                                            |
+| `contentClassName` | Class for the main content region.                                                    |
+| `navClassName`     | Class for the navigation region.                                                      |
+| `bodyClassName`    | Class for the body region.                                                            |
 
 ### Sample usage
 
@@ -1609,31 +1609,31 @@ export function JsonEditorExample() {
 ### Data + mapping props
 
 | Prop                | Description                                                             |
-| ------------------- | ----------------------------------------------------------------------- |
+|---------------------|-------------------------------------------------------------------------|
 | `def`               | Base lister definition (columns, source, mapping, etc.).                |
 | `endpoint`          | Inline source endpoint (standalone inline mode).                        |
 | `method`            | Inline HTTP method: `"GET"` or `"POST"`.                                |
 | `buildRequest`      | Custom request builder (params/body/headers).                           |
 | `selector`          | How to extract the array from the response (function or selector path). |
-| `optionValue`       | How to map a raw row â†’ option value (key or function).                  |
-| `optionLabel`       | How to map a raw row â†’ label.                                           |
-| `optionIcon`        | How to map a raw row â†’ icon.                                            |
-| `optionDescription` | How to map a raw row â†’ description.                                     |
-| `optionDisabled`    | How to map a raw row â†’ disabled.                                        |
-| `optionGroup`       | How to map a raw row â†’ group label.                                     |
-| `optionMeta`        | How to map a raw row â†’ meta payload.                                    |
+| `optionValue`       | How to map a raw row â†’ option value (key or function).                |
+| `optionLabel`       | How to map a raw row â†’ label.                                         |
+| `optionIcon`        | How to map a raw row â†’ icon.                                          |
+| `optionDescription` | How to map a raw row â†’ description.                                   |
+| `optionDisabled`    | How to map a raw row â†’ disabled.                                      |
+| `optionGroup`       | How to map a raw row â†’ group label.                                   |
+| `optionMeta`        | How to map a raw row â†’ meta payload.                                  |
 | `search`            | Search override (inline).                                               |
 | `searchTarget`      | Search target override (inline).                                        |
 
 ### Selection + behaviour props
 
 | Prop               | Description                                                |
-| ------------------ | ---------------------------------------------------------- |
+|--------------------|------------------------------------------------------------|
 | `filters`          | Filters payload used by the lister source.                 |
 | `confirm`          | Optional confirm behaviour (e.g. confirm selection).       |
 | `permissions`      | Permissions object used by the lister UI (actions, views). |
 | `placeholder`      | Placeholder text when nothing is selected.                 |
-| `maxDisplayItems`  | Max chips/labels to show before collapsing into â€œ+Nâ€.      |
+| `maxDisplayItems`  | Max chips/labels to show before collapsing into â€œ+Nâ€.  |
 | `renderTrigger`    | Custom trigger renderer.                                   |
 | `title`            | Title displayed when opening the lister UI.                |
 | `searchMode`       | Search mode for the open UI.                               |
@@ -1649,7 +1649,7 @@ export function JsonEditorExample() {
 ### Trigger styling + container props
 
 | Prop                          | Description                                                             |
-| ----------------------------- | ----------------------------------------------------------------------- |
+|-------------------------------|-------------------------------------------------------------------------|
 | `mode`                        | Trigger style: `"default"` (input-like) or `"button"` (custom trigger). |
 | `clearable`                   | Show clear action when a selection exists.                              |
 | `leadingIcons`                | Icons shown before the summary (default mode).                          |
@@ -1662,7 +1662,7 @@ export function JsonEditorExample() {
 | `trailingControl`             | Custom node on the far-right *outside* the trigger.                     |
 | `leadingControlClassName`     | ClassName for the leading control wrapper.                              |
 | `trailingControlClassName`    | ClassName for the trailing control wrapper.                             |
-| `joinControls`                | Visually â€œjoinsâ€ leading/trailing controls with the trigger.            |
+| `joinControls`                | Visually â€œjoinsâ€ leading/trailing controls with the trigger.        |
 | `extendBoxToControls`         | Extends the input box styling around joined controls.                   |
 | `maxListHeight`               | Max height for the open list/panel (px).                                |
 | `className`                   | Wrapper class for the whole variant.                                    |
@@ -1711,7 +1711,7 @@ export function ListerExample() {
 ### Variant props
 
 | Prop              | Description                                                                                                                                                                                                  |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `component`       | React component to render. **Required.**                                                                                                                                                                     |
 | `valueProp`       | Prop name that receives the current value. Default: `"value"`.                                                                                                                                               |
 | `changeProp`      | Prop name for the change handler the component calls. Default: `"onChange"`. The component is expected to call `props[changeProp](nextValue, ...args)`; the **first** argument is treated as the next value. |
@@ -1942,7 +1942,7 @@ It also returns **selection state** (optional) and **fetch/search/filter helpers
 ## `UseDataOptions` (inputs)
 
 | Option                     | Description                                                                  |
-| -------------------------- | ---------------------------------------------------------------------------- |
+|----------------------------|------------------------------------------------------------------------------|
 | `id?`                      | Optional identifier used when building the inline def.                       |
 | `endpoint`                 | URL/path to fetch items from.                                                |
 | `method?`                  | HTTP method (default: `"GET"`).                                              |
@@ -1961,7 +1961,7 @@ It also returns **selection state** (optional) and **fetch/search/filter helpers
 ### Selection config (`selection`)
 
 | Key     | Meaning                                                                                                                  |
-| ------- | ------------------------------------------------------------------------------------------------------------------------ |
+|---------|--------------------------------------------------------------------------------------------------------------------------|
 | `mode`  | `"single"` or `"multiple"` (omit = no selection).                                                                        |
 | `key`   | How to compute the item ID. String key (e.g. `"id"`) or `(item) => id`.                                                  |
 | `prune` | `"never"` (default) keeps selection across new fetches. `"missing"` removes selected IDs not present in the latest list. |
