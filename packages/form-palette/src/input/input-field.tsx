@@ -241,6 +241,8 @@ export function InputField<K extends VariantKey = VariantKey>(
         size,
         density,
 
+        value,
+
         // Validation hook
         onValidate,
         onChange,
@@ -378,11 +380,12 @@ export function InputField<K extends VariantKey = VariantKey>(
         onSubmit,
         variant,
         required,
+        value: value as TValue | undefined,
         defaultValue: defaultValue as TValue | undefined,
         validate,
     } as any);
 
-    const { value, setValue, error, ref, key } = field;
+    const { value: fieldValue, setValue, error, ref, key } = field;
 
     const Variant = module.Variant as React.ComponentType<any>;
     const visualError = (errorText ?? error) || "";
@@ -476,6 +479,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                 {items.map((tag, index) => (
                     <span
                         key={index}
+                        onClick={tag.onClick}
                         className={cn(
                             "inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium",
                             tag.className,
@@ -595,7 +599,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                         {...(rest as any)}
                         name={autoOff ? undefined : name}
                         id={key}
-                        value={value}
+                        value={fieldValue}
                         onValue={handleValueChange}
                         error={error}
                         required={required}
@@ -872,7 +876,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                                     {...(rest as any)}
                                     name={autoOff ? undefined : name}
                                     id={key}
-                                    value={value}
+                                    value={fieldValue}
                                     onValue={handleValueChange}
                                     error={error}
                                     required={required}

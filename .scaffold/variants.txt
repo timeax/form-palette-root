@@ -27,3 +27,5 @@ variants/
     toggle-group.tsx
     json-editor.tsx
     lister.tsx
+    icon.tsx
+    image-icon.tsx

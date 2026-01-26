@@ -145,12 +145,10 @@ export const App: React.FC = () => {
                 </button>
             </div>
             <InputField variant={"checkbox"} label={"Remember me"} single />
-            {/*<InputField*/}
-            {/*    variant={"select"}*/}
-            {/*    label={"Remember me"}*/}
-            {/*    mode={"button"}*/}
-            {/*    options={["name", "email", "value"]}*/}
-            {/*/>*/}
+            <InputField
+                variant={"image-icon"}
+                label={"Remember me"}
+            />
             <HeadlessResponsiveDialog
                 open={openDialog}
                 onOpenChange={setOpenDialog}
@@ -266,6 +264,8 @@ export const App: React.FC = () => {
                         label="Notes"
                         variant="textarea"
                         rows={4}
+                        extendBoxToControls
+                        leadingControl={[<>this leads</>]}
                         autoResize={false}
                         placeholder="Write your notes here…"
                         onChange={(e: any) => {

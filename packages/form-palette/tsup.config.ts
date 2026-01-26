@@ -39,5 +39,6 @@ export default defineConfig({
         "react-virtuosp",
         "react-draggable",
         "@toast-ui/editor",
+        "@iconify/react"
     ],
 });

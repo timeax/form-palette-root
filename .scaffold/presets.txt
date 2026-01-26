@@ -25,6 +25,8 @@ presets/
     slider.tsx
     toggle-group.tsx
     lister.tsx
+    icon.tsx
+    image-icon.tsx
     json-editor/
       types.ts
       index.tsx

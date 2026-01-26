@@ -586,7 +586,7 @@ export const ShadcnChipsVariant = React.forwardRef<
                <div
                   data-slot="chips-upper"
                   className={cn(
-                     "flex items-center gap-1 text-xs",
+                     "flex items-center gap-1 text-xs flex-wrap",
                      chipsClassName,
                   )}
                >

@@ -44,6 +44,11 @@ export interface InputFieldBaseProps<TValue = unknown> {
     autoOff?: boolean;
 
     /**
+     * Controlled value prop.
+     */
+    value?: TValue;
+
+    /**
      * Handles the submission logic for a given form or process.
      *
      * @param {TValue} e - The value associated with the submission action.
@@ -221,4 +226,5 @@ export interface FieldTag {
     className?: string;
     color?: string; // text color
     bgColor?: string; // background color
+    onClick?: React.MouseEventHandler<HTMLSpanElement>;
 }

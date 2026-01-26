@@ -1,7 +1,7 @@
 // noinspection RedundantConditionalExpressionJS,PointlessBooleanExpressionJS,SuspiciousTypeOfGuard,GrazieInspection,GrazieStyle
 
 import * as React from "react";
-import type { VariantBaseProps, ChangeDetail } from "@/variants/shared";
+import type { ChangeDetail, VariantBaseProps } from "@/variants/shared";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/presets/ui/checkbox";
 import { globalNormalizeCheckBasedOptions } from "@/lib/normalise-options";
@@ -36,6 +36,8 @@ export type CheckboxGroupValue<TValue> =
     | readonly CheckboxGroupEntry<TValue>[]
     | undefined;
 
+export type CheckboxGroupValueMain<TValue extends string | number | symbol> =
+    Record<TValue, CheckboxTriStateValue>;
 /**
  * Single checkbox value.
  * undefined → "none"
@@ -52,7 +54,8 @@ export type CheckboxSingleValue = boolean | undefined;
  */
 export type CheckboxVariantValue<TValue> =
     | CheckboxSingleValue
-    | CheckboxGroupValue<TValue>;
+    //@ts-ignore
+    | CheckboxGroupValueMain<TValue>;
 
 export interface CheckboxItem<TValue> {
     value: TValue;
@@ -148,7 +151,7 @@ export interface ShadcnCheckboxUiProps<TItem, TValue> {
      * Custom renderer for each option row.
      */
     renderOption?: (
-        ctx: CheckboxRenderOptionContext<TValue>
+        ctx: CheckboxRenderOptionContext<TValue>,
     ) => React.ReactNode;
 
     /**
@@ -320,7 +323,7 @@ function normalizeItems<TItem, TValue>(
     items: readonly TItem[] | undefined,
     mappers?: CheckboxMappers<TItem, TValue>,
     optionValueKey?: keyof TItem,
-    optionLabelKey?: keyof TItem
+    optionLabelKey?: keyof TItem,
 ): CheckboxItem<TValue>[] {
     if (!items || !items.length) return [];
 
@@ -350,7 +353,7 @@ function normalizeItems<TItem, TValue>(
                 item as any,
                 index,
                 optionLabelKey,
-                optionValueKey
+                optionValueKey,
             );
             const tristate = anyItem.tristate as boolean | undefined;
 
@@ -393,10 +396,18 @@ function isEqualValue(a: unknown, b: unknown): boolean {
  * Extract group value from the union.
  */
 function asGroupValue<TValue>(
-    value: CheckboxVariantValue<TValue>
+    value: CheckboxVariantValue<TValue>,
 ): CheckboxGroupValue<TValue> {
     if (!value) return undefined;
     if (Array.isArray(value)) return value;
+    if (typeof value == "object")
+        return Object.keys(value).map(
+            (key) =>
+                ({
+                    value: key,
+                    state: (value as any)[key] as CheckboxTriStateValue,
+                }) as CheckboxGroupEntry<TValue>,
+        );
     return undefined;
 }
 
@@ -404,7 +415,7 @@ function asGroupValue<TValue>(
  * Extract single value from the union.
  */
 function asSingleValue(
-    value: CheckboxVariantValue<unknown>
+    value: CheckboxVariantValue<unknown>,
 ): CheckboxSingleValue {
     if (Array.isArray(value)) return undefined;
     if (typeof value === "boolean" || value === undefined) return value;
@@ -417,7 +428,7 @@ function asSingleValue(
 
 const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
     props: ShadcnCheckboxVariantProps<TValue, TItem>,
-    ref: React.Ref<HTMLDivElement>
+    ref: React.Ref<HTMLDivElement>,
 ) => {
     const {
         // variant base
@@ -512,13 +523,13 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
         const labelCls = cn(
             "text-foreground",
             labelTextSize(size),
-            labelClassName
+            labelClassName,
         );
 
         const descriptionCls = cn(
             "mt-0.5 text-muted-foreground",
             descriptionTextSize(size),
-            descriptionClassName
+            descriptionClassName,
         );
 
         return (
@@ -534,7 +545,7 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
                 className={cn(
                     "flex items-start gap-3",
                     paddingForDensity(density),
-                    optGroupClassName ?? className
+                    optGroupClassName ?? className,
                 )}
                 {...restProps}
             >
@@ -574,9 +585,9 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
                 items ?? options,
                 mappers,
                 optionValue,
-                optionLabel
+                optionLabel,
             ),
-        [items, options, mappers, optionValue, optionLabel]
+        [items, options, mappers, optionValue, optionLabel],
     );
 
     const {
@@ -604,7 +615,7 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
             if (!groupValue) return -1;
             return groupValue.findIndex((e) => isEqualValue(e.value, val));
         },
-        [groupValue]
+        [groupValue],
     );
 
     const getEntryState = React.useCallback(
@@ -613,20 +624,20 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
             if (!groupValue || idx === -1) return "none";
             return groupValue[idx].state;
         },
-        [groupValue, findEntryIndex]
+        [groupValue, findEntryIndex],
     );
 
     const updateGroupValue = React.useCallback(
         (
             itemValue: TValue,
             nextInternal: CheckboxInternalState,
-            effectiveTristate: boolean
+            effectiveTristate: boolean,
         ) => {
             if (!onValue || disabled) return;
 
             const currentList = groupValue ? [...groupValue] : [];
             const idx = currentList.findIndex((e) =>
-                isEqualValue(e.value, itemValue)
+                isEqualValue(e.value, itemValue),
             );
 
             let nextList: CheckboxGroupEntry<TValue>[] = currentList;
@@ -693,9 +704,12 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
                 meta: undefined,
             };
 
-            onValue(nextList, detail);
+            const value: CheckboxGroupValueMain<any> = {};
+            nextList.forEach((item) => (value[item.value as any] = item.state));
+
+            onValue(value, detail);
         },
-        [onValue, disabled, groupValue]
+        [onValue, disabled, groupValue],
     );
 
     return (
@@ -747,7 +761,7 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
                             updateGroupValue(
                                 item.value,
                                 next as CheckboxInternalState,
-                                effectiveTristate
+                                effectiveTristate,
                             )
                         }
                         className="mt-1"
@@ -767,8 +781,8 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
                         />
                     ) : null;
 
-                
-                const renderer = (item as CheckboxItem<TValue>).render ?? renderOption;
+                const renderer =
+                    (item as CheckboxItem<TValue>).render ?? renderOption;
 
                 if (renderer) {
                     return (
@@ -804,7 +818,7 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
                                     updateGroupValue(
                                         item.value,
                                         nextInternal,
-                                        effectiveTristate
+                                        effectiveTristate,
                                     );
                                 },
                                 checkbox: checkboxNode,
@@ -832,7 +846,7 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
                                 <span
                                     className={cn(
                                         labelClassesBase,
-                                        optionLabelClassName
+                                        optionLabelClassName,
                                     )}
                                 >
                                     {displayItem.label}
@@ -854,11 +868,11 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
 };
 
 export const ShadcnCheckboxVariant = React.forwardRef(
-    InnerShadcnCheckboxVariant
+    InnerShadcnCheckboxVariant,
 ) as unknown as <TValue, TItem = CheckboxItem<TValue>>(
     props: ShadcnCheckboxVariantProps<TValue, TItem> & {
         ref?: React.Ref<HTMLDivElement>;
-    }
+    },
 ) => React.ReactElement | null;
 
 // ShadcnCheckboxVariant.displayName = "ShadcnCheckboxVariant";

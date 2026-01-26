@@ -770,6 +770,34 @@
       "sizeAtCreate": 0,
       "groupName": "lister-runtime",
       "groupRoot": "./presets/lister/runtime"
+    },
+    "presets/shadcn-variants/icon.tsx": {
+      "path": "presets/shadcn-variants/icon.tsx",
+      "createdAt": "2026-01-26T04:04:42.303Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "presets/shadcn-variants/image-icon.tsx": {
+      "path": "presets/shadcn-variants/image-icon.tsx",
+      "createdAt": "2026-01-26T04:04:42.306Z",
+      "sizeAtCreate": 0,
+      "groupName": "presets",
+      "groupRoot": "./"
+    },
+    "variants/core/icon.tsx": {
+      "path": "variants/core/icon.tsx",
+      "createdAt": "2026-01-26T04:15:01.444Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
+    },
+    "variants/core/image-icon.tsx": {
+      "path": "variants/core/image-icon.tsx",
+      "createdAt": "2026-01-26T04:15:01.446Z",
+      "sizeAtCreate": 0,
+      "groupName": "variants",
+      "groupRoot": "./"
     }
   }
 }

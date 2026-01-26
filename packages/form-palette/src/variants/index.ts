@@ -33,6 +33,8 @@ import { toggleGroupModule } from "./core/toggle-group";
 import { shadcnEditorVariant } from "@/variants/core/editor";
 import { jsonEditorVariant } from "./core/json-editor";
 import listerVariant from "./core/lister";
+import { imageIconVariant } from "@/variants/core/image-icon";
+import { iconVariant } from "@/variants/core/icon";
 
 export type { VariantKey, VariantModule, VariantValueFor, VariantPropsFor };
 export {
@@ -65,7 +67,9 @@ const variants = [
     toggleGroupModule,
     shadcnEditorVariant,
     jsonEditorVariant,
-    listerVariant
+    listerVariant,
+    imageIconVariant,
+    iconVariant,
 ]
 
 /**

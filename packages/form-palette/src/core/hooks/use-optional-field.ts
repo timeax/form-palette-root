@@ -44,6 +44,7 @@ export function useOptionalField<T = unknown>(
         main,
         ignore,
         required: requiredProp = false,
+        value: valueProp,
         defaultValue,
         disabled: disabledProp = false,
         readOnly: readOnlyProp = false,
@@ -53,8 +54,17 @@ export function useOptionalField<T = unknown>(
     } = options;
 
     const ref = React.useRef<HTMLElement>(null);
+    const [valueState, setValueState] = React.useState<T | undefined>(defaultValue);
 
-    const [value, setValueState] = React.useState<T | undefined>(defaultValue);
+    const isControlled = valueProp !== undefined;
+    const value = isControlled ? valueProp : valueState;
+
+    React.useEffect(() => {
+        if (isControlled) {
+            setValueState(valueProp);
+        }
+    }, [isControlled, valueProp]);
+
     const [error, setErrorState] = React.useState<string>("");
     const [loading, setLoadingState] = React.useState<boolean>(false);
     const [required, setRequired] = React.useState<boolean>(requiredProp);

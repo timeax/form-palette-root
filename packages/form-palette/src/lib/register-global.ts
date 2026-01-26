@@ -2,6 +2,11 @@ import type { CustomFileLoader, FileItem } from "@/presets/shadcn-variants/file"
 import { PasswordDefinitionMap } from "@/presets/shadcn-variants/password";
 import { PhoneCountry } from "@/presets/shadcn-variants/phone";
 
+type IconGroup = {
+    id: string; // stable key for selection/filtering
+    label: string;
+    prefixes: string[]; // iconify prefixes to load
+};
 // 1. Define the shape of your global palette store
 export interface PaletteRegistry {
    countries: PhoneCountry[];
@@ -9,6 +14,10 @@ export interface PaletteRegistry {
    customLoader: CustomFileLoader;
    getCountries: () => Promise<PhoneCountry[]>;
    formatFileValue: (file: FileItem) => string | undefined;
+   iconPicker: {
+       groups?: IconGroup[],
+       url?: string
+   }
    // You can add more keys here later, e.g.:
    // theme?: 'light' | 'dark';
    // locale?: string;

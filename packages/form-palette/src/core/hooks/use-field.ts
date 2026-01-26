@@ -82,6 +82,11 @@ export interface UseFieldOptions<T = unknown> {
     required?: boolean;
 
     /**
+     * Controlled value prop.
+     */
+    value?: T;
+
+    /**
      * Initial/default value for this field.
      */
     defaultValue?: T;
@@ -195,6 +200,7 @@ export function useField<T = unknown>(
         main,
         ignore,
         required: requiredProp = false,
+        value: valueProp,
         defaultValue,
         disabled: disabledProp = false,
         readOnly: readOnlyProp = false,
@@ -222,9 +228,19 @@ export function useField<T = unknown>(
     });
 
     // React state mirrors (used for rerenders)
-    const [value, setValueState] = React.useState<T | undefined>(
+    const [valueState, setValueState] = React.useState<T | undefined>(
         stateRef.current.value,
     );
+
+    const isControlled = valueProp !== undefined;
+    const value = isControlled ? valueProp : valueState;
+
+    React.useEffect(() => {
+        if (isControlled && valueProp !== stateRef.current.value) {
+            stateRef.current.value = valueProp;
+            setValueState(valueProp);
+        }
+    }, [isControlled, valueProp]);
     const [error, setErrorState] = React.useState<string>(
         stateRef.current.error,
     );
