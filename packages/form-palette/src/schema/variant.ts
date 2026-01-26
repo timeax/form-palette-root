@@ -38,6 +38,7 @@ import { JsonObject } from "@/lib/json-editor/utils";
 import { ShadcnJsonEditorProps } from "@/presets/shadcn-variants/json-editor/types";
 import { ListerVariantProps } from "@/presets/shadcn-variants/lister/types";
 import { ShadcnIconVariantProps } from "@/presets/shadcn-variants/icon";
+import {ShadcnImageIconVariantProps} from "@/presets/shadcn-variants/image-icon";
 
 /**
  * Helper type for a single variant registry entry.
@@ -104,7 +105,7 @@ export interface Variants<H = unknown> {
     'json-editor': VariantEntry<JsonObject | undefined, ShadcnJsonEditorProps>
     lister: VariantEntry<any | undefined, ListerVariantProps<any>>,
     icon: VariantEntry<any, ShadcnIconVariantProps>,
-    'image-icon': VariantEntry<any, ShadcnIconVariantProps>
+    'image-icon': VariantEntry<any, ShadcnImageIconVariantProps>
 }
 
 

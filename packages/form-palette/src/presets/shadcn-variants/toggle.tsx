@@ -21,7 +21,7 @@ type Density = "default" | "dense";
 export interface ShadcnToggleUiProps
    extends Omit<
       React.ComponentProps<typeof Switch>,
-      "checked" | "onCheckedChange" | "className" | 'defaultValue' | 'onChange'
+      "checked" | "onCheckedChange" | "className" | 'defaultValue' | 'onChange' | 'value'
    > {
    /**
     * Visual size of the switch / text.
@@ -144,7 +144,7 @@ export const ShadcnToggleVariant = React.forwardRef<
 
    const handleToggle = React.useCallback(
       (next: boolean) => {
-         const nextVal = !!next;
+         const nextVal = Boolean(next);
          const detail: ChangeDetail = {
             source: "variant",
             raw: nextVal,

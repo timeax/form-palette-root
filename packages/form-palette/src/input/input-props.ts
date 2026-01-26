@@ -173,7 +173,7 @@ export type InputFieldProps<
 > = InputFieldBaseProps<VariantValueFor<K, H>> &
     VariantPropsFor<K, H> &
     InputFieldClassNameProps &
-    Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> & {
+    Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue" | 'value'> & {
         variant: K;
 
         /**
