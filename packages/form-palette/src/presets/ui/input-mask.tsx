@@ -1,5 +1,4 @@
 import * as React from "react";
-import { Input } from "@/presets/ui/input";
 
 export interface InputMaskChangeEvent {
    originalEvent: React.SyntheticEvent<HTMLInputElement> | Event | undefined;

@@ -4,6 +4,7 @@ import * as React from "react";
 import type { ChangeDetail, VariantBaseProps } from "@/variants/shared";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/presets/ui/checkbox";
+import { Badge } from "@/presets/ui/badge";
 import { globalNormalizeCheckBasedOptions } from "@/lib/normalise-options";
 import { buildGroupLayoutClasses } from "@/lib/group-layout";
 
@@ -35,6 +36,7 @@ export interface CheckboxGroupEntry<TValue> {
 export type CheckboxGroupValue<TValue> =
     | readonly CheckboxGroupEntry<TValue>[]
     | undefined;
+export type CheckboxGroupSelectedValue<TValue> = readonly TValue[] | undefined;
 
 export type CheckboxGroupValueMain<TValue extends string | number | symbol> =
     Record<TValue, CheckboxTriStateValue>;
@@ -55,7 +57,8 @@ export type CheckboxSingleValue = boolean | undefined;
 export type CheckboxVariantValue<TValue> =
     | CheckboxSingleValue
     //@ts-ignore
-    | CheckboxGroupValueMain<TValue>;
+    | CheckboxGroupValueMain<TValue>
+    | CheckboxGroupSelectedValue<TValue>;
 
 export interface CheckboxItem<TValue> {
     value: TValue;
@@ -63,6 +66,16 @@ export interface CheckboxItem<TValue> {
     description?: React.ReactNode;
     disabled?: boolean;
     key?: React.Key;
+    raw?: unknown;
+    tags?: Array<{
+        label: React.ReactNode;
+        icon?: React.ReactNode;
+        className?: string;
+        color?: string;
+        bgColor?: string;
+        onClick?: React.MouseEventHandler<HTMLSpanElement>;
+        raw: unknown;
+    }>;
 
     /**
      * Option-level renderer (provided by the normaliser).
@@ -146,6 +159,15 @@ export interface ShadcnCheckboxUiProps<TItem, TValue> {
      *   optionLabel = "title"
      */
     optionLabel?: keyof TItem;
+    optionTags?: keyof TItem;
+    optionTagLabel?: string | ((tag: unknown) => React.ReactNode);
+    optionTagIcon?: string | ((tag: unknown) => React.ReactNode);
+    optionTagClassName?: string | ((tag: unknown) => string);
+    optionTagColor?: string | ((tag: unknown) => string);
+    optionTagBgColor?: string | ((tag: unknown) => string);
+    optionTagOnClick?:
+        | string
+        | ((tag: unknown) => React.MouseEventHandler<HTMLSpanElement>);
 
     /**
      * Custom renderer for each option row.
@@ -324,6 +346,15 @@ function normalizeItems<TItem, TValue>(
     mappers?: CheckboxMappers<TItem, TValue>,
     optionValueKey?: keyof TItem,
     optionLabelKey?: keyof TItem,
+    optionTagsKey?: keyof TItem,
+    optionTagLabel?: string | ((tag: unknown) => React.ReactNode),
+    optionTagIcon?: string | ((tag: unknown) => React.ReactNode),
+    optionTagClassName?: string | ((tag: unknown) => string),
+    optionTagColor?: string | ((tag: unknown) => string),
+    optionTagBgColor?: string | ((tag: unknown) => string),
+    optionTagOnClick?:
+        | string
+        | ((tag: unknown) => React.MouseEventHandler<HTMLSpanElement>),
 ): CheckboxItem<TValue>[] {
     if (!items || !items.length) return [];
 
@@ -342,6 +373,7 @@ function normalizeItems<TItem, TValue>(
             tristate: mappers.getTristate
                 ? mappers.getTristate(item, index)
                 : undefined,
+            raw: item,
         }));
     }
 
@@ -354,12 +386,22 @@ function normalizeItems<TItem, TValue>(
                 index,
                 optionLabelKey,
                 optionValueKey,
+                {
+                    optionTags: optionTagsKey as string | undefined,
+                    optionTagLabel,
+                    optionTagIcon,
+                    optionTagClassName,
+                    optionTagColor,
+                    optionTagBgColor,
+                    optionTagOnClick,
+                },
             );
             const tristate = anyItem.tristate as boolean | undefined;
 
             return {
                 ...normalised,
                 tristate,
+                raw: item,
             };
         });
     }
@@ -381,6 +423,7 @@ function normalizeItems<TItem, TValue>(
                 disabled: false,
                 key: index,
                 tristate: undefined,
+                raw: item,
             } satisfies CheckboxItem<TValue>;
         }
 
@@ -399,7 +442,24 @@ function asGroupValue<TValue>(
     value: CheckboxVariantValue<TValue>,
 ): CheckboxGroupValue<TValue> {
     if (!value) return undefined;
-    if (Array.isArray(value)) return value;
+    if (Array.isArray(value)) {
+        if (value.length === 0) return undefined;
+        const first = value[0] as any;
+        // Legacy/object-entry shape: [{ value, state }]
+        if (
+            first &&
+            typeof first === "object" &&
+            "value" in first &&
+            "state" in first
+        ) {
+            return value as CheckboxGroupValue<TValue>;
+        }
+        // Non-tristate shape: [value, value, ...]
+        return (value as TValue[]).map((item) => ({
+            value: item,
+            state: true,
+        }));
+    }
     if (typeof value == "object")
         return Object.keys(value).map(
             (key) =>
@@ -444,6 +504,13 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
         mappers,
         optionValue,
         optionLabel,
+        optionTags,
+        optionTagLabel,
+        optionTagIcon,
+        optionTagClassName,
+        optionTagColor,
+        optionTagBgColor,
+        optionTagOnClick,
         renderOption,
         single,
         tristate: tristateDefault,
@@ -476,6 +543,36 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
 
     const hasError = !!error;
     const isSingle = !!single;
+    const normalized = React.useMemo(
+        () =>
+            normalizeItems<TItem, TValue>(
+                items ?? options,
+                mappers,
+                optionValue,
+                optionLabel,
+                optionTags,
+                optionTagLabel,
+                optionTagIcon,
+                optionTagClassName,
+                optionTagColor,
+                optionTagBgColor,
+                optionTagOnClick,
+            ),
+        [
+            items,
+            options,
+            mappers,
+            optionValue,
+            optionLabel,
+            optionTags,
+            optionTagLabel,
+            optionTagIcon,
+            optionTagClassName,
+            optionTagColor,
+            optionTagBgColor,
+            optionTagOnClick,
+        ],
+    );
 
     // ─────────────────────────────────────────
     // Single mode
@@ -506,6 +603,12 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
             const detail: ChangeDetail = {
                 source: "variant",
                 raw: nextPublic,
+                selectedOptions:
+                    nextPublic === true
+                        ? normalized[0]
+                            ? [normalized[0].raw ?? normalized[0].value]
+                            : []
+                        : [],
                 nativeEvent: undefined,
                 meta: undefined,
             };
@@ -579,16 +682,6 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
     // ─────────────────────────────────────────
 
     const groupValue = asGroupValue<TValue>(value);
-    const normalized = React.useMemo(
-        () =>
-            normalizeItems<TItem, TValue>(
-                items ?? options,
-                mappers,
-                optionValue,
-                optionLabel,
-            ),
-        [items, options, mappers, optionValue, optionLabel],
-    );
 
     const {
         groupStyle,
@@ -609,6 +702,10 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
         labelTextSizeClass: labelTextSize(size),
         descriptionTextSizeClass: descriptionTextSize(size),
     });
+    const hasAnyTristate = React.useMemo(
+        () => normalized.some((item) => item.tristate ?? tristateDefault ?? false),
+        [normalized, tristateDefault],
+    );
 
     const findEntryIndex = React.useCallback(
         (val: TValue): number => {
@@ -700,16 +797,29 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
             const detail: ChangeDetail = {
                 source: "variant",
                 raw: nextList,
+                selectedOptions: nextList.map(
+                    (entry) =>
+                        normalized.find((item) =>
+                            isEqualValue(item.value, entry.value),
+                        )?.raw ?? entry.value,
+                ),
                 nativeEvent: undefined,
                 meta: undefined,
             };
 
-            const value: CheckboxGroupValueMain<any> = {};
-            nextList.forEach((item) => (value[item.value as any] = item.state));
+            if (hasAnyTristate) {
+                const value: CheckboxGroupValueMain<any> = {};
+                nextList.forEach(
+                    (item) => (value[item.value as any] = item.state),
+                );
+                onValue(value, detail);
+                return;
+            }
 
-            onValue(value, detail);
+            // Non-tristate group mode emits selected keys only.
+            onValue(nextList.map((item) => item.value) as any, detail);
         },
-        [onValue, disabled, groupValue],
+        [onValue, disabled, groupValue, normalized, hasAnyTristate],
     );
 
     return (
@@ -843,13 +953,38 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
                             {checkboxNode}
 
                             <div className="flex min-w-0 flex-col">
-                                <span
-                                    className={cn(
-                                        labelClassesBase,
-                                        optionLabelClassName,
+                                <span className="flex min-w-0 items-start gap-2">
+                                    <span
+                                        className={cn(
+                                            labelClassesBase,
+                                            optionLabelClassName,
+                                            "truncate",
+                                        )}
+                                    >
+                                        {displayItem.label}
+                                    </span>
+                                    {!!displayItem.tags?.length && (
+                                        <span className="ml-auto flex shrink-0 flex-wrap gap-1">
+                                            {displayItem.tags.map((tag, tagIndex) => (
+                                                <Badge
+                                                    key={tagIndex}
+                                                    className={cn("text-xs", tag.className)}
+                                                    onClick={tag.onClick}
+                                                    style={{
+                                                        color: tag.color,
+                                                        backgroundColor: tag.bgColor,
+                                                    }}
+                                                >
+                                                    {tag.icon && (
+                                                        <span className="shrink-0">
+                                                            {tag.icon}
+                                                        </span>
+                                                    )}
+                                                    <span>{tag.label}</span>
+                                                </Badge>
+                                            ))}
+                                        </span>
                                     )}
-                                >
-                                    {displayItem.label}
                                 </span>
                                 {displayItem.description != null && (
                                     <span className={descriptionClassesBase}>
@@ -895,7 +1030,8 @@ export type DefaultCheckboxItemValue = string | number;
  * Public "value" type for the checkbox variant used by the registry:
  *
  * - Single mode: boolean | undefined
- * - Group mode: CheckboxGroupEntry<DefaultCheckboxItemValue>[] | undefined
+ * - Group mode (non-tristate): DefaultCheckboxItemValue[] | undefined
+ * - Group mode (tristate): Record<DefaultCheckboxItemValue, true | false>
  *
  * In tri-state group mode, both `true` and `false` entries are present;
  * `"none"` never appears in this type.

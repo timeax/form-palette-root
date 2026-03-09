@@ -212,7 +212,7 @@ export function CoreProvider<
         const exceptions = propsRef.current.exceptions ?? [];
         const list: Dict = {};
         const shared: Dict<Dict> = {};
-        const formatFileValue = getPaletteUtil('formatFileValue')
+        const formatFileValue = getPaletteUtil("formatFileValue");
 
         for (const item of fetchAllNamedFields()) {
             const rawName = item.name;
@@ -249,8 +249,10 @@ export function CoreProvider<
                     return anyField.onSubmit(value);
                 }
 
-                if(formatFileValue && item.variant == 'file') {
-                    return toArray(value as FileItem | FileItem[]).map(formatFileValue);
+                if (formatFileValue && item.variant == "file") {
+                    return toArray(value as FileItem | FileItem[]).map(
+                        formatFileValue,
+                    );
                 }
 
                 return value;
@@ -367,8 +369,7 @@ export function CoreProvider<
         const finish = () => {
             if (finished) return;
             finished = true;
-            if (uncaughtRef.current.length)
-                setHasUncaughtErrors(hasUncaughtErrors + 1);
+            if (uncaughtRef.current.length) setHasUncaughtErrors((e) => e + 1);
             setButtonLoading(false);
         };
 

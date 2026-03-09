@@ -27,6 +27,9 @@
         "limit": 200
     },
     "shortcuts": {
+        "core": {
+            "include": ["./packages/form-palette/src/core/**"]
+        },
         "core-provider": {
             "files": ["packages/form-palette/src/index.ts"],
             "include": ["./packages/form-palette/src/adapters/**"],
@@ -35,9 +38,8 @@
         "variants": {
             "files": [],
             "include": [
-                "./packages/form-palette/src/presets/shadcn-variants/**/*.tsx",
-                "./packages/form-palette/src/presets/shadcn-variants/**/*.ts",
-                "./packages/form-palette/src/variants/core/**"
+                "./packages/form-palette/src/presets/shadcn-variants/**",
+                "./packages/form-palette/src/presets/ui/**"
             ]
         },
         "lister-and-json": {

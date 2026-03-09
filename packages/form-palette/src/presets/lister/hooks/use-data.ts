@@ -2,23 +2,16 @@
 
 import * as React from "react";
 
-import type {
-    ListerSearchMode,
-    ListerSearchPayload,
-    ListerSearchTarget,
-} from "@/presets/lister/types";
+import type {ListerSearchMode, ListerSearchPayload, ListerSearchTarget,} from "@/presets/lister/types";
 
-import { extractArray } from "@/presets/lister/runtime/engine/extract";
-import {
-    defaultHttpClient,
-    type ListerHttpClient,
-} from "@/presets/lister/runtime/engine/http";
-import { createRequestId } from "@/presets/lister/runtime/engine/engine";
-import { buildSearchPayloadFromTarget } from "@/presets/lister/runtime/engine/search";
+import {extractArray} from "@/presets/lister/runtime/engine/extract";
+import {defaultHttpClient, type ListerHttpClient,} from "@/presets/lister/runtime/engine/http";
+import {createRequestId} from "@/presets/lister/runtime/engine/engine";
+import {buildSearchPayloadFromTarget} from "@/presets/lister/runtime/engine/search";
 
 // ✅ NEW: runtime inflight (abort + debounce + latest)
-import { createInFlight } from "@/presets/lister/runtime/session/inflight";
-import { createRuntimeKey } from "@/presets/lister/runtime/session/key";
+import {createInFlight} from "@/presets/lister/runtime/session/inflight";
+import {createRuntimeKey} from "@/presets/lister/runtime/session/key";
 
 /**
  * Minimal selector contract (matches extractArray contract used by lister)
@@ -119,6 +112,7 @@ export type UseDataResult<TItem = any, TFilters = Record<string, any>> = {
 
     data: TItem[];
     visible: TItem[];
+    res?: any;
 
     loading: boolean;
     error: any;
@@ -150,7 +144,7 @@ export type UseDataResult<TItem = any, TFilters = Record<string, any>> = {
     getSelection: () => TItem | TItem[] | null;
 
     refresh: () => void;
-    override(data: TItem[]): void
+    override(data: TItem[]): void;
 
     fetch: (override?: {
         query?: string;
@@ -209,7 +203,8 @@ function stringifyForSearch(v: any): string {
 }
 
 export function useData<TItem = any, TFilters = Record<string, any>>(
-    opts: UseDataOptions<TItem, TFilters>, deps: any[] = []
+    opts: UseDataOptions<TItem, TFilters>,
+    deps: any[] = [],
 ): UseDataResult<TItem, TFilters> {
     const enabled = opts.enabled ?? true;
     const debounceMs = opts.debounceMs ?? 300;
@@ -217,6 +212,7 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
     const http = opts.http ?? defaultHttpClient;
 
     const [data, setData] = React.useState<TItem[]>(() => opts.initial ?? []);
+    const [res, setRes] = React.useState<any>();
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<any>(undefined);
 
@@ -246,7 +242,7 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
 
     // ✅ stable key for inflight map (not tied to lister context)
     const inflightKeyRef = React.useRef<string>(
-        opts.id ?? createRuntimeKey('data'),
+        opts.id ?? createRuntimeKey("data"),
     );
     React.useEffect(() => {
         // if user provides an id later, adopt it
@@ -405,6 +401,7 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
                     );
                 }
 
+                setRes(resBody);
                 setData(list);
                 setLoading(false);
                 return list;
@@ -624,7 +621,7 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
             if (selectionMode === "none") return;
 
             const ids = normalizeIds(idOrIds).filter(isKey);
-            if (!ids.length) return;
+            if (!ids.length) return clearSelection();
 
             for (const id of ids) {
                 const hit = dataById.get(id);
@@ -636,11 +633,7 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
                 return;
             }
 
-            setSelectedIdsArr((prev) => {
-                const set = new Set<DataKey>(prev);
-                for (const id of ids) set.add(id);
-                return Array.from(set);
-            });
+            setSelectedIdsArr(ids);
         },
         [dataById, normalizeIds, selectionMode],
     );
@@ -718,6 +711,7 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
 
         data,
         visible,
+        res,
 
         loading,
         error,

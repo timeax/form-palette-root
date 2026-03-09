@@ -23,6 +23,15 @@ export type NormalizedTreeItem = {
     description?: React.ReactNode;
     disabled?: boolean;
     icon?: React.ReactNode;
+    tags?: Array<{
+        label: React.ReactNode;
+        icon?: React.ReactNode;
+        className?: string;
+        color?: string;
+        bgColor?: string;
+        onClick?: React.MouseEventHandler<HTMLSpanElement>;
+        raw: unknown;
+    }>;
     level: number;
     parentValue?: TreeKey;
     path: TreeKey[]; // ancestors only (not including self)

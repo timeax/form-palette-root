@@ -10,6 +10,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/presets/ui/tooltip";
+import { Badge } from "@/presets/ui/badge";
 
 // ─────────────────────────────────────────────
 // Types
@@ -22,6 +23,15 @@ export interface ToggleOption {
     disabled?: boolean;
     tooltip?: React.ReactNode;
     meta?: any;
+    tags?: Array<{
+        label: React.ReactNode;
+        icon?: React.ReactNode;
+        className?: string;
+        color?: string;
+        bgColor?: string;
+        onClick?: React.MouseEventHandler<HTMLSpanElement>;
+        raw?: unknown;
+    }>;
 }
 
 /**
@@ -107,6 +117,13 @@ export interface ShadcnToggleVariantProps
      * If omitted, falls back to obj.meta.
      */
     optionMeta?: string;
+    optionTags?: string;
+    optionTagLabel?: string;
+    optionTagIcon?: string;
+    optionTagClassName?: string;
+    optionTagColor?: string;
+    optionTagBgColor?: string;
+    optionTagOnClick?: string;
 
     /**
      * Optional custom renderer for each option.
@@ -196,6 +213,13 @@ function normalizeOption(
         optionDisabled,
         optionTooltip,
         optionMeta,
+        optionTags,
+        optionTagLabel,
+        optionTagIcon,
+        optionTagClassName,
+        optionTagColor,
+        optionTagBgColor,
+        optionTagOnClick,
     }: {
         optionValue?: string;
         optionLabel?: string;
@@ -203,6 +227,13 @@ function normalizeOption(
         optionDisabled?: string;
         optionTooltip?: string;
         optionMeta?: string;
+        optionTags?: string;
+        optionTagLabel?: string;
+        optionTagIcon?: string;
+        optionTagClassName?: string;
+        optionTagColor?: string;
+        optionTagBgColor?: string;
+        optionTagOnClick?: string;
     },
     autoCap: boolean
 ): NormalizedToggle {
@@ -215,7 +246,14 @@ function normalizeOption(
         optionIcon ||
         optionDisabled ||
         optionTooltip ||
-        optionMeta
+        optionMeta ||
+        optionTags ||
+        optionTagLabel ||
+        optionTagIcon ||
+        optionTagClassName ||
+        optionTagColor ||
+        optionTagBgColor ||
+        optionTagOnClick
     ) {
         const rawValue =
             optionValue != null
@@ -252,6 +290,43 @@ function normalizeOption(
             optionMeta != null
                 ? anyInput[optionMeta]
                 : (anyInput.meta ?? undefined);
+        const rawTags =
+            optionTags != null ? anyInput[optionTags] : anyInput.tags;
+        const tags = Array.isArray(rawTags)
+            ? rawTags.flatMap((tag: any) => {
+                  const label =
+                      optionTagLabel != null ? tag?.[optionTagLabel] : tag?.label;
+                  if (label === undefined || label === null || label === "") {
+                      return [];
+                  }
+                  return [
+                      {
+                          label,
+                          icon:
+                              optionTagIcon != null
+                                  ? tag?.[optionTagIcon]
+                                  : tag?.icon,
+                          className:
+                              optionTagClassName != null
+                                  ? tag?.[optionTagClassName]
+                                  : tag?.className,
+                          color:
+                              optionTagColor != null
+                                  ? tag?.[optionTagColor]
+                                  : tag?.color,
+                          bgColor:
+                              optionTagBgColor != null
+                                  ? tag?.[optionTagBgColor]
+                                  : tag?.bgColor,
+                          onClick:
+                              optionTagOnClick != null
+                                  ? tag?.[optionTagOnClick]
+                                  : tag?.onClick,
+                          raw: tag,
+                      },
+                  ];
+              })
+            : undefined;
 
         return {
             ui: {
@@ -261,6 +336,7 @@ function normalizeOption(
                 disabled,
                 tooltip,
                 meta,
+                tags,
             },
             raw: input,
         };
@@ -305,6 +381,7 @@ function normalizeOption(
             disabled: !!anyInput.disabled,
             tooltip: anyInput.tooltip,
             meta: anyInput.meta,
+            tags: Array.isArray(anyInput.tags) ? anyInput.tags : undefined,
         },
         raw: input,
     };
@@ -339,6 +416,13 @@ export const ShadcnToggleVariant = React.forwardRef<
         optionDisabled,
         optionTooltip,
         optionMeta,
+        optionTags,
+        optionTagLabel,
+        optionTagIcon,
+        optionTagClassName,
+        optionTagColor,
+        optionTagBgColor,
+        optionTagOnClick,
 
         renderOption,
         className,
@@ -364,6 +448,13 @@ export const ShadcnToggleVariant = React.forwardRef<
                         optionDisabled,
                         optionTooltip,
                         optionMeta,
+                        optionTags,
+                        optionTagLabel,
+                        optionTagIcon,
+                        optionTagClassName,
+                        optionTagColor,
+                        optionTagBgColor,
+                        optionTagOnClick,
                     },
                     autoCap
                 )
@@ -376,6 +467,13 @@ export const ShadcnToggleVariant = React.forwardRef<
             optionDisabled,
             optionTooltip,
             optionMeta,
+            optionTags,
+            optionTagLabel,
+            optionTagIcon,
+            optionTagClassName,
+            optionTagColor,
+            optionTagBgColor,
+            optionTagOnClick,
             autoCap,
         ]
     );
@@ -409,6 +507,11 @@ export const ShadcnToggleVariant = React.forwardRef<
             const detail: ChangeDetail = {
                 source: "variant",
                 raw: rawSelection, // original item(s)
+                selectedOptions: Array.isArray(rawSelection)
+                    ? rawSelection
+                    : rawSelection === undefined
+                      ? []
+                      : [rawSelection],
                 nativeEvent: undefined,
                 meta: { action: "toggle" },
             };
@@ -472,11 +575,35 @@ export const ShadcnToggleVariant = React.forwardRef<
                 const contentNode = renderOption ? (
                     renderOption(opt, isSelected)
                 ) : (
-                    <div className="flex items-center gap-2 truncate">
-                        {opt.icon && (
-                            <span className="shrink-0">{opt.icon}</span>
-                        )}
-                        <span className="truncate">{opt.label}</span>
+                    <div className="flex flex-col items-start gap-1 truncate">
+                        <div className="flex w-full min-w-0 items-start gap-2">
+                            {opt.icon && (
+                                <span className="shrink-0">{opt.icon}</span>
+                            )}
+                            <span className="truncate">{opt.label}</span>
+                            {!!opt.tags?.length && (
+                                <span className="ml-auto flex shrink-0 flex-wrap gap-1">
+                                    {opt.tags.map((tag, tagIndex) => (
+                                        <Badge
+                                            key={tagIndex}
+                                            className={cn("text-xs", tag.className)}
+                                            onClick={tag.onClick}
+                                            style={{
+                                                color: tag.color,
+                                                backgroundColor: tag.bgColor,
+                                            }}
+                                        >
+                                            {tag.icon && (
+                                                <span className="shrink-0">
+                                                    {tag.icon}
+                                                </span>
+                                            )}
+                                            <span>{tag.label}</span>
+                                        </Badge>
+                                    ))}
+                                </span>
+                            )}
+                        </div>
                     </div>
                 );
 

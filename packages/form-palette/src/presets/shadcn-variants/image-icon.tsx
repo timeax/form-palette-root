@@ -1117,7 +1117,7 @@ export const ShadcnImageIconVariant = React.forwardRef<
 
                 <PopoverContent
                     className={cn(
-                        "w-(--radix-popover-trigger-width) p-0",
+                        "w-(--radix-popover-trigger-width) p-0 max-h-(--radix-popper-available-height)",
                         popoverClassName,
                     )}
                     align="start"

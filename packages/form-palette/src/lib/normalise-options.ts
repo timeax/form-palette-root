@@ -29,6 +29,16 @@ export type OptionAccessorNoIndex<TItem, TValue> =
     | null
     | undefined;
 
+export interface NormalizedOptionTag {
+    label: React.ReactNode;
+    icon?: React.ReactNode;
+    className?: string;
+    color?: string;
+    bgColor?: string;
+    onClick?: React.MouseEventHandler<HTMLSpanElement>;
+    raw: unknown;
+}
+
 export type OptionKeyAccessor<TItem> =
     | ((item: TItem, index: number) => React.Key)
     | keyof TItem
@@ -45,6 +55,16 @@ export interface GlobalNormalizeConfig<TItem, TValue = SelectPrimitive> {
     optionDisabled?: OptionAccessorNoIndex<TItem, boolean>;
     optionIcon?: OptionAccessorNoIndex<TItem, React.ReactNode>;
     optionKey?: OptionKeyAccessor<TItem>;
+    optionTags?: OptionAccessorNoIndex<TItem, unknown[]>;
+    optionTagLabel?: OptionAccessorNoIndex<unknown, React.ReactNode>;
+    optionTagIcon?: OptionAccessorNoIndex<unknown, React.ReactNode>;
+    optionTagClassName?: OptionAccessorNoIndex<unknown, string>;
+    optionTagColor?: OptionAccessorNoIndex<unknown, string>;
+    optionTagBgColor?: OptionAccessorNoIndex<unknown, string>;
+    optionTagOnClick?: OptionAccessorNoIndex<
+        unknown,
+        React.MouseEventHandler<HTMLSpanElement>
+    >;
 }
 
 export interface GlobalNormalizedOption<TItem, TValue = SelectPrimitive> {
@@ -55,6 +75,7 @@ export interface GlobalNormalizedOption<TItem, TValue = SelectPrimitive> {
     description?: React.ReactNode;
     disabled: boolean;
     icon?: React.ReactNode;
+    tags?: NormalizedOptionTag[];
 
     /** Option-level renderer (falls back to global renderOption in the variant) */
     render?: OptionRenderFn;
@@ -95,6 +116,72 @@ function resolveRender(obj: any): OptionRenderFn | undefined {
     }
 
     return undefined;
+}
+
+function resolveByAccessor<TInput, TOutput>(
+    input: TInput,
+    accessor: OptionAccessorNoIndex<TInput, TOutput>,
+    fallback?: TOutput,
+): TOutput | undefined {
+    if (typeof accessor === "function") return accessor(input);
+    if (typeof accessor === "string") return (input as any)?.[accessor];
+    return fallback;
+}
+
+function normalizeOptionTags<TItem, TValue>(
+    raw: TItem,
+    obj: any,
+    config: GlobalNormalizeConfig<TItem, TValue>,
+): NormalizedOptionTag[] | undefined {
+    const rawTags =
+        resolveByAccessor(raw, config.optionTags) ??
+        (Array.isArray(obj?.tags) ? obj.tags : undefined);
+
+    if (!Array.isArray(rawTags) || rawTags.length === 0) return undefined;
+
+    const tags = rawTags
+        .map((tag: unknown) => {
+            const tagObj =
+                tag != null && typeof tag === "object"
+                    ? (tag as Record<string, unknown>)
+                    : undefined;
+
+            const label =
+                resolveByAccessor(tag, config.optionTagLabel) ??
+                tagObj?.label ??
+                (typeof tag === "string" || typeof tag === "number"
+                    ? String(tag)
+                    : undefined);
+
+            if (label === undefined || label === null || label === "") {
+                return null;
+            }
+
+            return {
+                label,
+                icon:
+                    resolveByAccessor(tag, config.optionTagIcon) ??
+                    (tagObj?.icon as React.ReactNode | undefined),
+                className:
+                    resolveByAccessor(tag, config.optionTagClassName) ??
+                    (tagObj?.className as string | undefined),
+                color:
+                    resolveByAccessor(tag, config.optionTagColor) ??
+                    (tagObj?.color as string | undefined),
+                bgColor:
+                    resolveByAccessor(tag, config.optionTagBgColor) ??
+                    (tagObj?.bgColor as string | undefined),
+                onClick:
+                    resolveByAccessor(tag, config.optionTagOnClick) ??
+                    (tagObj?.onClick as
+                        | React.MouseEventHandler<HTMLSpanElement>
+                        | undefined),
+                raw: tag,
+            } satisfies NormalizedOptionTag;
+        })
+        .filter(Boolean) as NormalizedOptionTag[];
+
+    return tags.length ? tags : undefined;
 }
 
 function resolveValue<TItem, TValue>(
@@ -219,6 +306,7 @@ function normalizeOne<TItem, TValue>(
     const disabled = resolveDisabled(raw, obj, config.optionDisabled);
     const icon = resolveIcon(raw, obj, config.optionIcon);
     const key = resolveKey(raw, obj, index, value, config.optionKey);
+    const tags = normalizeOptionTags(raw, obj, config);
 
     const render = resolveRender(obj);
 
@@ -230,6 +318,7 @@ function normalizeOne<TItem, TValue>(
         description,
         disabled,
         icon,
+        tags,
         render,
         raw,
     };
@@ -260,7 +349,17 @@ export function globalNormalizeCheckBasedOptions<
     item: TItem,
     index: number,
     optionLabelKey: TLabelKey,
-    optionValueKey: TValueKey
+    optionValueKey: TValueKey,
+    tagConfig?: Pick<
+        GlobalNormalizeConfig<any, any>,
+        | "optionTags"
+        | "optionTagLabel"
+        | "optionTagIcon"
+        | "optionTagClassName"
+        | "optionTagColor"
+        | "optionTagBgColor"
+        | "optionTagOnClick"
+    >,
 ) {
     const anyItem = item as any;
 
@@ -279,6 +378,7 @@ export function globalNormalizeCheckBasedOptions<
     const description = anyItem.description;
     const disabled = !!anyItem.disabled;
     const key: React.Key = anyItem.key ?? index;
+    const tags = normalizeOptionTags(item, anyItem, tagConfig ?? {});
 
     const render = resolveRender(anyItem);
 
@@ -288,6 +388,7 @@ export function globalNormalizeCheckBasedOptions<
         label: rawLabel,
         description,
         disabled,
+        tags,
         render,
         raw: item,
     };
@@ -308,6 +409,13 @@ export function normalizeTree(
         | "optionDisabled"
         | "optionIcon"
         | "optionKey"
+        | "optionTags"
+        | "optionTagLabel"
+        | "optionTagIcon"
+        | "optionTagClassName"
+        | "optionTagColor"
+        | "optionTagBgColor"
+        | "optionTagOnClick"
     >,
     level = 0,
     parentValue?: TreeKey,

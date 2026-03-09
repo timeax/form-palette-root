@@ -2,11 +2,11 @@
 // noinspection DuplicatedCode
 
 import * as React from "react";
-import type { VariantBaseProps, ChangeDetail } from "@/variants/shared";
+import type { ChangeDetail, VariantBaseProps } from "@/variants/shared";
 import { cn } from "@/lib/utils";
 import { Input } from "@/presets/ui/input";
 import { Checkbox } from "@/presets/ui/checkbox";
-import { Popover, PopoverTrigger, PopoverContent } from "@/presets/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/presets/ui/popover";
 import { ChevronDown, Search, X } from "lucide-react";
 import { Badge } from "@/presets/ui/badge";
 import {
@@ -14,6 +14,8 @@ import {
     SelectionSummary,
 } from "@/variants/helpers/selection-summary";
 import { globalNormalizeOptions } from "@/lib/normalise-options";
+import { keyBy } from "lodash";
+import { Virtuoso } from "react-virtuoso";
 
 type SelectPrimitive = string | number;
 
@@ -39,6 +41,15 @@ type NormalizedMultiItem = {
     description?: React.ReactNode;
     disabled?: boolean;
     icon?: React.ReactNode;
+    tags?: Array<{
+        label: React.ReactNode;
+        icon?: React.ReactNode;
+        className?: string;
+        color?: string;
+        bgColor?: string;
+        onClick?: React.MouseEventHandler<HTMLSpanElement>;
+        raw: unknown;
+    }>;
     /** Option-level renderer (falls back to global renderOption) */
     render?: (...args: any[]) => React.ReactNode;
     raw: MultiSelectOption;
@@ -98,6 +109,15 @@ type MultiSelectBaseProps = Pick<
      * - function → custom mapper
      */
     optionIcon?: string | ((item: MultiSelectOption) => React.ReactNode);
+    optionTags?: string | ((item: MultiSelectOption) => unknown[]);
+    optionTagLabel?: string | ((tag: unknown) => React.ReactNode);
+    optionTagIcon?: string | ((tag: unknown) => React.ReactNode);
+    optionTagClassName?: string | ((tag: unknown) => string);
+    optionTagColor?: string | ((tag: unknown) => string);
+    optionTagBgColor?: string | ((tag: unknown) => string);
+    optionTagOnClick?:
+        | string
+        | ((tag: unknown) => React.MouseEventHandler<HTMLSpanElement>);
 
     /**
      * How to compute the React key for each option.
@@ -293,7 +313,14 @@ function normalizeOptions(
         | "optionDisabled"
         | "optionKey"
         | "optionIcon"
-    >
+        | "optionTags"
+        | "optionTagLabel"
+        | "optionTagIcon"
+        | "optionTagClassName"
+        | "optionTagColor"
+        | "optionTagBgColor"
+        | "optionTagOnClick"
+    >,
 ): NormalizedMultiItem[] {
     return globalNormalizeOptions(opts, config);
 }
@@ -347,6 +374,13 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
         optionDisabled,
         optionIcon,
         optionKey,
+        optionTags,
+        optionTagLabel,
+        optionTagIcon,
+        optionTagClassName,
+        optionTagColor,
+        optionTagBgColor,
+        optionTagOnClick,
 
         searchable,
         searchPlaceholder,
@@ -398,19 +432,8 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
     const [open, setOpen] = React.useState(false);
     const [query, setQuery] = React.useState("");
 
-    const items = React.useMemo(
-        () =>
-            normalizeOptions(options ?? [], {
-                autoCap,
-                optionLabel,
-                optionValue,
-                optionDescription,
-                optionDisabled,
-                optionKey,
-                optionIcon,
-            }),
-        [
-            options,
+    const { items, keyedItems } = React.useMemo(() => {
+        const items = normalizeOptions(options ?? [], {
             autoCap,
             optionLabel,
             optionValue,
@@ -418,17 +441,42 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
             optionDisabled,
             optionKey,
             optionIcon,
-        ]
-    );
+            optionTags,
+            optionTagLabel,
+            optionTagIcon,
+            optionTagClassName,
+            optionTagColor,
+            optionTagBgColor,
+            optionTagOnClick,
+        });
+
+        return { items, keyedItems: keyBy(items, "value") };
+    }, [
+        options,
+        autoCap,
+        optionLabel,
+        optionValue,
+        optionDescription,
+        optionDisabled,
+        optionKey,
+        optionIcon,
+        optionTags,
+        optionTagLabel,
+        optionTagIcon,
+        optionTagClassName,
+        optionTagColor,
+        optionTagBgColor,
+        optionTagOnClick,
+    ]);
 
     const selectedValues = React.useMemo(
         () => new Set<SelectPrimitive>((value ?? []) as SelectPrimitive[]),
-        [value]
+        [value],
     );
 
     const selectedItems = React.useMemo(
         () => items.filter((it) => selectedValues.has(it.value)),
-        [items, selectedValues]
+        [items, selectedValues],
     );
 
     const filteredItems = React.useMemo(() => {
@@ -439,12 +487,12 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
 
     const selectableItems = React.useMemo(
         () => items.filter((it) => !it.disabled),
-        [items]
+        [items],
     );
 
     const allSelectableValues = React.useMemo(
         () => new Set<SelectPrimitive>(selectableItems.map((it) => it.value)),
-        [selectableItems]
+        [selectableItems],
     );
 
     const allSelected =
@@ -463,6 +511,23 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
 
     const disabledTrigger = disabled || readOnly;
 
+    const estimatedRowHeight = 40;
+    const headerHeight =
+        showSelectAll && selectAllPosition === "top" ? estimatedRowHeight : 0;
+    const footerHeight =
+        showSelectAll && selectAllPosition === "bottom"
+            ? estimatedRowHeight
+            : 0;
+    const listHeight = Math.min(
+        maxListHeight,
+        Math.max(
+            estimatedRowHeight,
+            filteredItems.length * estimatedRowHeight +
+                headerHeight +
+                footerHeight,
+        ),
+    );
+
     const handleToggleValue = React.useCallback(
         (primitive: SelectPrimitive) => {
             if (!onValue || disabled || readOnly) return;
@@ -478,6 +543,9 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
             }
 
             const final = next.length ? next : undefined;
+            const values = next?.map(
+                (item) => keyedItems[item]?.raw ?? item,
+            );
 
             const detail: ChangeDetail = {
                 source: "variant",
@@ -485,14 +553,16 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
                     type: "toggle",
                     value: primitive,
                     next: final,
+                    values,
                 },
+                selectedOptions: values ?? [],
                 nativeEvent: undefined,
                 meta: undefined,
             };
 
             onValue(final as any, detail);
         },
-        [onValue, value, disabled, readOnly]
+        [onValue, value, disabled, readOnly, keyedItems],
     );
 
     const handleSelectAll = React.useCallback(() => {
@@ -519,13 +589,16 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
         }
 
         const final = next.length ? next : undefined;
+        const values = next.map((item) => keyedItems[item]?.raw ?? item);
 
         const detail: ChangeDetail = {
             source: "variant",
             raw: {
                 type: "select-all",
                 next: final,
+                values,
             },
+            selectedOptions: values,
             nativeEvent: undefined,
             meta: {
                 allSelected: !currentlyAllSelected,
@@ -540,6 +613,7 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
         readOnly,
         allSelectableValues,
         selectedValues,
+        keyedItems,
     ]);
 
     const handleClearAll = React.useCallback(() => {
@@ -550,6 +624,7 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
             raw: {
                 type: "clear",
             },
+            selectedOptions: [],
             nativeEvent: undefined,
             meta: undefined,
         };
@@ -570,12 +645,15 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
 
                 const updated = removeSelectValue(
                     selectedValues as unknown as SelectPrimitive[],
-                    item.value
+                    item.value,
                 );
+                const selectedOptions = ((updated ?? []) as SelectPrimitive[])
+                    .map((value) => keyedItems[value]?.raw ?? value);
 
                 const detail: ChangeDetail = {
                     source: "variant",
                     raw: item,
+                    selectedOptions,
                     nativeEvent: undefined,
                     meta: { action: "remove", removed: value },
                 };
@@ -629,14 +707,14 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
                 />
             );
         },
-        [renderCheckbox]
+        [renderCheckbox],
     );
 
     const baseBoxClasses = cn(
         "border-input w-full min-w-0 rounded-md border bg-transparent shadow-xs",
         "transition-[color,box-shadow] outline-none",
         "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
-        "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+        "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
     );
 
     // Trigger button body (icons + summary + clear + trailing icons + chevron)
@@ -655,7 +733,7 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
                     joinControls &&
                     extendBoxToControls &&
                     "border-none shadow-none focus-visible:ring-0 focus-visible:outline-none",
-                triggerClassName
+                triggerClassName,
             )}
         >
             <div className="flex w-full items-center justify-between gap-2">
@@ -742,7 +820,7 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
                         type="button"
                         className={cn(
                             "inline-flex items-center gap-2",
-                            triggerClassName
+                            triggerClassName,
                         )}
                     >
                         <span className="truncate">{triggerSummary}</span>
@@ -764,7 +842,7 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
                     <Badge
                         className={cn(
                             "absolute -top-2 -right-2 h-5 min-w-5 px-1.5",
-                            selectedBadgeClassName
+                            selectedBadgeClassName,
                         )}
                     >
                         {selectedCount}
@@ -780,7 +858,7 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
                 <Badge
                     className={cn(
                         "ml-1 h-5 min-w-5 px-1.5",
-                        selectedBadgeClassName
+                        selectedBadgeClassName,
                     )}
                 >
                     {selectedCount}
@@ -818,7 +896,7 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
             <PopoverContent
                 className={cn(
                     "w-(--radix-popover-trigger-width) p-0",
-                    contentClassName
+                    contentClassName,
                 )}
                 align="start"
             >
@@ -837,40 +915,71 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
                     </div>
                 )}
 
-                <div
-                    className="py-1 overflow-auto"
-                    style={{ maxHeight: maxListHeight }}
-                >
-                    {/* Optional "Select all" at top */}
-                    {showSelectAll && selectAllPosition === "top" && (
-                        <button
-                            type="button"
-                            className={cn(
-                                "flex w-full items-center px-2 py-1.5 text-sm",
-                                "hover:bg-muted/70",
-                                "disabled:cursor-not-allowed disabled:opacity-50"
-                            )}
-                            onClick={handleSelectAll}
-                        >
-                            {makeCheckboxNode({
-                                item: null,
-                                selected: allSelected,
-                                indeterminate: someSelected,
-                                isSelectAll: true,
-                            })}
-                            <span className="truncate">
-                                {selectAllLabel ?? "Select all"}
-                            </span>
-                        </button>
-                    )}
-
-                    {/* Options */}
-                    {filteredItems.length === 0 ? (
-                        <div className="px-2 py-1.5 text-xs text-muted-foreground">
-                            {emptySearchText ?? "No results found"}
-                        </div>
-                    ) : (
-                        filteredItems.map((item, index) => {
+                <div className="py-1">
+                    <Virtuoso
+                        style={{ height: listHeight }}
+                        data={filteredItems}
+                        computeItemKey={(_index, item) => item.key}
+                        components={{
+                            Header:
+                                showSelectAll &&
+                                selectAllPosition === "top"
+                                    ? () => (
+                                          <button
+                                              type="button"
+                                              className={cn(
+                                                  "flex w-full items-center px-2 py-1.5 text-sm",
+                                                  "hover:bg-muted/70",
+                                                  "disabled:cursor-not-allowed disabled:opacity-50",
+                                              )}
+                                              onClick={handleSelectAll}
+                                          >
+                                              {makeCheckboxNode({
+                                                  item: null,
+                                                  selected: allSelected,
+                                                  indeterminate: someSelected,
+                                                  isSelectAll: true,
+                                              })}
+                                              <span className="truncate">
+                                                  {selectAllLabel ??
+                                                      "Select all"}
+                                              </span>
+                                          </button>
+                                      )
+                                    : undefined,
+                            Footer:
+                                showSelectAll &&
+                                selectAllPosition === "bottom"
+                                    ? () => (
+                                          <button
+                                              type="button"
+                                              className={cn(
+                                                  "mt-1 flex w-full items-center px-2 py-1.5 text-sm border-t border-border",
+                                                  "hover:bg-muted/70",
+                                                  "disabled:cursor-not-allowed disabled:opacity-50",
+                                              )}
+                                              onClick={handleSelectAll}
+                                          >
+                                              {makeCheckboxNode({
+                                                  item: null,
+                                                  selected: allSelected,
+                                                  indeterminate: someSelected,
+                                                  isSelectAll: true,
+                                              })}
+                                              <span className="truncate">
+                                                  {selectAllLabel ??
+                                                      "Select all"}
+                                              </span>
+                                          </button>
+                                      )
+                                    : undefined,
+                            EmptyPlaceholder: () => (
+                                <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                                    {emptySearchText ?? "No results found"}
+                                </div>
+                            ),
+                        }}
+                        itemContent={(index, item) => {
                             const selected = selectedValues.has(item.value);
 
                             const row = (
@@ -881,7 +990,7 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
                                         "flex w-full items-start gap-2 px-2 py-1.5 text-sm",
                                         "hover:bg-muted/70",
                                         item.disabled &&
-                                            "opacity-50 cursor-not-allowed"
+                                            "opacity-50 cursor-not-allowed",
                                     )}
                                     onClick={() => {
                                         if (item.disabled) return;
@@ -901,8 +1010,44 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
                                                 {item.icon}
                                             </span>
                                         )}
-                                        <div className="flex flex-col">
-                                            <span>{item.labelNode}</span>
+                                        <div className="flex min-w-0 flex-col">
+                                            <span className="flex min-w-0 items-start gap-2">
+                                                <span className="truncate">
+                                                    {item.labelNode}
+                                                </span>
+                                                {!!item.tags?.length && (
+                                                    <span className="ml-auto flex shrink-0 flex-wrap gap-1">
+                                                        {item.tags.map(
+                                                            (tag, tagIndex) => (
+                                                                <Badge
+                                                                    key={tagIndex}
+                                                                    className={cn(
+                                                                        "text-xs",
+                                                                        tag.className,
+                                                                    )}
+                                                                    onClick={
+                                                                        tag.onClick
+                                                                    }
+                                                                    style={{
+                                                                        color: tag.color,
+                                                                        backgroundColor:
+                                                                            tag.bgColor,
+                                                                    }}
+                                                                >
+                                                                    {tag.icon && (
+                                                                        <span className="shrink-0">
+                                                                            {tag.icon}
+                                                                        </span>
+                                                                    )}
+                                                                    <span>
+                                                                        {tag.label}
+                                                                    </span>
+                                                                </Badge>
+                                                            ),
+                                                        )}
+                                                    </span>
+                                                )}
+                                            </span>
                                             {item.description && (
                                                 <span className="text-xs text-muted-foreground">
                                                     {item.description}
@@ -914,7 +1059,8 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
                             );
 
                             // Prefer per-option renderer (normalized) if present; fall back to global renderOption
-                            const renderer = (item as any).render ?? renderOption;
+                            const renderer =
+                                (item as any).render ?? renderOption;
 
                             if (!renderer) return row;
 
@@ -928,31 +1074,8 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
                                     handleToggleValue(item.value);
                                 },
                             });
-                        })
-                    )}
-
-                    {/* Optional "Select all" at bottom */}
-                    {showSelectAll && selectAllPosition === "bottom" && (
-                        <button
-                            type="button"
-                            className={cn(
-                                "mt-1 flex w-full items-center px-2 py-1.5 text-sm border-t border-border",
-                                "hover:bg-muted/70",
-                                "disabled:cursor-not-allowed disabled:opacity-50"
-                            )}
-                            onClick={handleSelectAll}
-                        >
-                            {makeCheckboxNode({
-                                item: null,
-                                selected: allSelected,
-                                indeterminate: someSelected,
-                                isSelectAll: true,
-                            })}
-                            <span className="truncate">
-                                {selectAllLabel ?? "Select all"}
-                            </span>
-                        </button>
-                    )}
+                        }}
+                    />
                 </div>
             </PopoverContent>
         </Popover>
@@ -971,7 +1094,7 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
                 className={cn(
                     "w-full",
                     disabled && "opacity-50 cursor-not-allowed",
-                    className
+                    className,
                 )}
                 aria-disabled={disabled || undefined}
                 aria-invalid={error ? "true" : undefined}
@@ -988,11 +1111,11 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
             extendBoxToControls &&
                 cn(
                     "relative",
-                    baseBoxClasses // ring via :focus-within
+                    baseBoxClasses, // ring via :focus-within
                 ),
             !extendBoxToControls &&
                 "relative border-none shadow-none bg-transparent",
-            className
+            className,
         );
 
         return (
@@ -1012,7 +1135,7 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
                         <div
                             className={cn(
                                 "flex items-center px-2",
-                                leadingControlClassName
+                                leadingControlClassName,
                             )}
                             data-slot="leading-control"
                         >
@@ -1031,7 +1154,7 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
                         <div
                             className={cn(
                                 "flex items-center px-2",
-                                trailingControlClassName
+                                trailingControlClassName,
                             )}
                             data-slot="trailing-control"
                         >
@@ -1051,7 +1174,7 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
             className={cn(
                 "flex items-stretch w-full",
                 disabled && "opacity-50 cursor-not-allowed",
-                className
+                className,
             )}
             aria-disabled={disabled || undefined}
             aria-invalid={error ? "true" : undefined}
@@ -1060,7 +1183,7 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
                 <div
                     className={cn(
                         "flex items-center mr-1",
-                        leadingControlClassName
+                        leadingControlClassName,
                     )}
                     data-slot="leading-control"
                 >
@@ -1076,7 +1199,7 @@ export const ShadcnMultiSelectVariant = React.forwardRef<
                 <div
                     className={cn(
                         "flex items-center ml-1",
-                        trailingControlClassName
+                        trailingControlClassName,
                     )}
                     data-slot="trailing-control"
                 >

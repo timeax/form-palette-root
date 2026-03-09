@@ -4,6 +4,8 @@
 import * as React from "react";
 import type { VariantBaseProps, ChangeDetail } from "@/variants/shared";
 import { buildGroupLayoutClasses } from "@/lib/group-layout";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/presets/ui/badge";
 
 // Adjust path if your radio group lives elsewhere
 import { RadioGroup, RadioGroupItem } from "@/presets/ui/radio-group";
@@ -42,6 +44,16 @@ export interface RadioItem<TValue> {
     description?: React.ReactNode;
     disabled?: boolean;
     key?: React.Key;
+    raw?: unknown;
+    tags?: Array<{
+        label: React.ReactNode;
+        icon?: React.ReactNode;
+        className?: string;
+        color?: string;
+        bgColor?: string;
+        onClick?: React.MouseEventHandler<HTMLSpanElement>;
+        raw: unknown;
+    }>;
 
     /**
      * Option-level renderer (provided by the normaliser).
@@ -124,6 +136,15 @@ export interface ShadcnRadioUiProps<TItem, TValue> {
      *   optionLabel = "title"
      */
     optionLabel?: keyof TItem | string;
+    optionTags?: keyof TItem | string;
+    optionTagLabel?: string | ((tag: unknown) => React.ReactNode);
+    optionTagIcon?: string | ((tag: unknown) => React.ReactNode);
+    optionTagClassName?: string | ((tag: unknown) => string);
+    optionTagColor?: string | ((tag: unknown) => string);
+    optionTagBgColor?: string | ((tag: unknown) => string);
+    optionTagOnClick?:
+        | string
+        | ((tag: unknown) => React.MouseEventHandler<HTMLSpanElement>);
 
     /**
      * Optional custom renderer for each option.
@@ -279,7 +300,16 @@ function normalizeItems<TItem, TValue>(
     items: readonly TItem[],
     mappers?: RadioMappers<TItem, TValue>,
     optionValueKey?: keyof TItem,
-    optionLabelKey?: keyof TItem
+    optionLabelKey?: keyof TItem,
+    optionTagsKey?: keyof TItem,
+    optionTagLabel?: string | ((tag: unknown) => React.ReactNode),
+    optionTagIcon?: string | ((tag: unknown) => React.ReactNode),
+    optionTagClassName?: string | ((tag: unknown) => string),
+    optionTagColor?: string | ((tag: unknown) => string),
+    optionTagBgColor?: string | ((tag: unknown) => string),
+    optionTagOnClick?:
+        | string
+        | ((tag: unknown) => React.MouseEventHandler<HTMLSpanElement>),
 ): RadioItem<TValue>[] {
     // 1) Full mappers win – most explicit
     if (mappers) {
@@ -293,18 +323,31 @@ function normalizeItems<TItem, TValue>(
                 ? mappers.isDisabled(item, index)
                 : false,
             key: mappers.getKey ? mappers.getKey(item, index) : index,
+            raw: item,
         }));
     }
 
     // 2) optionValue / optionLabel keys
     if (optionValueKey || optionLabelKey) {
         return items.map((item, index) => {
-            return globalNormalizeCheckBasedOptions(
+            return {
+                ...globalNormalizeCheckBasedOptions(
                 item as any,
                 index,
                 optionLabelKey,
-                optionValueKey
-            );
+                optionValueKey,
+                {
+                    optionTags: optionTagsKey as string | undefined,
+                    optionTagLabel,
+                    optionTagIcon,
+                    optionTagClassName,
+                    optionTagColor,
+                    optionTagBgColor,
+                    optionTagOnClick,
+                },
+            ),
+                raw: item,
+            };
         });
     }
 
@@ -325,6 +368,7 @@ function normalizeItems<TItem, TValue>(
                 description: undefined,
                 disabled: false,
                 key: index,
+                raw: item,
             } satisfies RadioItem<TValue>;
         }
 
@@ -362,6 +406,13 @@ const InnerShadcnRadioVariant = <TValue, TItem = RadioItem<TValue>>(
         mappers,
         optionValue,
         optionLabel,
+        optionTags,
+        optionTagLabel,
+        optionTagIcon,
+        optionTagClassName,
+        optionTagColor,
+        optionTagBgColor,
+        optionTagOnClick,
         renderOption,
         layout = "list",
         columns = 2,
@@ -395,9 +446,30 @@ const InnerShadcnRadioVariant = <TValue, TItem = RadioItem<TValue>>(
                 mappers,
                 //@ts-ignore
                 optionValue,
-                optionLabel
+                optionLabel,
+                //@ts-ignore
+                optionTags,
+                optionTagLabel,
+                optionTagIcon,
+                optionTagClassName,
+                optionTagColor,
+                optionTagBgColor,
+                optionTagOnClick,
             ),
-        [items, options, mappers, optionValue, optionLabel]
+        [
+            items,
+            options,
+            mappers,
+            optionValue,
+            optionLabel,
+            optionTags,
+            optionTagLabel,
+            optionTagIcon,
+            optionTagClassName,
+            optionTagColor,
+            optionTagBgColor,
+            optionTagOnClick,
+        ]
     );
 
     // Map TValue → string for RadioGroup
@@ -410,12 +482,13 @@ const InnerShadcnRadioVariant = <TValue, TItem = RadioItem<TValue>>(
     }, [normalized, value]);
 
     const handleSelect = React.useCallback(
-        (next: TValue) => {
+        (next: TValue, selectedRaw?: unknown) => {
             if (!onValue || disabled) return;
 
             const detail: ChangeDetail = {
                 source: "variant",
-                raw: next,
+                raw: selectedRaw ?? next,
+                selectedOptions: [selectedRaw ?? next],
                 nativeEvent: undefined,
                 meta: undefined,
             };
@@ -429,7 +502,7 @@ const InnerShadcnRadioVariant = <TValue, TItem = RadioItem<TValue>>(
         (raw: string) => {
             const found = normalized.find((item) => String(item.value) === raw);
             if (!found) return;
-            handleSelect(found.value);
+            handleSelect(found.value, found.raw ?? found.value);
         },
         [normalized, handleSelect]
     );
@@ -543,8 +616,32 @@ const InnerShadcnRadioVariant = <TValue, TItem = RadioItem<TValue>>(
                             {radioNode}
 
                             <div className="flex flex-col min-w-0">
-                                <span className={labelClassesBase}>
-                                    {displayItem.label}
+                                <span className="flex min-w-0 items-start gap-2">
+                                    <span className={cn(labelClassesBase, "truncate")}>
+                                        {displayItem.label}
+                                    </span>
+                                    {!!displayItem.tags?.length && (
+                                        <span className="ml-auto flex shrink-0 flex-wrap gap-1">
+                                            {displayItem.tags.map((tag, tagIndex) => (
+                                                <Badge
+                                                    key={tagIndex}
+                                                    className={cn("text-xs", tag.className)}
+                                                    onClick={tag.onClick}
+                                                    style={{
+                                                        color: tag.color,
+                                                        backgroundColor: tag.bgColor,
+                                                    }}
+                                                >
+                                                    {tag.icon && (
+                                                        <span className="shrink-0">
+                                                            {tag.icon}
+                                                        </span>
+                                                    )}
+                                                    <span>{tag.label}</span>
+                                                </Badge>
+                                            ))}
+                                        </span>
+                                    )}
                                 </span>
                                 {displayItem.description != null && (
                                     <span className={descriptionClassesBase}>

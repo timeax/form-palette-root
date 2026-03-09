@@ -26,6 +26,7 @@ import {
     PopoverTrigger,
 } from "@radix-ui/react-popover";
 import { HeadlessResponsiveDialog } from "./dialog";
+import { AllVariantsExamples } from "./AllVariantsExamples";
 
 const permissionOptions = [
     { code: "read", title: "Read content", notes: "View only" },
@@ -134,6 +135,7 @@ export const App: React.FC = () => {
                 <code>packages/form-palette/src</code> will hot-reload this
                 page.
             </p>
+            <AllVariantsExamples />
 
             <div className="mb-4">
                 <button
@@ -483,7 +485,8 @@ export const App: React.FC = () => {
                     <InputField
                         variant="multi-select"
                         name="countries"
-                        options={["ng", "gh", "ke", "tz"]}
+                        default
+                        options={["ng", "gh", "ke", "tz"].map(e => ({label: e.toUpperCase(), value: e}))}
                         autoCap
                         showSelectAll
                         clearable

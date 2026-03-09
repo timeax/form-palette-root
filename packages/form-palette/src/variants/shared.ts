@@ -46,6 +46,13 @@ export interface ChangeDetail<TMeta = unknown, TRaw = unknown> {
      * Example: original keyboard input or pasted string.
      */
     raw?: TRaw;
+    /**
+     * Raw selected option entries as provided by the variant input.
+     *
+     * For primitive options this contains primitives, for object options
+     * it contains the original objects.
+     */
+    selectedOptions?: unknown[];
 
     nativeEvent?: React.SyntheticEvent;
     /**

@@ -9,9 +9,11 @@ import {
     SelectContent,
     SelectItem,
 } from "@/presets/ui/select";
+import { Badge } from "@/presets/ui/badge";
 import { Input } from "@/presets/ui/input";
 import { Search, X } from "lucide-react";
 import { globalNormalizeOptions } from "@/lib/normalise-options";
+import { Virtuoso } from "react-virtuoso";
 
 type SelectPrimitive = string | number;
 
@@ -36,6 +38,15 @@ type NormalizedSelectItem = {
     description?: React.ReactNode;
     disabled?: boolean;
     icon?: React.ReactNode;
+    tags?: Array<{
+        label: React.ReactNode;
+        icon?: React.ReactNode;
+        className?: string;
+        color?: string;
+        bgColor?: string;
+        onClick?: React.MouseEventHandler<HTMLSpanElement>;
+        raw: unknown;
+    }>;
     /** Option-level renderer (falls back to global renderOption) */
     render?: (...args: any[]) => React.ReactNode;
     raw: SelectOption;
@@ -98,6 +109,15 @@ export interface SelectBaseProps extends Pick<
      * - function → custom mapper
      */
     optionIcon?: string | ((item: SelectOption) => React.ReactNode);
+    optionTags?: string | ((item: SelectOption) => unknown[]);
+    optionTagLabel?: string | ((tag: unknown) => React.ReactNode);
+    optionTagIcon?: string | ((tag: unknown) => React.ReactNode);
+    optionTagClassName?: string | ((tag: unknown) => string);
+    optionTagColor?: string | ((tag: unknown) => string);
+    optionTagBgColor?: string | ((tag: unknown) => string);
+    optionTagOnClick?:
+        | string
+        | ((tag: unknown) => React.MouseEventHandler<HTMLSpanElement>);
 
     /**
      * How to compute the React key for each option.
@@ -241,22 +261,18 @@ export interface SelectBaseProps extends Pick<
     // ─────────────────────────────────────────────
 
     /**
-     * Enable incremental rendering for large option lists.
-     *
-     * When true, only a page of options is rendered initially,
-     * and more are revealed as the user scrolls down.
+     * Enable virtualized rendering for large option lists.
+     * Default: true.
      */
     virtualScroll?: boolean;
 
     /**
-     * Number of options to render per "page" when virtualScroll is enabled.
-     * Default: 50.
+     * @deprecated No longer used with react-virtuoso.
      */
     virtualScrollPageSize?: number;
 
     /**
-     * Distance from the bottom (in px) at which the next page loads.
-     * Default: 48px.
+     * @deprecated No longer used with react-virtuoso.
      */
     virtualScrollThreshold?: number;
 }
@@ -339,6 +355,13 @@ function normalizeOptions(
         | "optionDisabled"
         | "optionKey"
         | "optionIcon"
+        | "optionTags"
+        | "optionTagLabel"
+        | "optionTagIcon"
+        | "optionTagClassName"
+        | "optionTagColor"
+        | "optionTagBgColor"
+        | "optionTagOnClick"
     >,
 ): NormalizedSelectItem[] {
     return globalNormalizeOptions(opts, config);
@@ -393,6 +416,13 @@ export const ShadcnSelectVariant = React.forwardRef<
         optionDisabled,
         optionIcon,
         optionKey,
+        optionTags,
+        optionTagLabel,
+        optionTagIcon,
+        optionTagClassName,
+        optionTagColor,
+        optionTagBgColor,
+        optionTagOnClick,
 
         searchable,
         searchPlaceholder,
@@ -432,10 +462,8 @@ export const ShadcnSelectVariant = React.forwardRef<
         button,
         children,
 
-        // Virtual scroll / incremental render
-        virtualScroll = false,
-        virtualScrollPageSize = 50,
-        virtualScrollThreshold = 48,
+        // Virtualization
+        virtualScroll = true,
     } = props;
 
     const isButtonMode = mode === "button";
@@ -453,6 +481,13 @@ export const ShadcnSelectVariant = React.forwardRef<
                 optionDisabled,
                 optionKey,
                 optionIcon,
+                optionTags,
+                optionTagLabel,
+                optionTagIcon,
+                optionTagClassName,
+                optionTagColor,
+                optionTagBgColor,
+                optionTagOnClick,
             }),
         [
             options,
@@ -463,6 +498,13 @@ export const ShadcnSelectVariant = React.forwardRef<
             optionDisabled,
             optionKey,
             optionIcon,
+            optionTags,
+            optionTagLabel,
+            optionTagIcon,
+            optionTagClassName,
+            optionTagColor,
+            optionTagBgColor,
+            optionTagOnClick,
         ],
     );
 
@@ -495,52 +537,12 @@ export const ShadcnSelectVariant = React.forwardRef<
     // Incremental render state
     // ─────────────────────────────────────────────
 
-    const [visibleCount, setVisibleCount] = React.useState(() =>
-        virtualScroll
-            ? Math.min(virtualScrollPageSize, filteredItems.length)
-            : filteredItems.length,
-    );
-
-    const listRef = React.useRef<HTMLDivElement | null>(null);
-
-    // Reset visibleCount when list / filter / toggle changes
-    React.useEffect(() => {
-        if (!virtualScroll) {
-            setVisibleCount(filteredItems.length);
-            return;
-        }
-
-        setVisibleCount(Math.min(virtualScrollPageSize, filteredItems.length));
-    }, [virtualScroll, filteredItems.length, virtualScrollPageSize]);
-
-    const handleListScroll = React.useCallback(() => {
-        if (!virtualScroll) return;
-        const el = listRef.current;
-        if (!el) return;
-
-        const { scrollTop, scrollHeight, clientHeight } = el;
-        const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
-
-        if (distanceFromBottom <= virtualScrollThreshold) {
-            setVisibleCount((prev) => {
-                if (prev >= filteredItems.length) return prev;
-                const next = prev + virtualScrollPageSize;
-                return Math.min(next, filteredItems.length);
-            });
-        }
-    }, [
-        virtualScroll,
-        filteredItems.length,
-        virtualScrollPageSize,
-        virtualScrollThreshold,
-    ]);
-
-    const renderedItems = React.useMemo(
-        () =>
-            virtualScroll
-                ? filteredItems.slice(0, visibleCount)
-                : filteredItems,
-        [filteredItems, visibleCount, virtualScroll],
+    const useVirtualization = virtualScroll !== false;
+    const estimatedRowHeight = 36;
+    const listMaxHeight = 240;
+    const listHeight = Math.min(
+        listMaxHeight,
+        Math.max(estimatedRowHeight, filteredItems.length * estimatedRowHeight),
     );
 
     const handleChange = React.useCallback(
@@ -557,6 +559,7 @@ export const ShadcnSelectVariant = React.forwardRef<
             const detail: ChangeDetail = {
                 source: "variant",
                 raw: item?.raw ?? primitive,
+                selectedOptions: [item?.raw ?? primitive],
                 nativeEvent: undefined,
                 meta: undefined,
             };
@@ -712,6 +715,7 @@ export const ShadcnSelectVariant = React.forwardRef<
                         const detail: ChangeDetail = {
                             source: "variant",
                             raw: undefined,
+                            selectedOptions: [],
                             nativeEvent: undefined,
                             meta: { action: "clear" },
                         };
@@ -825,14 +829,13 @@ export const ShadcnSelectVariant = React.forwardRef<
                     <div className="px-2 py-1.5 text-xs text-muted-foreground">
                         {emptySearchText ?? "No results found"}
                     </div>
-                ) : (
-                    // CASE 3: normal list, possibly virtually paged
-                    <div
-                        ref={listRef}
-                        className="max-h-60 overflow-auto"
-                        onScroll={handleListScroll}
-                    >
-                        {renderedItems.map((item, index) => {
+                ) : useVirtualization ? (
+                    // CASE 3: normal list, virtualized
+                    <Virtuoso
+                        style={{ height: listHeight }}
+                        data={filteredItems}
+                        computeItemKey={(_index, item) => item.key}
+                        itemContent={(index, item) => {
                             const optionNode = (
                                 <SelectItem
                                     key={item.key}
@@ -845,8 +848,44 @@ export const ShadcnSelectVariant = React.forwardRef<
                                                 {item.icon}
                                             </span>
                                         )}
-                                        <div className="flex flex-col">
-                                            <span>{item.labelNode}</span>
+                                        <div className="flex min-w-0 flex-col">
+                                            <span className="flex min-w-0 items-start gap-2">
+                                                <span className="truncate">
+                                                    {item.labelNode}
+                                                </span>
+                                                {!!item.tags?.length && (
+                                                    <span className="ml-auto flex shrink-0 flex-wrap gap-1">
+                                                        {item.tags.map(
+                                                            (tag, tagIndex) => (
+                                                                <Badge
+                                                                    key={tagIndex}
+                                                                    className={cn(
+                                                                        "text-xs",
+                                                                        tag.className,
+                                                                    )}
+                                                                    onClick={
+                                                                        tag.onClick
+                                                                    }
+                                                                    style={{
+                                                                        color: tag.color,
+                                                                        backgroundColor:
+                                                                            tag.bgColor,
+                                                                    }}
+                                                                >
+                                                                    {tag.icon && (
+                                                                        <span className="shrink-0">
+                                                                            {tag.icon}
+                                                                        </span>
+                                                                    )}
+                                                                    <span>
+                                                                        {tag.label}
+                                                                    </span>
+                                                                </Badge>
+                                                            ),
+                                                        )}
+                                                    </span>
+                                                )}
+                                            </span>
                                             {item.description && (
                                                 <span className="text-xs text-muted-foreground">
                                                     {item.description}
@@ -879,14 +918,93 @@ export const ShadcnSelectVariant = React.forwardRef<
                                     setQuery("");
                                 },
                             });
-                        })}
+                        }}
+                    />
+                ) : (
+                    <div className="max-h-60 overflow-auto">
+                        {filteredItems.map((item, index) => {
+                            const optionNode = (
+                                <SelectItem
+                                    key={item.key}
+                                    value={String(item.value)}
+                                    disabled={item.disabled}
+                                >
+                                    <div className="flex items-start gap-2">
+                                        {item.icon && (
+                                            <span className="mt-0.5 shrink-0">
+                                                {item.icon}
+                                            </span>
+                                        )}
+                                        <div className="flex min-w-0 flex-col">
+                                            <span className="flex min-w-0 items-start gap-2">
+                                                <span className="truncate">
+                                                    {item.labelNode}
+                                                </span>
+                                                {!!item.tags?.length && (
+                                                    <span className="ml-auto flex shrink-0 flex-wrap gap-1">
+                                                        {item.tags.map(
+                                                            (tag, tagIndex) => (
+                                                                <Badge
+                                                                    key={tagIndex}
+                                                                    className={cn(
+                                                                        "text-xs",
+                                                                        tag.className,
+                                                                    )}
+                                                                    onClick={
+                                                                        tag.onClick
+                                                                    }
+                                                                    style={{
+                                                                        color: tag.color,
+                                                                        backgroundColor:
+                                                                            tag.bgColor,
+                                                                    }}
+                                                                >
+                                                                    {tag.icon && (
+                                                                        <span className="shrink-0">
+                                                                            {tag.icon}
+                                                                        </span>
+                                                                    )}
+                                                                    <span>
+                                                                        {tag.label}
+                                                                    </span>
+                                                                </Badge>
+                                                            ),
+                                                        )}
+                                                    </span>
+                                                )}
+                                            </span>
+                                            {item.description && (
+                                                <span className="text-xs text-muted-foreground">
+                                                    {item.description}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </SelectItem>
+                            );
 
-                        {virtualScroll &&
-                            renderedItems.length < filteredItems.length && (
-                                <div className="px-2 py-1 text-[10px] text-muted-foreground text-center">
-                                    Scroll to load more…
-                                </div>
-                            )}
+                            const renderer =
+                                (item as any).render ?? renderOption;
+
+                            if (!renderer) return optionNode;
+
+                            return renderer({
+                                item,
+                                selected:
+                                    selectedItem != null &&
+                                    String(selectedItem.value) ===
+                                        String(item.value),
+                                index,
+                                option: optionNode,
+                                click() {
+                                    if (disabled || readOnly || item.disabled)
+                                        return;
+                                    handleChange(String(item.value));
+                                    setOpen(false);
+                                    setQuery("");
+                                },
+                            });
+                        })}
                     </div>
                 )}
             </SelectContent>

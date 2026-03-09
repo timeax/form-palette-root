@@ -64,7 +64,13 @@ export interface InputIconControlProps {
 
 export interface InputSizeProps {
     size?: "sm" | "md" | "lg" | (string & {});
-    density?: "compact" | "normal" | "relaxed" | "dense" | "loose" | (string & {});
+    density?:
+        | "compact"
+        | "normal"
+        | "relaxed"
+        | "dense"
+        | "loose"
+        | (string & {});
 }
 
 // ─────────────────────────────────────────────
@@ -75,13 +81,13 @@ export type InputKeyFilter =
     | string
     | RegExp
     | ((
-        nextValue: string,
-        ctx: {
-            event: any;
-            currentValue: string;
-            input: HTMLInputElement;
-        }
-    ) => boolean);
+          nextValue: string,
+          ctx: {
+              event: any;
+              currentValue: string;
+              input: HTMLInputElement;
+          },
+      ) => boolean);
 
 export interface InputKeyFilterProps {
     /**
@@ -115,7 +121,9 @@ function cx(...parts: any[]) {
     return cn(...parts);
 }
 
-function resolveKeyFilterPattern(filter: string | RegExp | undefined): RegExp | null {
+function resolveKeyFilterPattern(
+    filter: string | RegExp | undefined,
+): RegExp | null {
     if (!filter) return null;
 
     if (filter instanceof RegExp) {
@@ -148,7 +156,7 @@ function runKeyFilter(
     filter: InputKeyFilter | undefined,
     nextValue: string,
     input: HTMLInputElement,
-    event: any
+    event: any,
 ): boolean {
     if (!filter) return true;
     // Always allow empty so users can clear the field
@@ -169,7 +177,7 @@ function runKeyFilter(
 
 function computeNextFromInsertion(
     input: HTMLInputElement,
-    inserted: string
+    inserted: string,
 ): string {
     const value = input.value ?? "";
     const start = input.selectionStart ?? value.length;
@@ -229,12 +237,13 @@ function resolveSizeDensityClasses(size: unknown, density: unknown) {
 }
 
 export interface InputProps
-    extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">,
-    InputMaskProps,
-    InputAffixProps,
-    InputIconControlProps,
-    InputSizeProps,
-    InputKeyFilterProps { }
+    extends
+        Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">,
+        InputMaskProps,
+        InputAffixProps,
+        InputIconControlProps,
+        InputSizeProps,
+        InputKeyFilterProps {}
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     function Input(rawProps, forwardedRef) {
@@ -311,7 +320,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         React.useImperativeHandle(
             forwardedRef,
             () => innerRef.current as any,
-            []
+            [],
         );
 
         // Icons ONLY (prefix/suffix are NOT treated as icons)
@@ -374,7 +383,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         // utilities on the actual “box” via CSS variables)
         const { px: pxDefault, py: pyDefault } = resolveBasePadding(
             size,
-            density
+            density,
         );
 
         const extraPx = typeof px === "number" ? px : 0;
@@ -407,7 +416,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
         const { heightCls, textCls, densityCls } = resolveSizeDensityClasses(
             size,
-            density
+            density,
         );
 
         // Core “box” classes (border, radius, focus, size/density),
@@ -422,13 +431,13 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
             heightCls,
             textCls,
-            densityCls
+            densityCls,
         );
 
         // Padding classes driven by CSS vars
         const boxPaddingClasses = cx(
             "px-(--fp-pl,--spacing(3)) pr-(--fp-pr,--spacing(3))",
-            "pt-(--fp-pt,--spacing(1)) pb-(--fp-pb,--spacing(1))"
+            "pt-(--fp-pt,--spacing(1)) pb-(--fp-pb,--spacing(1))",
         );
 
         // Inner neutral input (used when the *wrapper* carries the box)
@@ -437,7 +446,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             "px-0 py-0",
             "focus-visible:outline-none focus-visible:ring-0 focus-visible:border-transparent",
             "placeholder:text-muted-foreground",
-            inputClassName
+            inputClassName,
         );
 
         const maskMode: MaskMode =
@@ -465,7 +474,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                     // ignore if unsupported
                 }
             },
-            [onFocus, prefix, suffix]
+            [onFocus, prefix, suffix],
         );
 
         const focusInput = () => {
@@ -480,9 +489,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         };
 
         const placeholder =
-            typeof mask === "string" && mask
-                ? mask
-                : (rest as any).placeholder;
+            typeof mask === "string" && mask ? mask : (rest as any).placeholder;
 
         const hasCustomPadding =
             typeof px === "number" ||
@@ -508,7 +515,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                     const inputEl = event.currentTarget;
                     const nextValue = computeNextFromInsertion(
                         inputEl,
-                        event.key
+                        event.key,
                     );
                     if (!runKeyFilter(keyFilter, nextValue, inputEl, event)) {
                         event.preventDefault();
@@ -518,7 +525,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
                 onKeyDown?.(event);
             },
-            [hasKeyFilter, keyFilterOn, keyFilter, onKeyDown]
+            [hasKeyFilter, keyFilterOn, keyFilter, onKeyDown],
         );
 
         const handleKeyPressWrapped = React.useCallback(
@@ -535,7 +542,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                     const inputEl = event.currentTarget;
                     const nextValue = computeNextFromInsertion(
                         inputEl,
-                        event.key
+                        event.key,
                     );
                     if (!runKeyFilter(keyFilter, nextValue, inputEl, event)) {
                         event.preventDefault();
@@ -545,7 +552,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
                 onKeyPress?.(event);
             },
-            [hasKeyFilter, keyFilterOn, keyFilter, onKeyPress]
+            [hasKeyFilter, keyFilterOn, keyFilter, onKeyPress],
         );
 
         const handleBeforeInputWrapped = React.useCallback(
@@ -557,15 +564,19 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 ) {
                     const inputEl = event.currentTarget as HTMLInputElement;
                     const data = event.nativeEvent.data as string | null;
-                    const inputType = event.nativeEvent.inputType as string | null;
+                    const inputType = event.nativeEvent.inputType as
+                        | string
+                        | null;
 
                     // We only care about text insertions; deletions/etc. pass through.
                     if (data && inputType && inputType.startsWith("insert")) {
                         const nextValue = computeNextFromInsertion(
                             inputEl,
-                            data
+                            data,
                         );
-                        if (!runKeyFilter(keyFilter, nextValue, inputEl, event)) {
+                        if (
+                            !runKeyFilter(keyFilter, nextValue, inputEl, event)
+                        ) {
                             event.preventDefault();
                             return;
                         }
@@ -574,21 +585,22 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
                 onBeforeInput?.(event);
             },
-            [hasKeyFilter, keyFilterOn, keyFilter, onBeforeInput]
+            [hasKeyFilter, keyFilterOn, keyFilter, onBeforeInput],
         );
 
         const handlePasteWrapped = React.useCallback(
             (event: React.ClipboardEvent<HTMLInputElement>) => {
                 if (hasKeyFilter && keyFilterOnPaste) {
-                    const pasted =
-                        event.clipboardData?.getData("text") ?? "";
+                    const pasted = event.clipboardData?.getData("text") ?? "";
                     if (pasted) {
                         const inputEl = event.currentTarget;
                         const nextValue = computeNextFromInsertion(
                             inputEl,
-                            pasted
+                            pasted,
                         );
-                        if (!runKeyFilter(keyFilter, nextValue, inputEl, event)) {
+                        if (
+                            !runKeyFilter(keyFilter, nextValue, inputEl, event)
+                        ) {
                             event.preventDefault();
                             return;
                         }
@@ -597,7 +609,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
                 onPaste?.(event);
             },
-            [hasKeyFilter, keyFilterOnPaste, keyFilter, onPaste]
+            [hasKeyFilter, keyFilterOnPaste, keyFilter, onPaste],
         );
 
         // Core renderer (mask vs plain)
@@ -640,7 +652,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                         placeholder={placeholder}
                         className={cx(
                             useInnerNeutral ? innerInputNeutral : "",
-                            extra.className
+                            extra.className,
                         )}
                         style={extra.style}
                         data-slot="input"
@@ -650,16 +662,17 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             }
 
             // PLAIN: value-level prefix/suffix
-            const modelValue = (rest.value ??
-                rest.defaultValue ??
-                "") as string | number | readonly string[];
+            const modelValue = (rest.value ?? rest.defaultValue ?? "") as
+                | string
+                | number
+                | readonly string[];
 
             let displayValue =
                 typeof modelValue === "string"
                     ? modelValue
                     : Array.isArray(modelValue)
-                        ? modelValue.join(",")
-                        : String(modelValue ?? "");
+                      ? modelValue.join(",")
+                      : String(modelValue ?? "");
 
             if (prefix) {
                 const hasPrefix = displayValue.startsWith(prefix);
@@ -682,9 +695,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 if (stripSuffix) {
                     const withoutSuffix = hasSuffix
                         ? displayValue.slice(
-                            0,
-                            displayValue.length - suffix.length
-                        )
+                              0,
+                              displayValue.length - suffix.length,
+                          )
                         : displayValue;
                     displayValue = withoutSuffix + suffix;
                 } else {
@@ -702,7 +715,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                     data-slot="input"
                     className={cx(
                         useInnerNeutral ? innerInputNeutral : "",
-                        extra.className
+                        extra.className,
                     )}
                     style={extra.style}
                     disabled={disabled}
@@ -745,7 +758,11 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 >
                     {renderBaseInput({
                         inner: false,
-                        className: cx(baseBoxClasses, boxPaddingClasses, className),
+                        className: cx(
+                            baseBoxClasses,
+                            boxPaddingClasses,
+                            className,
+                        ),
                         style: varsStyle,
                     })}
 
@@ -807,15 +824,15 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 "flex items-stretch w-full overflow-hidden",
                 extendBoxToControls && cx("relative", baseBoxClasses), // box is the group
                 !extendBoxToControls &&
-                "relative border-none shadow-none bg-transparent",
-                className
+                    "relative border-none shadow-none bg-transparent",
+                className,
             );
 
             const inputRegionClassName = cx(
                 "relative flex-1 flex items-center min-w-0",
                 // When the group isn't the box, the region becomes the box.
                 !extendBoxToControls && baseBoxClasses,
-                "pl-[var(--fp-pl)] pr-[var(--fp-pr)] pt-[var(--fp-pt)] pb-[var(--fp-pb)]"
+                "pl-[var(--fp-pl)] pr-[var(--fp-pr)] pt-[var(--fp-pt)] pb-[var(--fp-pb)]",
             );
 
             return (
@@ -832,7 +849,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                         <div
                             className={cx(
                                 "flex items-center",
-                                leadingControlClassName
+                                leadingControlClassName,
                             )}
                             data-slot="leading-control"
                         >
@@ -856,7 +873,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                                 className="absolute inset-y-0 left-0 flex items-center cursor-pointer"
                                 style={{
                                     gap: leadingGap,
-                                    paddingLeft: `${pxDefault}px`,
+                                    paddingLeft: hasLeadingControl
+                                        ? undefined
+                                        : `${pxDefault}px`,
                                 }}
                                 data-slot="leading-icons"
                                 onMouseDown={handleIconMouseDown}
@@ -878,7 +897,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                                 className="absolute inset-y-0 right-0 flex items-center cursor-pointer"
                                 style={{
                                     gap: trailingGap,
-                                    paddingRight: `${pxDefault}px`,
+                                    paddingRight: hasTrailingControl
+                                        ? undefined
+                                        : `${pxDefault}px`,
                                 }}
                                 data-slot="trailing-icons"
                                 onMouseDown={handleIconMouseDown}
@@ -899,7 +920,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                         <div
                             className={cx(
                                 "flex items-center",
-                                trailingControlClassName
+                                trailingControlClassName,
                             )}
                             data-slot="trailing-control"
                         >
@@ -915,7 +936,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             "relative",
             baseBoxClasses,
             "pl-[var(--fp-pl)] pr-[var(--fp-pr)] pt-[var(--fp-pt)] pb-[var(--fp-pb)]",
-            className
+            className,
         );
 
         return (
@@ -924,7 +945,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                     <div
                         className={cx(
                             "flex items-center",
-                            leadingControlClassName
+                            leadingControlClassName,
                         )}
                         data-slot="leading-control"
                     >
@@ -998,7 +1019,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                     <div
                         className={cx(
                             "flex items-center",
-                            trailingControlClassName
+                            trailingControlClassName,
                         )}
                         data-slot="trailing-control"
                     >
@@ -1007,5 +1028,5 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 )}
             </div>
         );
-    }
+    },
 );

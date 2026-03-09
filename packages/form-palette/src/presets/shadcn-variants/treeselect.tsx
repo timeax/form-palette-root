@@ -21,6 +21,7 @@ import {
     TreeSelectOption,
     TreeValue,
 } from "@/presets/shadcn-variants/tree-select-types";
+import { Virtuoso } from "react-virtuoso";
 
 type Size = "sm" | "md" | "lg";
 type Density = "compact" | "comfortable" | "loose";
@@ -118,6 +119,15 @@ type TreeSelectBaseProps = Pick<
     optionDisabled?: string | ((item: TreeSelectOption) => boolean);
     optionIcon?: string | ((item: TreeSelectOption) => React.ReactNode);
     optionKey?: string | ((item: TreeSelectOption, index: number) => React.Key);
+    optionTags?: string | ((item: TreeSelectOption) => unknown[]);
+    optionTagLabel?: string | ((tag: unknown) => React.ReactNode);
+    optionTagIcon?: string | ((tag: unknown) => React.ReactNode);
+    optionTagClassName?: string | ((tag: unknown) => string);
+    optionTagColor?: string | ((tag: unknown) => string);
+    optionTagBgColor?: string | ((tag: unknown) => string);
+    optionTagOnClick?:
+        | string
+        | ((tag: unknown) => React.MouseEventHandler<HTMLSpanElement>);
 
     searchable?: boolean;
     searchPlaceholder?: string;
@@ -251,6 +261,13 @@ export const ShadcnTreeSelectVariant = React.forwardRef<
         optionDisabled,
         optionIcon,
         optionKey,
+        optionTags,
+        optionTagLabel,
+        optionTagIcon,
+        optionTagClassName,
+        optionTagColor,
+        optionTagBgColor,
+        optionTagOnClick,
 
         searchable = true,
         searchPlaceholder,
@@ -317,6 +334,13 @@ export const ShadcnTreeSelectVariant = React.forwardRef<
                 optionDisabled,
                 optionIcon,
                 optionKey,
+                optionTags,
+                optionTagLabel,
+                optionTagIcon,
+                optionTagClassName,
+                optionTagColor,
+                optionTagBgColor,
+                optionTagOnClick,
             }),
         [
             options,
@@ -327,6 +351,13 @@ export const ShadcnTreeSelectVariant = React.forwardRef<
             optionDisabled,
             optionIcon,
             optionKey,
+            optionTags,
+            optionTagLabel,
+            optionTagIcon,
+            optionTagClassName,
+            optionTagColor,
+            optionTagBgColor,
+            optionTagOnClick,
         ]
     );
 
@@ -392,6 +423,17 @@ export const ShadcnTreeSelectVariant = React.forwardRef<
         });
     }, [allNodesFlat, query, tree, expanded]);
 
+    const estimatedRowHeight =
+        density === "compact" ? 32 : density === "loose" ? 48 : 40;
+    const listMaxHeight = 320;
+    const listHeight = Math.min(
+        listMaxHeight,
+        Math.max(
+            estimatedRowHeight,
+            displayedNodes.length * estimatedRowHeight,
+        ),
+    );
+
     // Selection normalization
     const selectedValues = React.useMemo<TreeKey[]>(() => {
         if (value === undefined || value === null) return [];
@@ -433,10 +475,15 @@ export const ShadcnTreeSelectVariant = React.forwardRef<
                 : nextValue !== undefined && nextValue !== null
                   ? [nextValue]
                   : [];
+            const nextSelectedOptions = nextSelectedValues.map(
+                (val) =>
+                    allNodesFlat.find((node) => node.value === val)?.raw ?? val,
+            );
 
             const detail: ChangeDetail = {
                 source: "variant",
                 raw: item.raw,
+                selectedOptions: nextSelectedOptions,
                 nativeEvent: undefined,
                 meta: {
                     toggled: item.value,
@@ -453,6 +500,7 @@ export const ShadcnTreeSelectVariant = React.forwardRef<
             selectedValues,
             onValue,
             toggleExpanded,
+            allNodesFlat,
         ]
     );
 
@@ -461,6 +509,7 @@ export const ShadcnTreeSelectVariant = React.forwardRef<
         const detail: ChangeDetail = {
             source: "variant",
             raw: undefined,
+            selectedOptions: [],
             nativeEvent: undefined,
             meta: { action: "clear" },
         };
@@ -692,7 +741,7 @@ export const ShadcnTreeSelectVariant = React.forwardRef<
     // ─────────────────────────────────────────────
 
     const TreeBody = (
-        <div className="max-h-80 w-full overflow-y-auto overflow-x-hidden py-1">
+        <div className="w-full">
             {emptyLabel && tree.length === 0 && !query && (
                 <div className="px-4 py-3 text-sm text-center text-muted-foreground">
                     {emptyLabel}
@@ -705,130 +754,169 @@ export const ShadcnTreeSelectVariant = React.forwardRef<
                 </div>
             )}
 
-            {displayedNodes.map((item, index) => {
-                const selected = selectedValues.includes(item.value);
-                const isExpanded = expanded.has(item.value);
-                const parentInLeafOnly = leafOnly && item.hasChildren;
+            {displayedNodes.length > 0 && (
+                <Virtuoso
+                    style={{ height: listHeight }}
+                    data={displayedNodes}
+                    computeItemKey={(_index, item) => item.key}
+                    itemContent={(index, item) => {
+                        const selected = selectedValues.includes(item.value);
+                        const isExpanded = expanded.has(item.value);
+                        const parentInLeafOnly = leafOnly && item.hasChildren;
 
-                const optionNode = (
-                    <div
-                        className={cn(
-                            "relative flex items-center px-2 text-sm outline-none select-none",
-                            d.rowGap,
-                            d.rowPy,
-                            item.disabled
-                                ? "opacity-50"
-                                : "hover:bg-accent hover:text-accent-foreground cursor-pointer",
-                            selected && !multiple && "bg-accent",
-                            selected && multiple && "bg-accent/50"
-                        )}
-                        style={{ paddingLeft: 12 + item.level * 20 }}
-                        onClick={(e) => {
-                            e.preventDefault();
-                            if (!item.disabled) handleToggleValue(item);
-                        }}
-                    >
-                        {/* Guidelines */}
-                        {item.level > 0 &&
-                            Array.from({ length: item.level }).map((_, i) => (
-                                <div
-                                    key={i}
-                                    className="absolute border-l border-border/40 h-full top-0"
-                                    style={{ left: 19 + i * 20 }}
-                                />
-                            ))}
+                        const optionNode = (
+                            <div
+                                className={cn(
+                                    "relative flex items-center px-2 text-sm outline-none select-none",
+                                    d.rowGap,
+                                    d.rowPy,
+                                    item.disabled
+                                        ? "opacity-50"
+                                        : "hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                                    selected && !multiple && "bg-accent",
+                                    selected && multiple && "bg-accent/50"
+                                )}
+                                style={{ paddingLeft: 12 + item.level * 20 }}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    if (!item.disabled) handleToggleValue(item);
+                                }}
+                            >
+                                {/* Guidelines */}
+                                {item.level > 0 &&
+                                    Array.from({ length: item.level }).map(
+                                        (_, i) => (
+                                            <div
+                                                key={i}
+                                                className="absolute border-l border-border/40 h-full top-0"
+                                                style={{ left: 19 + i * 20 }}
+                                            />
+                                        )
+                                    )}
 
-                        {/* Expander */}
-                        <button
-                            type="button"
-                            disabled={!!item.disabled || !item.hasChildren}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                if (item.disabled) return;
-                                toggleExpanded(item.value);
-                            }}
-                            className={cn(
-                                "z-10 flex h-5 w-5 shrink-0 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors",
-                                !item.hasChildren &&
-                                    "opacity-0 pointer-events-none"
-                            )}
-                            aria-label={isExpanded ? "Collapse" : "Expand"}
-                        >
-                            {isExpanded ? (
-                                <ChevronDown className="h-3.5 w-3.5" />
-                            ) : (
-                                <ChevronRight className="h-3.5 w-3.5" />
-                            )}
-                        </button>
+                                {/* Expander */}
+                                <button
+                                    type="button"
+                                    disabled={!!item.disabled || !item.hasChildren}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (item.disabled) return;
+                                        toggleExpanded(item.value);
+                                    }}
+                                    className={cn(
+                                        "z-10 flex h-5 w-5 shrink-0 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors",
+                                        !item.hasChildren &&
+                                            "opacity-0 pointer-events-none"
+                                    )}
+                                    aria-label={isExpanded ? "Collapse" : "Expand"}
+                                >
+                                    {isExpanded ? (
+                                        <ChevronDown className="h-3.5 w-3.5" />
+                                    ) : (
+                                        <ChevronRight className="h-3.5 w-3.5" />
+                                    )}
+                                </button>
 
-                        {/* Checkbox (Multi Only, hide for parent nodes in leafOnly mode) */}
-                        {multiple && !parentInLeafOnly && (
-                            <Checkbox
-                                checked={selected}
-                                className="shrink-0 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
-                                style={{ pointerEvents: "none" }}
-                            />
-                        )}
+                                {/* Checkbox (Multi Only, hide for parent nodes in leafOnly mode) */}
+                                {multiple && !parentInLeafOnly && (
+                                    <Checkbox
+                                        checked={selected}
+                                        className="shrink-0 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+                                        style={{ pointerEvents: "none" }}
+                                    />
+                                )}
 
-                        {/* Icon */}
-                        {item.icon ? (
-                            <span className="text-muted-foreground">
-                                {item.icon}
-                            </span>
-                        ) : item.hasChildren ? (
-                            isExpanded ? (
-                                <FolderOpen className="h-4 w-4 text-blue-400/80 fill-blue-400/20" />
-                            ) : (
-                                <Folder className="h-4 w-4 text-blue-400/80 fill-blue-400/20" />
-                            )
-                        ) : (
-                            <File className="h-4 w-4 text-muted-foreground/60" />
-                        )}
+                                {/* Icon */}
+                                {item.icon ? (
+                                    <span className="text-muted-foreground">
+                                        {item.icon}
+                                    </span>
+                                ) : item.hasChildren ? (
+                                    isExpanded ? (
+                                        <FolderOpen className="h-4 w-4 text-blue-400/80 fill-blue-400/20" />
+                                    ) : (
+                                        <Folder className="h-4 w-4 text-blue-400/80 fill-blue-400/20" />
+                                    )
+                                ) : (
+                                    <File className="h-4 w-4 text-muted-foreground/60" />
+                                )}
 
-                        {/* Label */}
-                        <div className="flex flex-col min-w-0 flex-1">
-                            <span className="truncate font-medium leading-none">
-                                {item.labelNode}
-                            </span>
-                            {item.description && (
-                                <span className="text-xs text-muted-foreground truncate mt-0.5">
-                                    {item.description}
-                                </span>
-                            )}
-                        </div>
+                                {/* Label */}
+                                <div className="flex flex-col min-w-0 flex-1">
+                                    <span className="flex min-w-0 items-start gap-2">
+                                        <span className="truncate font-medium leading-none">
+                                            {item.labelNode}
+                                        </span>
+                                        {!!item.tags?.length && (
+                                            <span className="ml-auto flex shrink-0 flex-wrap gap-1">
+                                                {item.tags.map((tag, tagIndex) => (
+                                                    <Badge
+                                                        key={tagIndex}
+                                                        className={cn(
+                                                            "text-xs",
+                                                            tag.className,
+                                                        )}
+                                                        onClick={tag.onClick}
+                                                        style={{
+                                                            color: tag.color,
+                                                            backgroundColor:
+                                                                tag.bgColor,
+                                                        }}
+                                                    >
+                                                        {tag.icon && (
+                                                            <span className="shrink-0">
+                                                                {tag.icon}
+                                                            </span>
+                                                        )}
+                                                        <span>{tag.label}</span>
+                                                    </Badge>
+                                                ))}
+                                            </span>
+                                        )}
+                                    </span>
+                                    {item.description && (
+                                        <span className="text-xs text-muted-foreground truncate mt-0.5">
+                                            {item.description}
+                                        </span>
+                                    )}
+                                </div>
 
-                        {/* Checkmark (Single Only) */}
-                        {!multiple && selected && (
-                            <Check className="h-4 w-4 text-primary ml-auto" />
-                        )}
-                    </div>
-                );
+                                {/* Checkmark (Single Only) */}
+                                {!multiple && selected && (
+                                    <Check className="h-4 w-4 text-primary ml-auto" />
+                                )}
+                            </div>
+                        );
 
-                // Prefer per-option renderer (normalized) if present; fall back to global renderOption
-                const renderer = (item as any).render ?? renderOption;
+                        // Prefer per-option renderer (normalized) if present; fall back to global renderOption
+                        const renderer = (item as any).render ?? renderOption;
 
-                if (!renderer) {
-                    return (
-                        <React.Fragment key={item.key}>
-                            {optionNode}
-                        </React.Fragment>
-                    );
-                }
+                        if (!renderer) {
+                            return (
+                                <React.Fragment key={item.key}>
+                                    {optionNode}
+                                </React.Fragment>
+                            );
+                        }
 
-                const rendered = renderer({
-                    item,
-                    selected,
-                    index,
-                    option: optionNode,
-                    click() {
-                        if (!item.disabled) handleToggleValue(item);
-                    },
-                });
+                        const rendered = renderer({
+                            item,
+                            selected,
+                            index,
+                            option: optionNode,
+                            click() {
+                                if (!item.disabled) handleToggleValue(item);
+                            },
+                        });
 
-                return (
-                    <React.Fragment key={item.key}>{rendered}</React.Fragment>
-                );
-            })}
+                        return (
+                            <React.Fragment key={item.key}>
+                                {rendered}
+                            </React.Fragment>
+                        );
+                    }}
+                />
+            )}
         </div>
     );
 

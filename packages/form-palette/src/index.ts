@@ -33,6 +33,7 @@ export * from "@/input";
 export { registerVariant, getVariant, listVariants } from "@/variants/registry";
 
 export { registerCoreVariants } from "@/variants"; // if you have a convenience registrar there
+// export * as Variants from '@/presets/shadcn-variants/index'
 
 export { Textarea } from "@/presets/ui/textarea";
 export { InputMask } from './presets/ui/input-mask';

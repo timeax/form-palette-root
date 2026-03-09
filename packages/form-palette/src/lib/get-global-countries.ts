@@ -7,7 +7,7 @@ const DEFAULT_COUNTRIES: PhoneCountry[] = [
    {
       code: "NG",
       label: "Nigeria",
-      dial: "234",
+      dial: "+234",
       mask: "999 999 9999",
       flag: "🇳🇬",
    },
