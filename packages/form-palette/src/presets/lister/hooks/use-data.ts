@@ -143,7 +143,7 @@ export type UseDataResult<TItem = any, TFilters = Record<string, any>> = {
     isSelected: (id: DataKey) => boolean;
     getSelection: () => TItem | TItem[] | null;
 
-    refresh: () => void;
+    refresh: () => Promise<TItem[]>;
     override(data: TItem[]): void;
 
     fetch: (override?: {
@@ -441,8 +441,8 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
         ],
     );
 
-    const refresh = React.useCallback(() => {
-        void fetchImpl();
+    const refresh = React.useCallback(async () => {
+        return fetchImpl();
     }, [fetchImpl]);
 
     const override = React.useCallback((newData: TItem[]) => {
