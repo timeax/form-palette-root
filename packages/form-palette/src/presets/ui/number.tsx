@@ -102,6 +102,10 @@ function isFiniteNumber(n: unknown): n is number {
     return typeof n === "number" && Number.isFinite(n);
 }
 
+function sanitizeNumberish(value: number | null | undefined): number | null {
+    return isFiniteNumber(value) ? value : null;
+}
+
 function resolveLocale(explicit?: string) {
     if (explicit) return explicit;
     if (typeof navigator !== "undefined" && navigator.language)
@@ -174,6 +178,7 @@ function formatDisplayNumber(
     prefix?: string,
     suffix?: string,
 ) {
+    if (!isFiniteNumber(n)) return "";
     const f = new Intl.NumberFormat(locale, opts).format(n);
     return `${prefix ?? ""}${f}${suffix ?? ""}`;
 }
@@ -350,9 +355,11 @@ export const InputNumber = React.memo(
 
         const emit = React.useCallback(
             (event: React.SyntheticEvent<any> | null, value: number | null) => {
+                const safeValue = sanitizeNumberish(value);
+
                 props.onValueChange?.({
                     originalEvent: event,
-                    value,
+                    value: safeValue,
                     stopPropagation() {
                         event?.stopPropagation();
                     },
@@ -362,12 +369,12 @@ export const InputNumber = React.memo(
                     target: {
                         name: props.name ?? null,
                         id: props.id ?? null,
-                        value,
+                        value: safeValue,
                     },
                 });
 
                 if (props.onChange && event) {
-                    props.onChange({ originalEvent: event, value });
+                    props.onChange({ originalEvent: event, value: safeValue });
                 }
             },
             [props],
@@ -386,11 +393,12 @@ export const InputNumber = React.memo(
 
         const formatFromModel = React.useCallback(
             (n: number | null) => {
-                if (n == null) return "";
-                if (!props.format) return toEditableFromNumber(n);
+                const safeNumber = sanitizeNumberish(n);
+                if (safeNumber == null) return "";
+                if (!props.format) return toEditableFromNumber(safeNumber);
 
                 const formatted = formatDisplayNumber(
-                    n,
+                    safeNumber,
                     locale,
                     fmtOptions,
                     props.prefix,
@@ -429,11 +437,12 @@ export const InputNumber = React.memo(
 
         const syncFromPropsValue = React.useCallback(
             (v: number | null | undefined) => {
-                if (v == null) {
+                const safeValue = sanitizeNumberish(v);
+                if (safeValue == null) {
                     setDisplay("");
                     return;
                 }
-                const clamped = clampModel(v);
+                const clamped = clampModel(safeValue);
                 setDisplay(
                     focused
                         ? toEditableFromNumber(clamped)

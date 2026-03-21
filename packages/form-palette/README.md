@@ -1127,6 +1127,18 @@ export function SelectExample() {
         addOnEnter
         addOnBlur
 />
+
+// Controlled usage: read/write chips from `e.value` (not e.target.value)
+const [tags, setTags] = React.useState<string[] | undefined>(["alpha"]);
+<InputField
+        name="tags_controlled"
+        label="Controlled tags"
+        variant="chips"
+        value={tags}
+        onChange={(e) => {
+          setTags(e.value);
+        }}
+/>
 ```
 
 ## color

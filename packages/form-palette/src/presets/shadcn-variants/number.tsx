@@ -3,6 +3,10 @@ import { InputNumber, InputNumberProps, InputNumberValueChangeEvent } from "../u
 import { cn } from "@/lib/utils";
 import { ChevronUp, ChevronDown, Plus, Minus } from "lucide-react";
 
+function sanitizeNumberish(value: number | null | undefined): number | null {
+   return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
 // Wrapper-level props for the variant
 export type ShadcnNumberVariantProps =
    // All the usual number stuff (mode, locale, prefix, suffix, etc.)
@@ -54,11 +58,13 @@ export const ShadcnNumberVariant = React.forwardRef<
 
    const handleChange = React.useCallback(
       (e: InputNumberValueChangeEvent) => {
+         const safeValue = sanitizeNumberish(e.value);
+
          if (onValueChange) {
-            onValueChange(e.value as any, {
+            onValueChange((safeValue ?? undefined) as any, {
                source: "user",
                nativeEvent: e.originalEvent as any,
-               raw: e.value,
+               raw: safeValue,
             });
          }
       },
@@ -69,7 +75,7 @@ export const ShadcnNumberVariant = React.forwardRef<
       (direction: 1 | -1, originalEvent: React.SyntheticEvent<any>) => {
          if (disabled) return;
 
-         const current = value ?? 0;
+         const current = sanitizeNumberish(value) ?? 0;
          let next = current + direction * step;
 
          if (typeof min === "number") next = Math.max(next, min);
@@ -78,13 +84,13 @@ export const ShadcnNumberVariant = React.forwardRef<
          // Prime-style event
          const e: InputNumberValueChangeEvent = {
             originalEvent,
-            value: next,
+            value: sanitizeNumberish(next),
             stopPropagation: () => originalEvent.stopPropagation(),
             preventDefault: () => originalEvent.preventDefault(),
             target: {
                name,
                id: id ?? inputId ?? null,
-               value: next,
+               value: sanitizeNumberish(next),
             },
          };
 

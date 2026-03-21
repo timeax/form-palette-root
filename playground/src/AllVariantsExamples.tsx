@@ -141,7 +141,7 @@ const PillToggle = React.forwardRef<HTMLButtonElement, PillToggleProps>(
 
 export function AllVariantsExamples() {
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 mx-6">
             <h2 className="text-xl font-bold">All Variants Showcase</h2>
 
             <Form wrapped gap={12} onSubmit={(e) => console.log(e)}>

@@ -282,7 +282,26 @@ export const ShadcnChipsVariant = React.forwardRef<
       ...restTextProps
    } = props;
 
-   const chips = React.useMemo(() => value ?? [], [value]);
+   const hasInvalidIncomingValue =
+      value !== undefined && !Array.isArray(value);
+
+   React.useEffect(() => {
+      if (process.env.NODE_ENV === "production") return;
+      if (!hasInvalidIncomingValue) return;
+
+      // Chips always render from an array; non-array controlled values
+      // are treated as empty to prevent runtime crashes.
+      // eslint-disable-next-line no-console
+      console.warn(
+         "[form-palette] ShadcnChipsVariant expected `value` to be `string[] | undefined`; received:",
+         value,
+      );
+   }, [hasInvalidIncomingValue, value]);
+
+   const chips = React.useMemo(
+      () => (Array.isArray(value) ? value : []),
+      [value],
+   );
    const hasChips = chips.length > 0;
 
    const [inputText, setInputText] = React.useState("");
