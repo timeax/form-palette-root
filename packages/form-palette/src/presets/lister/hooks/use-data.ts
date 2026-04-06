@@ -2,16 +2,16 @@
 
 import * as React from "react";
 
-import type {ListerSearchMode, ListerSearchPayload, ListerSearchTarget,} from "@/presets/lister/types";
+import type { ListerSearchMode, ListerSearchPayload, ListerSearchTarget, } from "@/presets/lister/types";
 
-import {extractArray} from "@/presets/lister/runtime/engine/extract";
-import {defaultHttpClient, type ListerHttpClient,} from "@/presets/lister/runtime/engine/http";
-import {createRequestId} from "@/presets/lister/runtime/engine/engine";
-import {buildSearchPayloadFromTarget} from "@/presets/lister/runtime/engine/search";
+import { extractArray } from "@/presets/lister/runtime/engine/extract";
+import { defaultHttpClient, type ListerHttpClient, } from "@/presets/lister/runtime/engine/http";
+import { createRequestId } from "@/presets/lister/runtime/engine/engine";
+import { buildSearchPayloadFromTarget } from "@/presets/lister/runtime/engine/search";
 
 // ✅ NEW: runtime inflight (abort + debounce + latest)
-import {createInFlight} from "@/presets/lister/runtime/session/inflight";
-import {createRuntimeKey} from "@/presets/lister/runtime/session/key";
+import { createInFlight } from "@/presets/lister/runtime/session/inflight";
+import { createRuntimeKey } from "@/presets/lister/runtime/session/key";
 
 /**
  * Minimal selector contract (matches extractArray contract used by lister)
@@ -382,6 +382,8 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
                     signal,
                     requestId,
                 });
+                //---
+                setRes(resBody);
 
                 const list = extractArray<TItem>(resBody, opts.selector as any);
 
@@ -401,7 +403,6 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
                     );
                 }
 
-                setRes(resBody);
                 setData(list);
                 setLoading(false);
                 return list;
