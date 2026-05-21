@@ -149,6 +149,7 @@ export function AllVariantsExamples() {
                     name="text_default"
                     variant="text"
                     label="Text"
+                    prefix={'$'}
                     placeholder="Enter text"
                     onChange={(e) => console.log(e)}
                 />
@@ -157,6 +158,7 @@ export function AllVariantsExamples() {
                     name="number_default"
                     variant="number"
                     label="Number"
+                    prefix={'#'}
                     min={0}
                     max={100}
                     showButtons

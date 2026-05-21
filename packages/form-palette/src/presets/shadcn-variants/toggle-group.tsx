@@ -62,7 +62,7 @@ export interface ShadcnToggleVariantProps
     options: ToggleOptionInput[];
 
     multiple?: boolean;
-    variant?: "default" | "outline";
+    design?: "default" | "outline";
     layout?: "horizontal" | "vertical" | "grid";
     gridCols?: number;
     fillWidth?: boolean;
@@ -405,7 +405,7 @@ export const ShadcnToggleVariant = React.forwardRef<
 
         options = [],
         multiple = false,
-        variant = "default",
+        design = "default",
         layout = "horizontal",
         gridCols = 2,
         fillWidth: fullWidth = false,
@@ -535,7 +535,6 @@ export const ShadcnToggleVariant = React.forwardRef<
         className
     );
 
-    console.log(layoutClasses, fullWidth, autoCap);
     const groupStyle: React.CSSProperties | undefined = React.useMemo(() => {
         const style: React.CSSProperties = {};
 
@@ -561,7 +560,7 @@ export const ShadcnToggleVariant = React.forwardRef<
             value={currentValue as any}
             onValueChange={handleChange}
             disabled={isDisabled}
-            variant={variant}
+            variant={design}
             size={toggleSize}
             className={layoutClasses}
             style={groupStyle}
@@ -629,7 +628,7 @@ export const ShadcnToggleVariant = React.forwardRef<
                                 "border-destructive/50 hover:bg-destructive/10 data-[state=on]:bg-destructive data-[state=on]:text-destructive-foreground",
 
                             // Variant: Outline specific tweaks
-                            variant === "outline" &&
+                            design === "outline" &&
                                 layout === "horizontal" &&
                                 !fullWidth &&
                                 "first:rounded-l-md last:rounded-r-md rounded-none border-l-0 first:border-l",

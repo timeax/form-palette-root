@@ -427,12 +427,20 @@ function normalizeItems<TItem, TValue>(
             } satisfies CheckboxItem<TValue>;
         }
 
-        return item as unknown as CheckboxItem<TValue>;
+        const existing = item as unknown as CheckboxItem<TValue>;
+        return {
+            ...existing,
+            raw: existing.raw ?? item,
+        };
     });
 }
 
 function isEqualValue(a: unknown, b: unknown): boolean {
     return Object.is(a, b);
+}
+
+function valueLookupKey(value: unknown): string {
+    return `${typeof value}:${String(value)}`;
 }
 
 /**
@@ -460,14 +468,15 @@ function asGroupValue<TValue>(
             state: true,
         }));
     }
-    if (typeof value == "object")
-        return Object.keys(value).map(
+    if (typeof value == "object") {
+        return Reflect.ownKeys(value).map(
             (key) =>
                 ({
-                    value: key,
+                    value: key as TValue,
                     state: (value as any)[key] as CheckboxTriStateValue,
                 }) as CheckboxGroupEntry<TValue>,
         );
+    }
     return undefined;
 }
 
@@ -681,7 +690,39 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
     // Group mode
     // ─────────────────────────────────────────
 
-    const groupValue = asGroupValue<TValue>(value);
+    const normalizedByValueKey = React.useMemo(() => {
+        const lookup = new Map<string, CheckboxItem<TValue>>();
+        normalized.forEach((item) => {
+            lookup.set(valueLookupKey(item.value), item);
+        });
+        return lookup;
+    }, [normalized]);
+
+    const groupValue = React.useMemo<CheckboxGroupValue<TValue>>(() => {
+        const source = asGroupValue<TValue>(value);
+        if (!source?.length) return source;
+
+        return source.map((entry) => {
+            const byExact = normalized.find((item) =>
+                isEqualValue(item.value, entry.value),
+            );
+            if (byExact) return { ...entry, value: byExact.value };
+
+            const byKey = normalizedByValueKey.get(valueLookupKey(entry.value));
+            if (byKey) return { ...entry, value: byKey.value };
+
+            if (typeof entry.value === "string") {
+                const byString = normalized.find(
+                    (item) =>
+                        typeof item.value !== "object" &&
+                        String(item.value) === entry.value,
+                );
+                if (byString) return { ...entry, value: byString.value };
+            }
+
+            return entry;
+        });
+    }, [value, normalized, normalizedByValueKey]);
 
     const {
         groupStyle,
@@ -798,10 +839,16 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
                 source: "variant",
                 raw: nextList,
                 selectedOptions: nextList.map(
-                    (entry) =>
-                        normalized.find((item) =>
-                            isEqualValue(item.value, entry.value),
-                        )?.raw ?? entry.value,
+                    (entry) => {
+                        const normalizedItem =
+                            normalizedByValueKey.get(
+                                valueLookupKey(entry.value),
+                            ) ??
+                            normalized.find((item) =>
+                                isEqualValue(item.value, entry.value),
+                            );
+                        return normalizedItem?.raw ?? normalizedItem ?? entry.value;
+                    },
                 ),
                 nativeEvent: undefined,
                 meta: undefined,
@@ -819,7 +866,7 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
             // Non-tristate group mode emits selected keys only.
             onValue(nextList.map((item) => item.value) as any, detail);
         },
-        [onValue, disabled, groupValue, normalized, hasAnyTristate],
+        [onValue, disabled, groupValue, normalizedByValueKey, normalized, hasAnyTristate],
     );
 
     return (
