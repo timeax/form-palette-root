@@ -83,13 +83,21 @@ describe("number variant runtime safety", () => {
    it("keeps valid finite numbers working as before", () => {
       const onValueChange = vi.fn();
 
-      render(
-         <InputNumber
-            value={12.5}
-            onValueChange={onValueChange}
-            maxFractionDigits={1}
-         />,
-      );
+      function Host() {
+         const [value, setValue] = React.useState<number | null>(12.5);
+         return (
+            <InputNumber
+               value={value}
+               onValueChange={(e) => {
+                  onValueChange(e);
+                  setValue(e.value);
+               }}
+               maxFractionDigits={1}
+            />
+         );
+      }
+
+      render(<Host />);
 
       const input = screen.getByRole("spinbutton");
 
@@ -106,5 +114,93 @@ describe("number variant runtime safety", () => {
          }),
       );
       expect((input as HTMLInputElement).value).toBe("14.5");
+   });
+
+   it("keeps prefix/suffix visible in focused and blurred states", () => {
+      render(
+         <InputNumber
+            value={12.5}
+            prefix="$"
+            suffix="kg"
+            onValueChange={vi.fn()}
+         />,
+      );
+
+      const input = screen.getByRole("spinbutton") as HTMLInputElement;
+      expect(input.value).toBe("$12.5kg");
+
+      fireEvent.focus(input);
+      expect(input.value).toBe("$12.5kg");
+
+      fireEvent.blur(input);
+      expect(input.value).toBe("$12.5kg");
+   });
+
+   it("parses affixed user input and emits numeric model", () => {
+      const onValueChange = vi.fn();
+
+      function Host() {
+         const [value, setValue] = React.useState<number | null>(null);
+         return (
+            <InputNumber
+               value={value}
+               prefix="$"
+               suffix="kg"
+               onValueChange={(e) => {
+                  onValueChange(e);
+                  setValue(e.value);
+               }}
+            />
+         );
+      }
+
+      render(<Host />);
+
+      const input = screen.getByRole("spinbutton");
+      fireEvent.focus(input);
+      fireEvent.change(input, { target: { value: "$25kg" } });
+
+      expect(onValueChange).toHaveBeenCalledWith(
+         expect.objectContaining({
+            value: 25,
+            target: expect.objectContaining({ value: 25 }),
+         }),
+      );
+
+      fireEvent.blur(input);
+      expect((input as HTMLInputElement).value).toBe("$25kg");
+   });
+
+   it("variant step buttons keep affixed formatting and clamp with min/max", () => {
+      function Host() {
+         const [value, setValue] = React.useState<number | null>(9);
+         return (
+            <ShadcnNumberVariant
+               value={value}
+               onValue={(next) => setValue(next ?? null)}
+               prefix="$"
+               suffix="kg"
+               min={0}
+               max={10}
+               step={2}
+               showButtons
+               buttonLayout="inline"
+            />
+         );
+      }
+
+      render(<Host />);
+
+      const input = screen.getByRole("spinbutton") as HTMLInputElement;
+      expect(input.value).toBe("$9kg");
+
+      fireEvent.click(screen.getByLabelText("Increase value"));
+      expect(input.value).toBe("$10kg");
+
+      fireEvent.click(screen.getByLabelText("Increase value"));
+      expect(input.value).toBe("$10kg");
+
+      fireEvent.click(screen.getByLabelText("Decrease value"));
+      expect(input.value).toBe("$8kg");
    });
 });

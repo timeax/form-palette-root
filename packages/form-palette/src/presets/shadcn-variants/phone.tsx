@@ -190,12 +190,16 @@ function digitsOnly(input: string | undefined | null): string {
     return (input ?? "").replace(/\D+/g, "");
 }
 
+function normalizeDial(dial: string | undefined | null): string {
+    return digitsOnly(dial ?? "");
+}
+
 // ———————————————————————————————
 // Value ↔ display helpers
 // ———————————————————————————————
 
 function dialPrefixFor(country: PhoneCountry): string {
-    return `+${country.dial} `;
+    return `+${normalizeDial(country.dial)} `;
 }
 
 /**
@@ -211,8 +215,9 @@ function valueToNationalDigits(
 ): string {
     const digits = digitsOnly(value);
     if (!digits) return "";
-    if (digits.startsWith(country.dial)) {
-        return digits.slice(country.dial.length);
+    const dial = normalizeDial(country.dial);
+    if (dial && digits.startsWith(dial)) {
+        return digits.slice(dial.length);
     }
     return digits;
 }
@@ -262,8 +267,9 @@ function computeNextFromInput(
     const prefix = dialPrefixFor(country);
 
     let national = digitsOnly(rawInput);
-    if (national.startsWith(country.dial)) {
-        national = national.slice(country.dial.length);
+    const dial = normalizeDial(country.dial);
+    if (dial && national.startsWith(dial)) {
+        national = national.slice(dial.length);
     }
 
     const mask = compileMask(country.mask);
@@ -278,7 +284,7 @@ function computeNextFromInput(
     } else if (mode === "masked") {
         nextValue = display;
     } else if (mode === "e164") {
-        nextValue = country.dial + national;
+        nextValue = dial + national;
     } else {
         // "national"
         nextValue = national;
@@ -306,8 +312,11 @@ function remapToCountry(
     const digitsAll = digitsOnly(value);
 
     let national = digitsAll;
-    if (digitsAll.startsWith(from.dial)) {
-        national = digitsAll.slice(from.dial.length);
+    const fromDial = normalizeDial(from.dial);
+    const toDial = normalizeDial(to.dial);
+
+    if (fromDial && digitsAll.startsWith(fromDial)) {
+        national = digitsAll.slice(fromDial.length);
     }
 
     const prefix = dialPrefixFor(to);
@@ -322,7 +331,7 @@ function remapToCountry(
     } else if (mode === "masked") {
         nextValue = display;
     } else if (mode === "e164") {
-        nextValue = to.dial + national;
+        nextValue = toDial + national;
     } else {
         nextValue = national;
     }
@@ -380,7 +389,7 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
     const triggerLabel = selected
         ? [
               showFlag && selected.flag ? selected.flag : null,
-              showSelectedDial ? `+${selected.dial}` : null,
+              showSelectedDial ? `+${normalizeDial(selected.dial)}` : null,
               showSelectedLabel ? selected.label : null,
           ]
               .filter(Boolean)
@@ -412,7 +421,7 @@ const CountrySelect: React.FC<CountrySelectProps> = ({
                         }
 
                         if (showDialInList) {
-                            parts.push(`${c.dial}`);
+                            parts.push(`+${normalizeDial(c.dial)}`);
                         }
 
                         parts.push(c.label);

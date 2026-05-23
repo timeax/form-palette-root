@@ -3,6 +3,7 @@
 import * as React from "react";
 import Editor from "@toast-ui/editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
+import "@toast-ui/editor/dist/theme/toastui-editor-dark.css";
 import { cn } from "@/lib/utils";
 import type { ChangeDetail, VariantBaseProps, } from "@/variants/shared";
 
@@ -31,6 +32,8 @@ export type ToastToolbarItem =
 
 export type EditorFormat = "html" | "markdown";
 export type EditorToolbar = "default" | "none" | ToastToolbarItem[][];
+export type EditorTheme = "auto" | "light" | "dark";
+export type EditorThemeTarget = "nearest" | "document";
 
 type TuiEditorInstance = {
     getHTML(): string;
@@ -79,8 +82,55 @@ export interface ShadcnEditorVariantProps extends Pick<
 
     /** If true, paste is intercepted and inserted as plain text only */
     pastePlainText?: boolean;
+    /** Theme mode for Toast UI */
+    theme?: EditorTheme;
+    /**
+     * In auto mode:
+     * - "nearest": resolve from nearest themed ancestor (default)
+     * - "document": resolve from document root only
+     */
+    themeTarget?: EditorThemeTarget;
 
     className?: string;
+}
+
+function isDarkThemedElement(el: Element | null | undefined): boolean {
+    if (!el) return false;
+    if (el.classList.contains("dark")) return true;
+    const dataTheme = el.getAttribute("data-theme");
+    return dataTheme === "dark";
+}
+
+function resolveAutoDarkFromHost(
+    host: HTMLElement | null,
+    target: EditorThemeTarget,
+): boolean {
+    if (typeof document === "undefined") return false;
+
+    if (target === "document") {
+        return (
+            isDarkThemedElement(document.documentElement) ||
+            isDarkThemedElement(document.body)
+        );
+    }
+
+    // Walk ancestors manually so we can ignore this variant's own data-theme marker.
+    let node: HTMLElement | null = host ?? null;
+    while (node) {
+        const isEditorMarker = node.hasAttribute("data-editor-theme");
+        if (!isEditorMarker) {
+            if (node.classList.contains("dark")) return true;
+            if (node.hasAttribute("data-theme")) {
+                return node.getAttribute("data-theme") === "dark";
+            }
+        }
+        node = node.parentElement;
+    }
+
+    return (
+        isDarkThemedElement(document.documentElement) ||
+        isDarkThemedElement(document.body)
+    );
 }
 
 export function ShadcnEditorVariant(props: ShadcnEditorVariantProps) {
@@ -103,6 +153,8 @@ export function ShadcnEditorVariant(props: ShadcnEditorVariantProps) {
         format = "html",
         toolbar = "default",
         pastePlainText = false,
+        theme = "auto",
+        themeTarget = "nearest",
     } = props;
 
     const mountRef = React.useRef<HTMLDivElement>(null);
@@ -113,11 +165,18 @@ export function ShadcnEditorVariant(props: ShadcnEditorVariantProps) {
 
     const syncingRef = React.useRef(false);
     const loadedRef = React.useRef(false);
+    const lastContentRef = React.useRef(value ?? "");
+
+    const [autoDark, setAutoDark] = React.useState<boolean>(false);
 
     formatRef.current = format;
     onValueRef.current = onValue;
+    if (value !== undefined) lastContentRef.current = value;
 
     const effectiveReadOnly = Boolean(disabled || readOnly);
+    const effectiveTheme: "light" | "dark" = theme === "auto"
+        ? (autoDark ? "dark" : "light")
+        : theme;
 
     const readContent = React.useCallback((ed: TuiEditorInstance): string => {
         return formatRef.current === "markdown"
@@ -133,8 +192,45 @@ export function ShadcnEditorVariant(props: ShadcnEditorVariantProps) {
     const structuralKey = React.useMemo(() => {
         const hideModeSwitch = toolbar === "none" || pastePlainText;
         // toolbar array is serializable (strings)
-        return JSON.stringify({ toolbar, useCommandShortcut, hideModeSwitch });
-    }, [toolbar, useCommandShortcut, pastePlainText]);
+        return JSON.stringify({
+            toolbar,
+            useCommandShortcut,
+            hideModeSwitch,
+            effectiveTheme,
+        });
+    }, [toolbar, useCommandShortcut, pastePlainText, effectiveTheme]);
+
+    React.useEffect(() => {
+        if (theme !== "auto") return;
+        if (typeof document === "undefined") return;
+
+        const host = mountRef.current;
+        const recompute = () => {
+            setAutoDark(resolveAutoDarkFromHost(host, themeTarget));
+        };
+
+        recompute();
+
+        const observer = new MutationObserver(() => {
+            recompute();
+        });
+
+        observer.observe(document.documentElement, {
+            attributes: true,
+            subtree: true,
+            attributeFilter: ["class", "data-theme"],
+        });
+
+        if (document.body) {
+            observer.observe(document.body, {
+                attributes: true,
+                subtree: true,
+                attributeFilter: ["class", "data-theme"],
+            });
+        }
+
+        return () => observer.disconnect();
+    }, [theme, themeTarget]);
 
     // Create / recreate editor when structural options change
     React.useEffect(() => {
@@ -163,13 +259,14 @@ export function ShadcnEditorVariant(props: ShadcnEditorVariantProps) {
         const options: any = {
             el,
             height,
-            initialValue: value ?? "",
+            initialValue: value ?? lastContentRef.current ?? "",
             previewStyle,
             initialEditType: editType,
             useCommandShortcut,
             usageStatistics: false,
             placeholder,
             hideModeSwitch,
+            ...(effectiveTheme === "dark" ? { theme: "dark" } : {}),
             ...(toolbar === "none"
                 ? { toolbarItems: [] }
                 : Array.isArray(toolbar)
@@ -184,7 +281,9 @@ export function ShadcnEditorVariant(props: ShadcnEditorVariantProps) {
                     const ed = editorRef.current;
                     if (!ed) return;
                     if (syncingRef.current) return;
-                    emit(readContent(ed));
+                    const next = readContent(ed);
+                    lastContentRef.current = next;
+                    emit(next);
                 },
             },
         };
@@ -259,6 +358,7 @@ export function ShadcnEditorVariant(props: ShadcnEditorVariantProps) {
             const cur = ed.getHTML?.() ?? "";
             if (cur !== next) ed.setHTML(next, false);
         }
+        lastContentRef.current = next;
 
         Promise.resolve().then(() => {
             syncingRef.current = false;
@@ -287,6 +387,8 @@ export function ShadcnEditorVariant(props: ShadcnEditorVariantProps) {
         <div
             data-size={size}
             data-density={density}
+            data-theme={effectiveTheme}
+            data-editor-theme={effectiveTheme}
             className={cn(
                 "rounded-md border border-input bg-background overflow-hidden",
                 effectiveReadOnly && "opacity-60 pointer-events-none",

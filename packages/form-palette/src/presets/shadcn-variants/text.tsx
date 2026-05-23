@@ -13,6 +13,13 @@ import type { InputMaskChangeEvent } from "../ui/input-mask";
 
 type MaskMode = "raw" | "masked";
 
+function stripAffixes(value: string, prefix?: string, suffix?: string) {
+    let out = value ?? "";
+    if (prefix && out.startsWith(prefix)) out = out.slice(prefix.length);
+    if (suffix && out.endsWith(suffix)) out = out.slice(0, -suffix.length);
+    return out;
+}
+
 /**
  * Mask-related props for the Shadcn text variant.
  *
@@ -242,11 +249,16 @@ export const ShadcnTextVariant = React.forwardRef<
     const handleMaskedChange = React.useCallback(
         (e: InputMaskChangeEvent) => {
             const maskedValue = e.value ?? "";
+            const maskedValueWithoutAffixes = stripAffixes(
+                maskedValue,
+                prefix,
+                suffix
+            );
 
             // Same heuristic as your original variant:
             // "Unmasked" = characters that would normally be accepted by masks.
             const unmaskedInner =
-                maskedValue.match(/[0-9A-Za-z]/g)?.join("") ?? "";
+                maskedValueWithoutAffixes.match(/[0-9A-Za-z]/g)?.join("") ?? "";
 
             const mode: MaskMode =
                 unmask === true || unmask === "raw" ? "raw" : "masked";

@@ -394,7 +394,7 @@ Below are the **variant-specific props** you can pass to `<InputField />` for:
 | `maskDefinitions?: Record<string, RegExp>` | **Record** — Per-symbol slot definitions (kept for future custom engine; unused by current implementation).                                        |
 | `slotChar?: string`                        | **string** — Placeholder slot character (default `_`).                                                                                             |
 | `autoClear?: boolean`                      | **boolean** — If `true`, “empty” masked values emit `""` instead of a fully-masked placeholder string.                                             |
-| `unmask?: "raw" \| "masked" \| boolean`    | **union** — Controls whether the **model value** is raw vs masked. (`"raw"`/`true` ⇒ emit unmasked; `"masked"`/`false`/`undefined` ⇒ emit masked). |
+| `unmask?: "raw" \| "masked" \| boolean`    | **union** � Controls whether the **model value** is raw vs masked. (`"raw"`/`true` ? emit unmasked payload characters **without prefix/suffix**; `"masked"`/`false`/`undefined` ? emit masked string). |
 | `maskInsertMode?: "stream" \| "caret"`     | **union** — Reserved for future caret-mode logic (currently unused; kept for API compatibility).                                                   |
 | `...inputProps`                            | All other standard `React.InputHTMLAttributes<HTMLInputElement>` (except `value`, `defaultValue`, `onChange`, `size`) are forwarded.               |
 
@@ -539,6 +539,7 @@ export function ExampleToggleGroup() {
 | `max`          | Maximum numeric value constraint (used by the stepping logic and forwarded to the underlying number input).                                              |
 
 > Also accepts the rest of the underlying `InputNumberProps` (they’re forwarded to the number input).
+> Number `prefix` / `suffix` (from `InputNumberProps`) stay visible during focus/edit and blur; emitted model values remain numeric.
 
 **Sample**
 

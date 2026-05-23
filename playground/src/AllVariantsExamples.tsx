@@ -483,6 +483,26 @@ export function AllVariantsExamples() {
                     onChange={(e) => console.log(e)}
                 />
 
+                <div className="space-y-3 rounded-md border p-3">
+                    <p className="text-sm font-medium">Editor Theme Demo</p>
+                    <InputField
+                        name="editor_auto_theme"
+                        variant="editor"
+                        label="Editor (Auto Theme)"
+                        theme="auto"
+                        onChange={(e) => console.log(e)}
+                    />
+                    <div className="dark rounded-md border bg-background p-3">
+                        <InputField
+                            name="editor_forced_dark"
+                            variant="editor"
+                            label="Editor (Forced Dark)"
+                            theme="dark"
+                            onChange={(e) => console.log(e)}
+                        />
+                    </div>
+                </div>
+
                 <InputField
                     name="json_accordion"
                     variant="json-editor"

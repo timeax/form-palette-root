@@ -9,7 +9,7 @@ import { globalNormalizeCheckBasedOptions } from "@/lib/normalise-options";
 import { buildGroupLayoutClasses } from "@/lib/group-layout";
 
 // ─────────────────────────────────────────────
-// Types
+// Types`
 // ─────────────────────────────────────────────
 
 export type CheckboxSize = "sm" | "md" | "lg";

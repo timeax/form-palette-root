@@ -724,6 +724,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                     data-size={sizeKey}
                     data-density={densityKey}
                     placeholder={placeholder}
+                    {...rest}
                     value={displayValue}
                     onChange={onChange as any}
                     onBlur={onBlur as any}
@@ -732,7 +733,6 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                     onKeyPress={handleKeyPressWrapped as any}
                     onBeforeInput={handleBeforeInputWrapped as any}
                     onPaste={handlePasteWrapped as any}
-                    {...rest}
                 />
             );
         };
