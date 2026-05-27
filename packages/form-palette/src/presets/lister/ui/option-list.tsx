@@ -11,6 +11,7 @@ import {
 } from "@/presets/lister";
 
 import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/presets/ui/scroll-area";
 import { Check } from "lucide-react";
 
 type AnyPresetMap = any;
@@ -140,27 +141,27 @@ export function OptionList(props: { id: ListerSessionId; className?: string }) {
 
     if (s?.errorCode) {
         return (
-            <div className={cn("h-full min-h-0 overflow-y-auto", className)}>
+            <ScrollArea className={cn("h-full min-h-0", className)}>
                 <div className="px-3 py-4 text-sm opacity-70">
                     Error: {String(s.errorCode)}
                 </div>
-            </div>
+            </ScrollArea>
         );
     }
 
     if (s?.loading && !s?.optionsList?.length) {
         return (
-            <div className={cn("h-full min-h-0 overflow-y-auto", className)}>
+            <ScrollArea className={cn("h-full min-h-0", className)}>
                 <div className="px-3 py-4 text-sm opacity-70">Loading…</div>
-            </div>
+            </ScrollArea>
         );
     }
 
     if (!options.length) {
         return (
-            <div className={cn("h-full min-h-0 overflow-y-auto", className)}>
+            <ScrollArea className={cn("h-full min-h-0", className)}>
                 <div className="px-3 py-4 text-sm opacity-70">No results</div>
-            </div>
+            </ScrollArea>
         );
     }
 

@@ -17,6 +17,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/presets/ui/popover";
+import { ScrollArea } from "@/presets/ui/scroll-area";
 
 import { ChevronDown, Info, PenLine, Plus, Tag, X } from "lucide-react";
 
@@ -614,7 +615,7 @@ export const ShadcnKeyValueVariant = React.forwardRef<
                         {emptyLabel}
                     </div>
                 ) : (
-                    <div className="max-h-64 overflow-auto rounded-md border border-border/50">
+                    <ScrollArea className="max-h-64 rounded-md border border-border/50">
                         <div className="divide-y divide-border/50">
                             {items.map((pair, index) => (
                                 <div
@@ -688,7 +689,7 @@ export const ShadcnKeyValueVariant = React.forwardRef<
                                 </div>
                             ))}
                         </div>
-                    </div>
+                    </ScrollArea>
                 )}
             </PopoverContent>
         </Popover>

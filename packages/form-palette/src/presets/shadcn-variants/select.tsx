@@ -11,6 +11,7 @@ import {
 } from "@/presets/ui/select";
 import { Badge } from "@/presets/ui/badge";
 import { Input } from "@/presets/ui/input";
+import { ScrollArea } from "@/presets/ui/scroll-area";
 import { Search, X } from "lucide-react";
 import { globalNormalizeOptions } from "@/lib/normalise-options";
 import { Virtuoso } from "react-virtuoso";
@@ -921,8 +922,9 @@ export const ShadcnSelectVariant = React.forwardRef<
                         }}
                     />
                 ) : (
-                    <div className="max-h-60 overflow-auto">
-                        {filteredItems.map((item, index) => {
+                    <ScrollArea className="max-h-60">
+                        <div>
+                            {filteredItems.map((item, index) => {
                             const optionNode = (
                                 <SelectItem
                                     key={item.key}
@@ -1005,7 +1007,8 @@ export const ShadcnSelectVariant = React.forwardRef<
                                 },
                             });
                         })}
-                    </div>
+                        </div>
+                    </ScrollArea>
                 )}
             </SelectContent>
         </Select>
