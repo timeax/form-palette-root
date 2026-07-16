@@ -10,7 +10,7 @@ import Draggable, {
 import type { ListerMode, ListerSessionId, ListerStoreState } from "./types";
 import { useLister } from ".";
 
-import { Separator } from "@/presets/ui/separator";
+import { Separator } from "@/presets/shadcn/ui/separator";
 import { cn } from "@/lib/utils";
 
 import { SearchBar } from "./ui/search";

@@ -1,7 +1,7 @@
 // src/variants/core/radio.ts
 
 import type { VariantModuleFor } from "@/schema/variant";
-import { ShadcnRadioVariant } from "@/presets/shadcn-variants/radio";
+import { ShadcnRadioVariant } from "@/presets/shadcn/variants/radio";
 
 /**
  * Built-in "radio" variant module.

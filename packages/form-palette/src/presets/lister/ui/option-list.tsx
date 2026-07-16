@@ -1,7 +1,7 @@
 // OptionList (react-virtuoso, variable height, no forwardRef components)
 
 import * as React from "react";
-import { Virtuoso } from "react-virtuoso";
+import { VirtualScroll } from "@/presets/shadcn/ui/virtual-scroll";
 
 import {
     ListerId,
@@ -11,7 +11,7 @@ import {
 } from "@/presets/lister";
 
 import { cn } from "@/lib/utils";
-import { ScrollArea } from "@/presets/ui/scroll-area";
+import { ScrollArea } from "@/presets/shadcn/ui/scroll-area";
 import { Check } from "lucide-react";
 
 type AnyPresetMap = any;
@@ -168,7 +168,7 @@ export function OptionList(props: { id: ListerSessionId; className?: string }) {
     return (
         <div className={cn("h-full min-h-0 overflow-hidden", className)}>
             <div className="h-full min-h-0 p-1">
-                <Virtuoso
+                <VirtualScroll
                     style={{ height: "100%", minHeight: 0 }}
                     data={options}
                     increaseViewportBy={{ top: 400, bottom: 400 }}

@@ -1,7 +1,7 @@
 // ———————————————————————————————
 // VariantModule wiring
 
-import { ShadcnPhoneVariant } from "@/presets/shadcn-variants/phone";
+import { ShadcnPhoneVariant } from "@/presets/shadcn/variants/phone";
 import { VariantModule } from "@/schema/variant";
 
 // ———————————————————————————————

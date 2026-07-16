@@ -33,12 +33,12 @@ export * from "@/input";
 export { registerVariant, getVariant, listVariants } from "@/variants/registry";
 
 export { registerCoreVariants } from "@/variants"; // if you have a convenience registrar there
-// export * as Variants from '@/presets/shadcn-variants/index'
+// export * as Variants from '@/presets/shadcn/variants/index'
 
-export { Textarea } from "@/presets/ui/textarea";
-export { InputMask } from './presets/ui/input-mask';
-export { InputNumber } from './presets/ui/number';
-export { Input } from '@/presets/ui/input';
+export { Textarea } from "@/presets/shadcn/ui/textarea";
+export { InputMask } from './presets/shadcn/ui/input-mask';
+export { InputNumber } from './presets/shadcn/ui/number';
+export { Input } from '@/presets/shadcn/ui/input';
 // ─────────────────────────────────────────────────────────────
 // Adapters
 // ─────────────────────────────────────────────────────────────

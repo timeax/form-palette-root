@@ -4,7 +4,7 @@ import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 
-import { ShadcnCheckboxVariant } from "../src/presets/shadcn-variants/checkbox";
+import { ShadcnCheckboxVariant } from "../src/presets/shadcn/variants/checkbox";
 
 describe("checkbox variant selectedOptions emission", () => {
    it("emits raw option objects in selectedOptions with object options + optionValue", () => {

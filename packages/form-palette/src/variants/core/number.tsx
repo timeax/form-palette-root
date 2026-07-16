@@ -5,9 +5,9 @@ import * as React from "react";
 import type { Dict } from "@/schema/core";
 import type { VariantModule } from "@/schema/variant";
 import type { ValidateResult } from "@/schema/input-field";
-import { ShadcnTextVariant } from "@/presets/shadcn-variants/text";
-import type { ShadcnTextUiProps } from "@/presets/shadcn-variants/text";
-import { ShadcnNumberVariant, ShadcnNumberVariantProps } from "@/presets/shadcn-variants/number";
+import { ShadcnTextVariant } from "@/presets/shadcn/variants/text";
+import type { ShadcnTextUiProps } from "@/presets/shadcn/variants/text";
+import { ShadcnNumberVariant, ShadcnNumberVariantProps } from "@/presets/shadcn/variants/number";
 
 /**
  * Text variant props (core layer).

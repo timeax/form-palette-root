@@ -4,7 +4,7 @@ import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 
-import { ShadcnTextVariant } from "../src/presets/shadcn-variants/text";
+import { ShadcnTextVariant } from "../src/presets/shadcn/variants/text";
 
 describe("text variant affix behavior", () => {
    it("renders visible prefix/suffix from model value", () => {

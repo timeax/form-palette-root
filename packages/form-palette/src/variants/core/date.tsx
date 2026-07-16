@@ -1,4 +1,4 @@
-import ShadcnDateVariant from "@/presets/shadcn-variants/date";
+import ShadcnDateVariant from "@/presets/shadcn/variants/date";
 import { VariantModuleFor } from "@/schema/variant";
 
 

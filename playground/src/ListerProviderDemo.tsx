@@ -6,7 +6,7 @@ import {
     useLister,
 } from "@timeax/form-palette/presets/lister";
 import React from "react";
-import { Button } from "@timeax/form-palette/presets/ui/button";
+import { Button } from "@timeax/form-palette/presets/shadcn/ui/button";
 
 export function ListerProviderDemo() {
     return (

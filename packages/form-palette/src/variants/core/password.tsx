@@ -1,7 +1,7 @@
 // src/variants/core/password.tsx
 
 import type { VariantModuleFor } from "@/schema/variant";
-import { ShadcnPasswordVariant } from "@/presets/shadcn-variants/password";
+import { ShadcnPasswordVariant } from "@/presets/shadcn/variants/password";
 
 /**
  * Core module for the "password" variant.

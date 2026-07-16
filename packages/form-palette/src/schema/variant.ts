@@ -11,34 +11,34 @@ import type {
     ValidateResult,
 } from "@/schema/input-field";
 import type { VariantBaseProps } from "@/variants/shared";
-import { ShadcnNumberVariantProps } from "@/presets/shadcn-variants/number";
-import { ShadcnPhoneVariantProps } from "@/presets/shadcn-variants/phone";
-import { ShadcnColorVariantProps } from "@/presets/shadcn-variants/color";
-import { ShadcnPasswordVariantProps } from "@/presets/shadcn-variants/password";
+import { ShadcnNumberVariantProps } from "@/presets/shadcn/variants/number";
+import { ShadcnPhoneVariantProps } from "@/presets/shadcn/variants/phone";
+import { ShadcnColorVariantProps } from "@/presets/shadcn/variants/color";
+import { ShadcnPasswordVariantProps } from "@/presets/shadcn/variants/password";
 import {
     ShadcnDateVariantProps,
-} from "@/presets/shadcn-variants/date";
-import { ShadcnChipsVariantProps } from "@/presets/shadcn-variants/chips";
-import { ShadcnTextareaVariantProps } from "@/presets/shadcn-variants/textarea";
-import { ShadcnToggleVariantProps } from "@/presets/shadcn-variants/toggle";
-import { ShadcnRadioVariantProps } from "@/presets/shadcn-variants/radio";
-import { CheckboxVariantPublicValue, ShadcnCheckboxVariantPublicProps } from "@/presets/shadcn-variants/checkbox";
-import { ShadcnMultiSelectVariantProps } from "@/presets/shadcn-variants/multiselect";
+} from "@/presets/shadcn/variants/date";
+import { ShadcnChipsVariantProps } from "@/presets/shadcn/variants/chips";
+import { ShadcnTextareaVariantProps } from "@/presets/shadcn/variants/textarea";
+import { ShadcnToggleVariantProps } from "@/presets/shadcn/variants/toggle";
+import { ShadcnRadioVariantProps } from "@/presets/shadcn/variants/radio";
+import { CheckboxVariantPublicValue, ShadcnCheckboxVariantPublicProps } from "@/presets/shadcn/variants/checkbox";
+import { ShadcnMultiSelectVariantProps } from "@/presets/shadcn/variants/multiselect";
 import { SliderValue } from "@/variants/core/slider";
-import { ShadcnSliderVariantProps } from "@/presets/shadcn-variants/slider";
-import { KeyValueMap, ShadcnKeyValueVariantProps } from "@/presets/shadcn-variants/keyvalue";
-import { ShadcnCustomVariantProps } from "@/presets/shadcn-variants/custom";
-import { ShadcnTreeSelectVariantProps } from "@/presets/shadcn-variants/treeselect";
-import { FileLike, ShadcnFileVariantProps } from "@/presets/shadcn-variants/file";
-import { ShadcnTextVariantProps } from "@/presets/shadcn-variants/text";
+import { ShadcnSliderVariantProps } from "@/presets/shadcn/variants/slider";
+import { KeyValueMap, ShadcnKeyValueVariantProps } from "@/presets/shadcn/variants/keyvalue";
+import { ShadcnCustomVariantProps } from "@/presets/shadcn/variants/custom";
+import { ShadcnTreeSelectVariantProps } from "@/presets/shadcn/variants/treeselect";
+import { FileLike, ShadcnFileVariantProps } from "@/presets/shadcn/variants/file";
+import { ShadcnTextVariantProps } from "@/presets/shadcn/variants/text";
 import { SelectVariantProps } from "@/variants/core/select";
-import { ShadcnToggleVariantProps as ShadcnToggleGroupVariantProps } from "@/presets/shadcn-variants/toggle-group";
-import { ShadcnEditorVariantProps } from "@/presets/shadcn-variants/editor";
+import { ShadcnToggleVariantProps as ShadcnToggleGroupVariantProps } from "@/presets/shadcn/variants/toggle-group";
+import { ShadcnEditorVariantProps } from "@/presets/shadcn/variants/editor";
 import { JsonObject } from "@/lib/json-editor/utils";
-import { ShadcnJsonEditorProps } from "@/presets/shadcn-variants/json-editor/types";
-import { ListerVariantProps } from "@/presets/shadcn-variants/lister/types";
-import { ShadcnIconVariantProps } from "@/presets/shadcn-variants/icon";
-import {ShadcnImageIconVariantProps} from "@/presets/shadcn-variants/image-icon";
+import { ShadcnJsonEditorProps } from "@/presets/shadcn/variants/json-editor/types";
+import { ListerVariantProps } from "@/presets/shadcn/variants/lister/types";
+import { ShadcnIconVariantProps } from "@/presets/shadcn/variants/icon";
+import {ShadcnImageIconVariantProps} from "@/presets/shadcn/variants/image-icon";
 
 /**
  * Helper type for a single variant registry entry.

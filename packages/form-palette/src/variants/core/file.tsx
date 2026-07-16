@@ -1,4 +1,4 @@
-import ShadcnFileVariant from "@/presets/shadcn-variants/file";
+import ShadcnFileVariant from "@/presets/shadcn/variants/file";
 import { VariantModule } from "@/schema/variant";
 
 

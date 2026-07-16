@@ -54,7 +54,7 @@ vi.mock("@toast-ui/editor", () => {
    };
 });
 
-import { ShadcnEditorVariant } from "../src/presets/shadcn-variants/editor";
+import { ShadcnEditorVariant } from "../src/presets/shadcn/variants/editor";
 import * as ToastEditorModule from "@toast-ui/editor";
 
 const editorMock = (ToastEditorModule as any).__mock as {

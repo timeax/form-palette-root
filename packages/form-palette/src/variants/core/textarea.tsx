@@ -1,4 +1,4 @@
-import ShadcnTextareaVariant from "@/presets/shadcn-variants/textarea";
+import ShadcnTextareaVariant from "@/presets/shadcn/variants/textarea";
 import { VariantModuleFor } from "@/schema/variant";
 
 

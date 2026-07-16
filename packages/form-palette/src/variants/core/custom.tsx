@@ -1,7 +1,7 @@
 // src/variants/core/custom.tsx
 
 import type { VariantModule } from "@/schema/variant";
-import { ShadcnCustomVariant } from "@/presets/shadcn-variants/custom";
+import { ShadcnCustomVariant } from "@/presets/shadcn/variants/custom";
 
 /**
  * Core "custom" variant module.

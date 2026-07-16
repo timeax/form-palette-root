@@ -7,7 +7,7 @@ import * as React from "react";
 import type { ListerMode, ListerSessionId } from "../types";
 import { useLister } from "..";
 
-import { Button } from "@/presets/ui/button";
+import { Button } from "@/presets/shadcn/ui/button";
 
 export function FooterBar(props: {
     id: ListerSessionId;

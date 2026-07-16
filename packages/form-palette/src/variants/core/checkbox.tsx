@@ -1,11 +1,11 @@
 // src/variants/core/checkbox.ts
 
 import type { VariantModuleFor } from "@/schema/variant";
-import { ShadcnCheckboxVariant } from "@/presets/shadcn-variants/checkbox";
+import { ShadcnCheckboxVariant } from "@/presets/shadcn/variants/checkbox";
 import type {
    ShadcnCheckboxVariantPublicProps,
    CheckboxVariantPublicValue,
-} from "@/presets/shadcn-variants/checkbox";
+} from "@/presets/shadcn/variants/checkbox";
 import type { VariantBaseProps } from "@/variants/shared";
 import { toggleLayoutDefaults } from "./toggle";
 

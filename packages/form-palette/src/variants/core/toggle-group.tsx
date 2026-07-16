@@ -1,7 +1,7 @@
 // ———————————————————————————————
 // VariantModule wiring
 
-import { ShadcnToggleVariant } from "@/presets/shadcn-variants/toggle-group";
+import { ShadcnToggleVariant } from "@/presets/shadcn/variants/toggle-group";
 import { VariantModule } from "@/schema/variant";
 
 // ———————————————————————————————

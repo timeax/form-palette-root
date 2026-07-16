@@ -1,4 +1,4 @@
-import ShadcnSelectVariant, { ShadcnSelectVariantProps } from "@/presets/shadcn-variants/select";
+import ShadcnSelectVariant, { ShadcnSelectVariantProps } from "@/presets/shadcn/variants/select";
 import { VariantModuleFor } from "@/schema/variant";
 
 export type SelectVariantProps = ShadcnSelectVariantProps;

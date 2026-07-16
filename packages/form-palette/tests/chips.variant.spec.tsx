@@ -2,7 +2,7 @@ import * as React from "react";
 import { describe, it, expect, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 
-import { ShadcnChipsVariant } from "../src/presets/shadcn-variants/chips";
+import { ShadcnChipsVariant } from "../src/presets/shadcn/variants/chips";
 
 describe("ShadcnChipsVariant runtime safety", () => {
    it("does not crash when value is a non-array shape", () => {

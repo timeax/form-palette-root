@@ -5,7 +5,7 @@ import {
    Popover,
    PopoverTrigger,
    PopoverContent,
-} from "@/presets/ui/popover";
+} from "@/presets/shadcn/ui/popover";
 
 type NormalizedMultiItem = {
    key: string;

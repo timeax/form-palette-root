@@ -1,8 +1,8 @@
 // src/variants/core/json-editor.tsx
 
 import type { VariantModule } from "@/schema/variant";
-import ShadcnJsonEditorVariant from "@/presets/shadcn-variants/json-editor";
-import type { ShadcnJsonEditorProps } from "@/presets/shadcn-variants/json-editor/types";
+import ShadcnJsonEditorVariant from "@/presets/shadcn/variants/json-editor";
+import type { ShadcnJsonEditorProps } from "@/presets/shadcn/variants/json-editor/types";
 import Ajv from "ajv";
 
 const ajv = new Ajv({

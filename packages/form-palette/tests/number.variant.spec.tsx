@@ -4,8 +4,8 @@ import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 
-import { InputNumber } from "../src/presets/ui/number";
-import { ShadcnNumberVariant } from "../src/presets/shadcn-variants/number";
+import { InputNumber } from "../src/presets/shadcn/ui/number";
+import { ShadcnNumberVariant } from "../src/presets/shadcn/variants/number";
 
 describe("number variant runtime safety", () => {
    it("renders a blank input when controlled with NaN", () => {

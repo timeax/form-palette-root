@@ -1,4 +1,4 @@
-import { PhoneCountry } from "@/presets/shadcn-variants/phone";
+import { PhoneCountry } from "@/presets/shadcn/variants/phone";
 
 // e.g. src/lib/get-global-countries.ts
 let cachedCountries: PhoneCountry[] | null = null;

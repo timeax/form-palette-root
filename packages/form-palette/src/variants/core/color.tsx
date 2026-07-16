@@ -1,7 +1,7 @@
 // ———————————————————————————————
 // VariantModule wiring
 
-import { ShadcnColorVariant } from "@/presets/shadcn-variants/color";
+import { ShadcnColorVariant } from "@/presets/shadcn/variants/color";
 import { VariantModule } from "@/schema/variant";
 
 // ———————————————————————————————

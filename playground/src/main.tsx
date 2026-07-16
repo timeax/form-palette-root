@@ -37,6 +37,6 @@ const Select = () => {
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
-        <AllVariantsExamples />
+        <App />
     </React.StrictMode>,
 );

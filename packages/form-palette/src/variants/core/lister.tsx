@@ -1,5 +1,5 @@
 import { VariantModule } from "@/schema/variant";
-import ShadcnListerVariant from "@/presets/shadcn-variants/lister";
+import ShadcnListerVariant from "@/presets/shadcn/variants/lister";
 
 const module: VariantModule<"lister"> = {
     variant: "lister",

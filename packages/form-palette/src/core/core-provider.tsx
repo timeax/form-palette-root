@@ -27,7 +27,7 @@ import type {
 import type { ButtonRef, Field } from "@/schema/field";
 import { getPaletteUtil } from "@/lib/register-global";
 import { toArray } from "@/lib/utils";
-import type { FileItem } from "@/presets/shadcn-variants/file";
+import type { FileItem } from "@/presets/shadcn/variants/file";
 
 type Props<
     V extends Dict,

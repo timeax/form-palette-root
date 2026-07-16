@@ -1,6 +1,6 @@
 // src/variants/core/image-icon.ts
 
-import ShadcnImageIconVariant from "@/presets/shadcn-variants/image-icon";
+import ShadcnImageIconVariant from "@/presets/shadcn/variants/image-icon";
 import type { VariantModuleFor } from "@/schema/variant";
 
 export const imageIconVariant: VariantModuleFor<"image-icon"> = {

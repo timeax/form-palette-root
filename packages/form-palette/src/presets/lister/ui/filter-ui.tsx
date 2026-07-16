@@ -1,8 +1,8 @@
 // packages/form-palette/src/presets/lister/ui/filter-ui.tsx
 
 import * as React from "react";
-import { Button } from "@/presets/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/presets/ui/popover";
+import { Button } from "@/presets/shadcn/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/presets/shadcn/ui/popover";
 import { InputField } from "@/input/input-field";
 
 import { Check, ChevronRight, Filter, X } from "lucide-react";

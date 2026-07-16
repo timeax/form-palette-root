@@ -2,8 +2,8 @@
 
 
 import { useData } from "@timeax/form-palette/presets/lister";
-import { Input } from "@timeax/form-palette/presets/ui/input";
-import { Button } from "@timeax/form-palette/presets/ui/button";
+import { Input } from "@timeax/form-palette/presets/shadcn/ui/input";
+import { Button } from "@timeax/form-palette/presets/shadcn/ui/button";
 import { cn } from "@timeax/form-palette/lib/utils";
 
 export function UseDataDemo() {

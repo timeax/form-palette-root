@@ -16,9 +16,9 @@ import type {
 } from "@/presets/lister/types";
 
 import { useLister } from "@/presets/lister";
-import { Popover, PopoverContent, PopoverTrigger } from "@/presets/ui/popover";
-import { Input } from "@/presets/ui/input";
-import { Button } from "@/presets/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/presets/shadcn/ui/popover";
+import { Input } from "@/presets/shadcn/ui/input";
+import { Button } from "@/presets/shadcn/ui/button";
 
 import { ListerFiltersButton } from "./filter-ui";
 

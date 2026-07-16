@@ -1,4 +1,4 @@
-import ShadcnKeyValueVariant from "@/presets/shadcn-variants/keyvalue";
+import ShadcnKeyValueVariant from "@/presets/shadcn/variants/keyvalue";
 import { VariantModule } from "@/schema/variant";
 
 

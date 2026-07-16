@@ -1,4 +1,4 @@
-import ShadcnChipsVariant from "@/presets/shadcn-variants/chips";
+import ShadcnChipsVariant from "@/presets/shadcn/variants/chips";
 import { VariantModuleFor } from "@/schema/variant";
 
 

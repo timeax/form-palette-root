@@ -1,7 +1,7 @@
 //@ts-nocheck
 
 import * as React from "react";
-import { Form, Input, InputField } from "@timeax/form-palette";
+import { Form, InputField } from "@timeax/form-palette";
 import {
     Check,
     Globe2,
@@ -11,23 +11,30 @@ import {
     SearchIcon,
     Volume2,
     VolumeX,
+    Sun,
+    Moon,
+    Sparkles,
+    RefreshCw,
+    CheckCircle,
+    AlertCircle,
+    FileJson,
+    LayoutDashboard,
+    Type,
+    ToggleLeft,
+    Layers,
+    FileCode2,
+    Play
 } from "lucide-react";
 import { Textarea } from "@timeax/form-palette";
 import { cn } from "@timeax/form-palette/lib/utils";
-import { TreeSelectOption } from "@timeax/form-palette/presets/shadcn-variants/treeselect";
+import { TreeSelectOption } from "@timeax/form-palette/presets/shadcn/variants/treeselect";
 import {
     FileItem,
     CustomFileLoader,
     FileLike,
-} from "@timeax/form-palette/presets/shadcn-variants/file";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@radix-ui/react-popover";
-import { HeadlessResponsiveDialog } from "./dialog";
-import { AllVariantsExamples } from "./AllVariantsExamples";
+} from "@timeax/form-palette/presets/shadcn/variants/file";
 
+// Options
 const permissionOptions = [
     { code: "read", title: "Read content", notes: "View only" },
     { code: "write", title: "Write content", notes: "Create & edit" },
@@ -45,1074 +52,83 @@ const userListerDef = {
         method: "GET",
     },
     mapping: {
-        // optionValue: (raw: any) => raw.id,
+        optionValue: (raw: any) => raw.id,
         optionLabel: (raw: any) => raw.name,
         optionDescription: (raw: any) => raw.email,
     },
 };
 
-export const App: React.FC = () => {
-    function handleSubmit(e: any) {
-        // later we'll wire actual values here
-        e.form.inputs.getByName("email").setValue("this is nice");
-        // alert("Submitted (dummy)");
-        console.log(e.form.inputs.getByName("email"), e.formData);
-    }
-    const [regions, setRegions] = React.useState<
-        (string | number)[] | undefined
-    >();
-    const [openDialog, setOpenDialog] = React.useState(false);
-    const regionOptions: TreeSelectOption[] = [
-        {
-            label: "Africa",
-            value: "africa",
-            icon: <Globe2 className="h-3.5 w-3.5" />,
-            children: [
-                {
-                    label: "Nigeria",
-                    value: "ng",
-                    description: "Lagos, Abuja, Port Harcourt",
-                    icon: <MapPin className="h-3.5 w-3.5" />,
-                },
-                {
-                    label: "Ghana",
-                    value: "gh",
-                    description: "Accra, Kumasi",
-                },
-                {
-                    label: "Kenya",
-                    value: "ke",
-                    description: "Nairobi, Mombasa",
-                },
-            ],
-        },
-        {
-            label: "Europe",
-            value: "europe",
-            icon: <Globe2 className="h-3.5 w-3.5" />,
-            children: [
-                {
-                    label: "United Kingdom",
-                    value: "uk",
-                    description: "England, Scotland, Wales, NI",
-                },
-                {
-                    label: "Germany",
-                    value: "de",
-                },
-                {
-                    label: "France",
-                    value: "fr",
-                },
-            ],
-        },
-        {
-            label: "Asia",
-            value: "asia",
-            icon: <Globe2 className="h-3.5 w-3.5" />,
-            children: [
-                {
-                    label: "India",
-                    value: "in",
-                },
-                {
-                    label: "Japan",
-                    value: "jp",
-                },
-                {
-                    label: "Singapore",
-                    value: "sg",
-                },
-            ],
-        },
-    ];
+const largeSelectOptions = Array.from({ length: 2000 }, (_, i) => ({
+    value: `opt-${i + 1}`,
+    label: `Option #${i + 1}`,
+    description: `This is the description for option number ${i + 1}`,
+}));
 
-    return (
-        <div style={{ padding: 24, fontFamily: "system-ui, sans-serif" }}>
-            <h1>@timeax/form-palette playground</h1>
-            <p style={{ marginBottom: 16 }}>
-                This is a simple live playground. Editing{" "}
-                <code>packages/form-palette/src</code> will hot-reload this
-                page.
-            </p>
-            <AllVariantsExamples />
-
-            <div className="mb-4">
-                <button
-                    className="rounded-md border px-3 py-1 text-sm"
-                    type="button"
-                    onClick={() => setOpenDialog(true)}
-                >
-                    Open Form Dialog
-                </button>
-            </div>
-            <InputField variant={"checkbox"} label={"Remember me"} single />
-            <InputField
-                variant={"image-icon"}
-                label={"Remember me"}
-            />
-            <HeadlessResponsiveDialog
-                open={openDialog}
-                onOpenChange={setOpenDialog}
-                title="Playground Form"
-                description="All form fields wrapped in a responsive dialog."
-                drawerAt={640}
-                drawerSide="bottom"
-                maxVh={90}
-            >
-                <Form wrapped gap={15} onSubmit={handleSubmit}>
-                    <InputField
-                        contain
-                        icon={
-                            <>
-                                <SearchIcon /> icon detected
-                            </>
-                        }
-                        name="email"
-                        label="Email"
-                        sublabel="@example.com"
-                        helpText="This is all fake for now."
-                        onChange={(e: any) => {
-                            console.log("Changed value:", e);
-                            // e.preventDefault()
-                        }}
-                        errorText="This field is required."
-                        variant="text"
-                    />
-                    <InputField
-                        name="phone"
-                        label="Phone"
-                        variant="text"
-                        mask="+99 99 999 999? x999"
-                        slotChar="_"
-                        onChange={(e: any) => {
-                            console.log("Phone changed:", e);
-                            // e.preventDefault();
-                        }}
-                        // unmask="raw" // form gets only digits
-                        leadingControl={<span>Leading control</span>}
-                        prefix="number: "
-                        autoClear // clears if incomplete on blur
-                    />
-                    <InputField
-                        name="password"
-                        label="Password"
-                        variant="phone"
-                        onChange={(e: any) => {
-                            console.log("Password changed:", e);
-                            // e.preventDefault();
-                        }}
-                        showToggle
-                    />
-                    <InputField
-                        name="age"
-                        label="Age"
-                        variant="number"
-                        onChange={(e: any) => {
-                            console.log("Age changed:", e);
-                            // e.value = 42;
-                            // e.detail.nativeEvent.preventDefault();
-                        }}
-                        showButtons
-                        min={0}
-                        max={120}
-                        step={1}
-                    />
-                    <InputField
-                        name="color"
-                        label="Favorite colour"
-                        variant="color"
-                        onChange={(e: any) => {
-                            console.log("Color changed:", e);
-                            // e.preventDefault();
-                        }}
-                        showPreview
-                        previewButtonClassName="bg-gray-200 hover:bg-gray-300"
-                    />
-                    <InputField
-                        name="phone-variant"
-                        label="Password variant"
-                        variant="password"
-                        placeholder="Enter your password "
-                        strengthMeter
-                        meterStyle="rules"
-                        onChange={(e: any) => {
-                            console.log("Phone variant changed:", e);
-                            // e.preventDefault();
-                        }}
-                    />
-                    <InputField
-                        name="birthdate"
-                        label="Birthdate"
-                        variant="date"
-                        onChange={(e: any) => {
-                            console.log("Date changed:", e);
-                            // e.preventDefault();
-                        }}
-                    />
-                    <InputField
-                        name="tags"
-                        label="Tags"
-                        variant="chips"
-                        textareaMode
-                        maxChipWidth={150}
-                        onChange={(e: any) => {
-                            console.log("Tags changed:", e);
-                            // e.preventDefault();
-                        }}
-                    />
-                    <InputField
-                        name="notes"
-                        label="Notes"
-                        variant="textarea"
-                        rows={4}
-                        extendBoxToControls
-                        leadingControl={[<>this leads</>]}
-                        autoResize={false}
-                        placeholder="Write your notes here…"
-                        onChange={(e: any) => {
-                            console.log("Notes changed:", e);
-                            // e.preventDefault();
-                        }}
-                    />
-                    <InputField
-                        name="subscribe"
-                        helpText={
-                            <span>
-                                You agree to our{" "}
-                                <a href="#">terms of service</a>
-                            </span>
-                        }
-                        label="Subscribe to newsletter"
-                        variant="toggle"
-                        onChange={(e: any) => {
-                            console.log("Subscribe changed:", e);
-                            // e.preventDefault();
-                        }}
-                    />
-                    <SubscribeField />
-                    <InputField
-                        name="plan"
-                        variant="radio"
-                        label="Choose a plan"
-                        items={[
-                            {
-                                value: "free",
-                                label: "Free",
-                                description: "Basic features",
-                            },
-                            {
-                                value: "pro",
-                                label: "Pro",
-                                description: "Advanced tools",
-                            },
-                        ]}
-                        renderOption={({ item, selected, disabled, radio }) => (
-                            <label className="flex w-full cursor-pointer items-center gap-3">
-                                {radio}
-                                <div className="flex flex-col">
-                                    <span className="font-medium">
-                                        {item.label} {selected && "✓"}
-                                    </span>
-                                    {item.description && (
-                                        <span className="text-xs text-muted-foreground">
-                                            {item.description}
-                                        </span>
-                                    )}
-                                </div>
-                            </label>
-                        )}
-                        onChange={(e) => {
-                            console.log(e);
-                        }}
-                    />
-                    <InputField
-                        name="newsletter"
-                        variant="checkbox"
-                        label="Subscribe to newsletter"
-                        helpText="We only email occasionally."
-                        // single-mode checkbox
-                        single
-                        // non-tristate (default)
-                        defaultValue={false} // unchecked (or omit)
-                    />
-                    <InputField
-                        name="gdpr_consent"
-                        variant="checkbox"
-                        label="GDPR consent"
-                        description="You can explicitly accept or reject."
-                        // single checkbox tri-state
-                        single
-                        tristate
-                        // undefined → internal "none"
-                        defaultValue={undefined}
-                        onChange={(e) => {
-                            console.log(e.value);
-                        }}
-                    />
-                    <InputField
-                        name="roles"
-                        variant="checkbox"
-                        label="Roles"
-                        description="Select the roles assigned to this user."
-                        // non-tristate group
-                        items={[
-                            { value: "viewer", label: "Viewer" },
-                            { value: "editor", label: "Editor" },
-                            {
-                                value: "admin",
-                                label: "Admin",
-                                description: "Full access",
-                            },
-                        ]}
-                        defaultValue={[{ value: "viewer", state: true }]}
-                    />
-                    <InputField
-                        name="permissions"
-                        variant="checkbox"
-                        label="Permissions"
-                        sublabel="Tri-state aware"
-                        helpText="True/false both have meaning; 'none' is not stored."
-                        tristate // default for all items
-                        items={[
-                            {
-                                value: "read",
-                                label: "Read",
-                                description: "Can view content",
-                                // inherits tristate: true
-                            },
-                            {
-                                value: "write",
-                                label: "Write",
-                                description: "Can modify content",
-                                // inherits tristate: true
-                            },
-                            {
-                                value: "delete",
-                                label: "Delete",
-                                description: "Can remove content",
-                                tristate: false, // specific item is normal on/off
-                            },
-                        ]}
-                        defaultValue={[
-                            { value: "read", state: true },
-                            { value: "write", state: false },
-                            // "delete" starts at "none" (no entry)
-                        ]}
-                        onChange={(e) => {
-                            console.log(e.value);
-                        }}
-                    />
-                    <InputField
-                        name="permissions2"
-                        variant="checkbox"
-                        label="Permissions (optionValue/optionLabel)"
-                        items={permissionOptions}
-                        tristate
-                        optionValue="code" // maps to TValue
-                        optionLabel="title" // label to display
-                        renderOption={({
-                            item,
-                            checkbox,
-                            state,
-                            effectiveTristate,
-                        }) => (
-                            <div className="flex w-full items-start gap-3">
-                                {checkbox}
-                                <div className="flex min-w-0 flex-col">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm font-medium">
-                                            {item.label}
-                                        </span>
-                                        {effectiveTristate && (
-                                            <span className="text-[0.7rem] text-muted-foreground">
-                                                {state === "none"
-                                                    ? "No stance"
-                                                    : state === true
-                                                      ? "Allowed"
-                                                      : "Explicitly denied"}
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    {item.description && (
-                                        <span className="mt-0.5 text-xs text-muted-foreground">
-                                            {item.description}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-                    />
-                    <InputField
-                        name="marketing_optin"
-                        variant="checkbox"
-                        label="Marketing emails"
-                        helpText="We might send you updates about new features."
-                        single
-                        // inline row: checkbox + label on one row
-                        inline
-                        labelPlacement="right"
-                    />
-                    <InputField
-                        name="country"
-                        variant="select"
-                        label="Country"
-                        helpText="Used for billing & tax."
-                        // ⬇️ These are SELECT VARIANT props, but they live directly on InputField
-                        options={[]}
-                        optionValue="code"
-                        optionLabel="name"
-                        searchable
-                        searchPlaceholder="Search countries..."
-                        emptyLabel="No country selected"
-                        emptySearchText="No countries found"
-                        clearable
-                        // still works with shared props like disabled, required, size, density, etc.
-                        required
-                    />
-                    <InputField
-                        name="status"
-                        variant="select"
-                        label="Status"
-                        // options={["active", "paused", "disabled"]}
-                        searchable={false}
-                        clearable
-                        icon={<span>O</span>}
-                        autoCap
-                    />
-                    <BigSelectPrimitiveDemo />
-                    <InputField
-                        variant="multi-select"
-                        name="countries"
-                        default
-                        options={["ng", "gh", "ke", "tz"].map(e => ({label: e.toUpperCase(), value: e}))}
-                        autoCap
-                        showSelectAll
-                        clearable
-                        searchable
-                    />
-                    <InputField
-                        variant="slider"
-                        name="volume"
-                        label="Volume"
-                        helpText="Drag to adjust"
-                        min={0}
-                        max={100}
-                        step={5}
-                    />
-                    <InputField
-                        variant="slider"
-                        name="volume"
-                        label="Volume"
-                        helpText="Drag to adjust"
-                        min={0}
-                        max={100}
-                        step={5}
-                        // variant props – all flat, no wrapper
-                        leadingIcons={[
-                            <VolumeX key="quiet" className="h-4 w-4" />,
-                        ]}
-                        trailingIcons={[
-                            <Volume2 key="loud" className="h-4 w-4" />,
-                        ]}
-                        leadingControl={
-                            <button
-                                type="button"
-                                className="px-2 text-xs"
-                                onClick={() => {
-                                    // your own handler via onChange if you want
-                                }}
-                            >
-                                -10
-                            </button>
-                        }
-                        trailingControl={
-                            <button
-                                type="button"
-                                className="px-2 text-xs"
-                                onClick={() => {
-                                    // your own handler via onChange if you want
-                                }}
-                            >
-                                +10
-                            </button>
-                        }
-                    />
-                    // Boxed (first sketch)
-                    <InputField
-                        variant="slider"
-                        name="counter"
-                        min={0}
-                        max={100}
-                        step={5}
-                        label="Counter"
-                        controlVariant="boxed"
-                    />
-                    // Edge / loose (second sketch)
-                    <InputField
-                        variant="slider"
-                        name="counterLoose"
-                        min={0}
-                        max={100}
-                        step={5}
-                        label="Counter"
-                        controlVariant="edge"
-                    />
-                    <InputField variant="keyvalue" label="Key values" />
-                    <AppCustomVariantDemo />
-                    <InputField
-                        name="regions"
-                        label="Regions"
-                        description="Pick one or more regions / countries."
-                        variant="treeselect" // <-- your ShadcnTreeSelectVariant, wired in the registry
-                        value={regions}
-                        onValue={(next, detail) => {
-                            // `next` is (string | number)[] | undefined
-                            // `detail.raw` is the last toggled node's raw option object
-                            console.log("TREE VALUE:", next);
-                            console.log("LAST TOGGLED RAW:", detail.raw);
-                            setRegions(next);
-                        }}
-                        // Tree-select specific props (merged into InputField props)
-                        options={regionOptions}
-                        searchable
-                        searchPlaceholder="Search regions…"
-                        placeholder="Select regions…"
-                        clearable
-                        autoCap
-                        emptySearchText="No matching region"
-                        // Only leaf nodes are selectable (countries, not continents)
-                        leafOnly
-                        expandAll
-                        // Icons & controls (same pattern as text/select/slider)
-                        icon={
-                            <Globe2 className="h-4 w-4 text-muted-foreground" />
-                        }
-                        trailingIcons={[
-                            <MapPin
-                                key="pin"
-                                className="h-3.5 w-3.5 text-muted-foreground"
-                            />,
-                        ]}
-                        joinControls
-                        // extendBoxToControls
-                        size="md"
-                        multiple={false}
-                        density="comfortable"
-                    />
-                    <InputField
-                        variant="file"
-                        multiple={false}
-                        placeholder="Load file"
-                        onChange={(e) => console.log(e)}
-                    />
-                    <InputField
-                        variant="toggle-group"
-                        options={["light", "dark"]}
-                        autoCap
-                        itemClassName="bg-amber-600"
-                        activeClassName="data-[state=on]:bg-[red]"
-                        fillWidth
-                    />
-                    <InputField variant={"editor"} />
-                    <InputField
-                        variant="json-editor"
-                        label="Configuration (Popover)"
-                        description="Advanced JSON configuration with schema validation (Popover mode)"
-                        defaultValue={{
-                            api: {
-                                endpoint: "https://api.example.com",
-                                timeout: 5000,
-                                retry: true,
-                            },
-                            features: ["auth", "logging"],
-                        }}
-                        schema={{
-                            type: "object",
-                            properties: {
-                                api: {
-                                    type: "object",
-                                    properties: {
-                                        endpoint: {
-                                            type: "string",
-                                            format: "uri",
-                                        },
-                                        timeout: { type: "number", minimum: 0 },
-                                        retry: { type: "boolean" },
-                                    },
-                                    required: ["endpoint"],
-                                },
-                                features: {
-                                    type: "array",
-                                    items: { type: "string" },
-                                },
-                            },
-                        }}
-                    />
-                    <InputField
-                        variant="json-editor"
-                        mode="accordion"
-                        label="Settings (Accordion)"
-                        description="Inline JSON editor with accordion-like expansion"
-                        defaultValue={{
-                            theme: "dark",
-                            notifications: {
-                                email: true,
-                                push: false,
-                            },
-                        }}
-                    />
-                    <ListerSample />
-                    <AppSamples />
-                    <button type="submit">Submit</button>
-                </Form>
-            </HeadlessResponsiveDialog>
-
-            <div className="mt-10 p-6 border-t">
-                <h2 className="text-xl font-bold mb-4">
-                    JSON Editor Samples (Outside Dialog)
-                </h2>
-                <Form
-                    valueBag={{status: 'disabled', statuses: ['disabled']}}
-                    onSubmit={(e) =>
-                        console.log("Outside form submit", e.formData)
-                    }
-                >
-                    <InputField
-                        variant={"select"}
-                        name={"status"}
-                        autoCap
-                        label={"Status"}
-                        options={["active", "inactive", "disabled"]}
-                    />
-
-                    <InputField
-                        variant={"multi-select"}
-                        name={"statuses"}
-                        autoCap
-                        label={"Status"}
-                        options={["active", "inactive", "disabled"]}
-                    />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-4">
-                            <h3 className="font-semibold">Accordion Mode</h3>
-                            <InputField
-                                variant="json-editor"
-                                mode="accordion"
-                                label="Project Config"
-                                description="Directly embedded in the layout"
-                                defaultValue={{
-                                    name: "form-palette",
-                                    version: "1.0.0",
-                                    dependencies: {
-                                        react: "^18.0.0",
-                                        ajv: "^8.0.0",
-                                    },
-                                }}
-                            />
-                        </div>
-                        <div className="space-y-4">
-                            <h3 className="font-semibold">Popover Mode</h3>
-                            <InputField
-                                variant="json-editor"
-                                mode="popover"
-                                label="User Metadata"
-                                description="Opens in a popover for better space usage"
-                                triggerLabel="Edit Metadata"
-                                optionValue={"id"}
-                                defaultValue={{
-                                    lastLogin: "2023-10-27T10:00:00Z",
-                                    preferences: {
-                                        language: "en",
-                                        timezone: "UTC",
-                                    },
-                                }}
-                            />
-                        </div>
-                    </div>
-                </Form>
-
-                <h2 className="text-xl font-bold mt-12 mb-4">
-                    Lister Samples (Outside Dialog)
-                </h2>
-                <Form
-                    onSubmit={(e) =>
-                        console.log("Lister form submit", e.formData)
-                    }
-                >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-4">
-                            <h3 className="font-semibold">Single Selection</h3>
-                            <InputField
-                                variant="lister"
-                                label="Remote User"
-                                description="Select a single user from API"
-                                host={dummyListerHost}
-                                onChange={(e) =>
-                                    console.log("Lister change", e)
-                                }
-                                def={userListerDef}
-                                mode="single"
-                            />
-                        </div>
-                        <div className="space-y-4">
-                            <h3 className="font-semibold">
-                                Multiple Selection
-                            </h3>
-                            <InputField
-                                variant="lister"
-                                label="Remote Users"
-                                description="Select multiple users from API"
-                                host={dummyListerHost}
-                                optionValue={"id"}
-                                def={userListerDef}
-                                mode="multiple"
-                                defaultValue={[1, 2]}
-                            />
-                        </div>
-                    </div>
-
-                    <InputField
-                        variant="lister"
-                        label="Remote Users"
-                        description="Select multiple users from API"
-                        host={dummyListerHost}
-                        optionValue="id"
-                        def={userListerDef}
-                        mode="multiple"
-                        defaultValue={[1, 2]}
-                        filtersSpec={{
-                            options: [
-                                // input-based filter (bindKey => filter column/key)
-                                {
-                                    value: "name",
-                                    label: "Name",
-                                    description: "Filter by name",
-                                    input: {
-                                        variant: "text",
-                                        bindKey: "name",
-                                        unsetOnEmpty: true,
-                                        props: {
-                                            placeholder: "e.g. Leanne",
-                                        },
-                                    },
-                                },
-
-                                {
-                                    value: "email_domain",
-                                    label: "Email domain",
-                                    bindKey: "email_domain",
-                                    children: [
-                                        {
-                                            id: "email_domain.email_gmail", // ✅ matches UI generated id
-                                            value: "email_gmail",
-                                            label: "Gmail",
-                                            kind: "value",
-                                            dbValue: "gmail.com",
-                                            bindKey: "email_domain", // ✅ add if inheritance isn't working yet
-                                        },
-                                        {
-                                            id: "email_domain.email_yahoo",
-                                            value: "email_yahoo",
-                                            label: "Yahoo",
-                                            kind: "value",
-                                            dbValue: "yahoo.com",
-                                            bindKey: "email_domain",
-                                        },
-                                        {
-                                            id: "email_domain.email_org",
-                                            value: "email_org",
-                                            label: ".org",
-                                            kind: "value",
-                                            dbValue: "org",
-                                            bindKey: "email_domain",
-                                        },
-                                    ],
-                                },
-
-                                // simple toggle (true => applied; click again => unset)
-                                {
-                                    value: "has_phone",
-                                    label: "Has phone",
-                                    description: "Applies has_phone=true",
-                                    kind: "value",
-                                    bindKey: "has_phone",
-                                    dbValue: true,
-                                    apply: { toggleable: true },
-                                },
-                            ],
-                        }}
-                    />
-                </Form>
-            </div>
-        </div>
-    );
-};
-
-export function AppSamples() {
-    const [files, setFiles] = React.useState<FileItem[]>([]);
-
-    // Custom media-manager loader (no native file dialog)
-    const mediaManagerLoader = React.useCallback<CustomFileLoader>(
-        async ({ multiple, current }) => {
-            // In reality: open your media manager and resolve with user choices
-            const base: FileItem[] = [
-                {
-                    id: "hero-banner",
-                    kind: "external",
-                    name: "banner-hero.jpg",
-                    size: 256_000,
-                    type: "image/jpeg",
-                    path: "/uploads/banner-hero.jpg",
-                    meta: { source: "media-manager" },
-                },
-                {
-                    id: "logo-dark",
-                    kind: "external",
-                    name: "logo-dark.svg",
-                    size: 14_000,
-                    type: "image/svg+xml",
-                    path: "/uploads/logo-dark.svg",
-                    meta: { source: "media-manager" },
-                },
-            ];
-
-            return multiple ? base : base[0];
-        },
-        [],
-    );
-
-    return (
-        <div className="space-y-6 p-6">
-            <InputField
-                variant="file"
-                name="hero_media"
-                label="Hero media"
-                description="Selected via custom media manager, but drag-and-drop still works."
-                // value + change
-                value={files}
-                onValue={(next, detail) => {
-                    setFiles(next);
-                    console.log("file change", next, detail);
-                }}
-                // core file behaviour (all flat props – NO variantProps)
-                multiple
-                customLoader={mediaManagerLoader}
-                mergeMode="append" // or "replace"
-                showDropArea
-                dropTitle="Click to open media manager or drop files"
-                dropDescription="You can mix uploads with existing media files."
-                showCheckboxes // enable multi-select + bulk delete
-                accept={["image/*", ".pdf"]}
-
-                // optional: custom item renderer etc. (if you expose them)
-                // renderFileItem={({ item }) => <div>{item.name}</div>}
-            />
-        </div>
-    );
-}
-
-const bigCountryList = Array.from(
-    { length: 2000 },
-    (_, i) => `country-${i + 1}`,
-);
-
-export function BigSelectPrimitiveDemo() {
-    return (
-        <div className="max-w-md space-y-4">
-            <InputField
-                variant="select"
-                name="country"
-                label="Select a country"
-                description="2,000 items, searchable + virtual scroll"
-                // core select props
-                options={bigCountryList}
-                autoCap
-                searchable
-                clearable
-                placeholder="Choose one…"
-                // performance bits
-                virtualScroll
-                virtualScrollPageSize={80} // show 80 at a time
-                virtualScrollThreshold={64} // load more when ~64px from bottom
-                // just to show the value coming back
-                onChange={(e) => {
-                    // e.value is string | undefined here
-                    // console.log("selected:", e.value);
-                }}
-            />
-        </div>
-    );
-}
-
-type SubscribeDecision = "yes" | "no";
-
-const subscribeOptions = [
+const regionOptions: TreeSelectOption[] = [
     {
-        value: "yes" as SubscribeDecision,
-        label: "Yes, keep me updated",
-        description: "We’ll send occasional product updates.",
+        label: "Africa",
+        value: "africa",
+        icon: <Globe2 className="h-3.5 w-3.5" />,
+        children: [
+            {
+                label: "Nigeria",
+                value: "ng",
+                description: "Lagos, Abuja, Port Harcourt",
+                icon: <MapPin className="h-3.5 w-3.5" />,
+            },
+            {
+                label: "Ghana",
+                value: "gh",
+                description: "Accra, Kumasi",
+            },
+            {
+                label: "Kenya",
+                value: "ke",
+                description: "Nairobi, Mombasa",
+            },
+        ],
     },
     {
-        value: "no" as SubscribeDecision,
-        label: "No, don’t send me emails",
-        description: "You can still see updates in your dashboard.",
+        label: "Europe",
+        value: "europe",
+        icon: <Globe2 className="h-3.5 w-3.5" />,
+        children: [
+            {
+                label: "United Kingdom",
+                value: "uk",
+                description: "England, Scotland, Wales, NI",
+            },
+            {
+                label: "Germany",
+                value: "de",
+            },
+            {
+                label: "France",
+                value: "fr",
+            },
+        ],
+    },
+    {
+        label: "Asia",
+        value: "asia",
+        icon: <Globe2 className="h-3.5 w-3.5" />,
+        children: [
+            {
+                label: "India",
+                value: "in",
+            },
+            {
+                label: "Japan",
+                value: "jp",
+            },
+            {
+                label: "Singapore",
+                value: "sg",
+            },
+        ],
     },
 ];
 
-export function SubscribeField() {
-    return (
-        <InputField
-            name="subscribe"
-            variant="radio"
-            // chrome
-            label="Subscribe to product updates?"
-            helpText="You can toggle this off anytime."
-            // everything else (sublabel, description, helpText, error)
-            // will be positioned by the smart layout graph
-
-            // you can still override placements if desired:
-            // sublabelPlacement="right"
-            // descriptionPlacement="below"
-            // helpTextPlacement="below"
-
-            defaultValue={"yes" as SubscribeDecision}
-            items={subscribeOptions}
-        />
-    );
-}
-
-function CommentBox() {
-    const [value, setValue] = React.useState("");
-
-    return (
-        <Textarea
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder="Leave a comment…"
-            size="md"
-            density="normal"
-            upperLeadingControl={
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Info className="h-3 w-3" />
-                    <span>Markdown supported</span>
-                </div>
-            }
-            upperTrailingControl={
-                <span className="text-xs text-muted-foreground tabular-nums">
-                    {value.length}/280
-                </span>
-            }
-        />
-    );
-}
-
-function NotesWithAction() {
-    const [value, setValue] = React.useState("");
-
-    return (
-        <Textarea
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder="Add some internal notes…"
-            size="sm"
-            joinControls={true}
-            extendBoxToControls={true}
-            trailingControl={
-                <button
-                    type="button"
-                    className="inline-flex h-full items-center px-3 text-xs font-medium text-muted-foreground hover:text-foreground"
-                    onClick={() => setValue("")}
-                >
-                    Clear
-                </button>
-            }
-        />
-    );
-}
-
-function RichCommentBox() {
-    const [value, setValue] = React.useState("");
-
-    return (
-        <Textarea
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder="Write your update…"
-            size="md"
-            density="normal"
-            upperLeadingIcons={[
-                <Hash key="tag" className="h-3 w-3 text-muted-foreground" />,
-                <Info key="info" className="h-3 w-3 text-muted-foreground" />,
-            ]}
-            extendBoxToToolbox
-            upperControl={
-                <button
-                    type="button"
-                    className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-[0.7rem] text-muted-foreground hover:bg-muted/80"
-                >
-                    Preview
-                </button>
-            }
-            trailingControl={
-                <button
-                    type="button"
-                    className="inline-flex h-full items-center px-3 text-xs font-medium text-primary hover:text-primary/80"
-                >
-                    Post
-                </button>
-            }
-            joinControls={true}
-            extendBoxToControls={true}
-        />
-    );
-}
-
-function LimitedTextarea() {
-    const [value, setValue] = React.useState("");
-
-    return (
-        <Textarea
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder="Max 200 chars, single line only…"
-            rows={1}
-            keyFilter={(next, { input }) => {
-                if (next.length > 200) return false;
-                if (/\r|\n/.test(next)) return false;
-                return true;
-            }}
-            keyFilterOn="beforeinput"
-            keyFilterOnPaste={true}
-        />
-    );
-}
-
-function HexDumpTextarea() {
-    const [value, setValue] = React.useState("");
-
-    return (
-        <Textarea
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder="Enter hex data (0–9, A–F)…"
-            size="md"
-            density="compact"
-            keyFilter="hex" // preset from the textarea
-            keyFilterOn="beforeinput"
-            keyFilterOnPaste={true}
-        />
-    );
-}
-
-/**
- * Example custom control that doesn't know anything
- * about the form system. It just speaks:
- *
- *   - checked: boolean
- *   - onCheckedChange(next: boolean)
- */
 type PillToggleProps = {
     checked?: boolean;
     onCheckedChange?: (next: boolean) => void;
@@ -1148,76 +164,522 @@ const PillToggle = React.forwardRef<HTMLButtonElement, PillToggleProps>(
                 >
                     {checked && <Check className="size-3" />}
                 </span>
-                <span className="truncate">{children}</span>
+                <span className="truncate">{children ?? "Toggle"}</span>
             </button>
         );
     },
 );
 
-/**
- * Demo: using the "custom" variant with ShadcnCustomVariant.
- *
- * Assumes your variants registry maps:
- *   custom → ShadcnCustomVariant
- */
-export function AppCustomVariantDemo() {
-    return (
-        <div className="space-y-6 p-6">
-            <h2 className="text-lg font-semibold">Custom variant demo</h2>
+export const App: React.FC = () => {
+    const formRef = React.useRef<any>(null);
+    const [activeTab, setActiveTab] = React.useState<"dashboard" | "text" | "choice" | "advanced">("dashboard");
+    const [darkMode, setDarkMode] = React.useState<boolean>(false);
+    const [tick, setTick] = React.useState<number>(0);
+    const [outputLog, setOutputLog] = React.useState<string[]>([]);
+    
+    // Controlled states
+    const [regions, setRegions] = React.useState<(string | number)[] | undefined>();
 
-            <InputField
-                variant="custom"
-                name="pill-toggle"
-                label="Join beta program"
-                description="This field uses a completely custom React component wired through the custom variant."
-                defaultValue={false}
-                // --- custom variant wiring ---
-                component={PillToggle}
-                valueProp="checked"
-                changeProp="onCheckedChange"
-                disabledProp="disabled"
-                // optional: enrich ChangeDetail
-                mapDetail={(raw) => ({
-                    source: "variant",
-                    raw,
-                    nativeEvent: undefined,
-                    meta: { from: "PillToggle" },
-                })}
-                // Just to see what comes out on the host side:
-                onChange={(e) => {
-                    // e.value is the next field value (boolean)
-                    // e.detail is the ChangeDetail from mapDetail
-                    // eslint-disable-next-line no-console
-                    console.log("custom field changed:", e.value, e.detail);
-                }}
-            >
-                what eber
-                {/* You can also ignore children entirely; this is just to show it works */}
-            </InputField>
+    const forceUpdate = () => setTick(t => t + 1);
+
+    const logOutput = (msg: string) => {
+        setOutputLog(prev => [ `[${new Date().toLocaleTimeString()}] ${msg}`, ...prev.slice(0, 15) ]);
+    };
+
+    const handleFormSubmit = (e: any) => {
+        console.log("Form Submitted:", e.formData);
+        logOutput(`Form Submitted: ${JSON.stringify(e.formData)}`);
+    };
+
+    // Pre-fill profile mock values
+    const handlePreFill = () => {
+        if (!formRef.current) return;
+        formRef.current.persist({
+            email: "david@example.com",
+            phone: "08012345678",
+            password: "SecurePassword123!",
+            age: 28,
+            color: "#6366f1",
+            birthdate: "1998-05-12",
+            tags: ["React", "Typescript", "Tailwind"],
+            notes: "Developing high-performance, modular UI form components with state adapters.",
+            subscribe: true,
+            plan: "pro",
+            newsletter: true,
+            gdpr_consent: true,
+            volume: 75,
+            countries: ["ng", "ke"]
+        });
+        logOutput("Pre-filled form values programmatically.");
+        forceUpdate();
+    };
+
+    const handleReset = () => {
+        if (!formRef.current) return;
+        // Call reset on each field
+        formRef.current.inputs.all().forEach((f: any) => {
+            if (typeof f.reset === "function") f.reset();
+        });
+        logOutput("Reset form state.");
+        forceUpdate();
+    };
+
+    const handleValidate = () => {
+        if (!formRef.current) return;
+        const valid = formRef.current.validate(true);
+        logOutput(`Validation run completed. Form is ${valid ? "VALID" : "INVALID"}.`);
+        forceUpdate();
+    };
+
+    // Form states
+    const currentValues = formRef.current ? formRef.current.values() : {};
+    const isDirty = formRef.current ? formRef.current.isDirty() : false;
+    const registeredFields = formRef.current ? formRef.current.inputs.all() : [];
+
+    const fieldErrors = registeredFields.reduce((acc: any, field: any) => {
+        if (field.error) acc[field.name || field.bindId] = field.error;
+        return acc;
+    }, {});
+
+    const menuItems = [
+        { id: "dashboard", label: "Dashboard", icon: <LayoutDashboard className="size-4" /> },
+        { id: "text", label: "Text & Fields", icon: <Type className="size-4" /> },
+        { id: "choice", label: "Choices & Inputs", icon: <ToggleLeft className="size-4" /> },
+        { id: "advanced", label: "Advanced Controls", icon: <Layers className="size-4" /> },
+    ] as const;
+
+    return (
+        <div className={cn("min-h-screen flex flex-col font-sans transition-colors duration-200", darkMode ? "dark bg-neutral-950 text-neutral-50" : "bg-neutral-50 text-neutral-900")}>
+            
+            {/* Glossy Glassmorphism Header */}
+            <header className="sticky top-0 z-40 border-b border-neutral-200/60 dark:border-neutral-800/60 bg-white/75 dark:bg-neutral-900/75 backdrop-blur-md px-6 py-4 flex items-center justify-between shadow-xs">
+                <div className="flex items-center gap-3">
+                    <div className="bg-primary text-primary-foreground p-2 rounded-xl flex items-center justify-center shadow-md shadow-primary/20">
+                        <Sparkles className="size-5" />
+                    </div>
+                    <div>
+                        <h1 className="text-lg font-bold tracking-tight text-neutral-900 dark:text-white flex items-center gap-2">
+                            @timeax/form-palette
+                            <span className="text-[10px] bg-neutral-200 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 px-2 py-0.5 rounded-full font-semibold">
+                                v0.2.2
+                            </span>
+                        </h1>
+                        <p className="text-xs text-neutral-500 dark:text-neutral-400">Interactive Form Runtime Showcase</p>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setDarkMode(!darkMode)}
+                        className="p-2.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-background hover:bg-neutral-100 dark:hover:bg-neutral-900 text-neutral-500 dark:text-neutral-400 transition-all active:scale-95"
+                        title="Toggle dark mode"
+                    >
+                        {darkMode ? <Sun className="size-4" /> : <Moon className="size-4" />}
+                    </button>
+                </div>
+            </header>
+
+            {/* Main Layout Grid */}
+            <div className="flex-1 max-w-8xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-[240px_1fr_400px] gap-6">
+                
+                {/* 1. Sidebar Navigation */}
+                <aside className="space-y-1">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-3 mb-2">Showcase Sections</p>
+                    {menuItems.map(item => (
+                        <button
+                            key={item.id}
+                            onClick={() => setActiveTab(item.id)}
+                            className={cn(
+                                "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 active:scale-98",
+                                activeTab === item.id
+                                    ? "bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-sm"
+                                    : "text-neutral-500 dark:text-neutral-400 hover:bg-neutral-150 dark:hover:bg-neutral-900 hover:text-neutral-900 dark:hover:text-white"
+                            )}
+                        >
+                            {item.icon}
+                            {item.label}
+                        </button>
+                    ))}
+                </aside>
+
+                {/* 2. Active Preview Canvas */}
+                <main className="flex flex-col gap-6">
+                    <div className="bg-white dark:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800/60 rounded-3xl p-6 shadow-sm flex-1 flex flex-col">
+                        
+                        <Form 
+                            formRef={formRef} 
+                            onSubmit={handleFormSubmit}
+                            onChange={() => {
+                                forceUpdate();
+                            }}
+                            wrapped 
+                            gap={20}
+                        >
+                            {activeTab === "dashboard" && (
+                                <div className="space-y-6 flex-1 flex flex-col justify-center">
+                                    <div className="text-center max-w-md mx-auto space-y-3">
+                                        <div className="bg-neutral-100 dark:bg-neutral-800 size-16 rounded-full flex items-center justify-center mx-auto text-primary">
+                                            <Sparkles className="size-8" />
+                                        </div>
+                                        <h3 className="text-xl font-bold">Form Palette Engine</h3>
+                                        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                                            Explore registered layout variants, real-time validation feedback, schema binding, and state inspections. Toggle tabs on the left to configure fields.
+                                        </p>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-2 gap-4 max-w-lg mx-auto w-full pt-4">
+                                        <button
+                                            type="button"
+                                            onClick={handlePreFill}
+                                            className="flex items-center justify-center gap-2 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-sm font-medium py-3 px-4 rounded-2xl transition-all active:scale-95 cursor-pointer"
+                                        >
+                                            <Sparkles className="size-4 text-indigo-500" />
+                                            Fill Mock Data
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={handleReset}
+                                            className="flex items-center justify-center gap-2 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-sm font-medium py-3 px-4 rounded-2xl transition-all active:scale-95 cursor-pointer"
+                                        >
+                                            <RefreshCw className="size-4 text-emerald-500" />
+                                            Reset State
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === "text" && (
+                                <div className="space-y-5">
+                                    <h3 className="text-sm font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Text & Textarea Fields</h3>
+                                    
+                                    <InputField
+                                        name="email"
+                                        label="Email Address"
+                                        description="Standard text field with format check."
+                                        variant="text"
+                                        placeholder="david@example.com"
+                                        required
+                                    />
+                                    
+                                    <InputField
+                                        name="phone"
+                                        label="Phone Number"
+                                        description="Uses local masking pattern and digit filters."
+                                        variant="text"
+                                        mask="+99 99 999 999"
+                                        slotChar="_"
+                                        placeholder="+23 48 012 345"
+                                        autoClear
+                                    />
+                                    
+                                    <InputField
+                                        name="password"
+                                        label="Password"
+                                        description="Secure entry with password strength indicators."
+                                        variant="password"
+                                        placeholder="Enter secure password"
+                                        strengthMeter
+                                        meterStyle="rules"
+                                        showToggle
+                                    />
+
+                                    <InputField
+                                        name="notes"
+                                        label="Bio/Notes"
+                                        description="Custom Textarea variant with automatic resize features."
+                                        variant="textarea"
+                                        placeholder="Add some details about yourself..."
+                                        rows={3}
+                                    />
+
+                                    <InputField
+                                        name="tags"
+                                        label="Skills/Tags"
+                                        description="Chip creator. Press Enter or comma to create chips."
+                                        variant="chips"
+                                        placeholder="React, Typescript, Tailwind"
+                                        clearable
+                                    />
+                                </div>
+                            )}
+
+                            {activeTab === "choice" && (
+                                <div className="space-y-5">
+                                    <h3 className="text-sm font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Choices & Selection Fields</h3>
+
+                                    <InputField
+                                        name="subscribe"
+                                        label="Subscribe to Product Updates"
+                                        description="Simple toggle switch variant."
+                                        variant="toggle"
+                                    />
+
+                                    <InputField
+                                        name="plan"
+                                        variant="radio"
+                                        label="Pricing Plan"
+                                        description="Choose your account tier."
+                                        items={[
+                                            { value: "free", label: "Free Plan", description: "Basic access limit" },
+                                            { value: "pro", label: "Pro Plan", description: "All variants unlocked" },
+                                        ]}
+                                    />
+
+                                    <InputField
+                                        name="volume"
+                                        variant="slider"
+                                        label="Volume/Intensity"
+                                        description="Slider variant with leading & trailing icons."
+                                        min={0}
+                                        max={100}
+                                        step={5}
+                                        leadingIcons={[<VolumeX key="v-off" className="size-4 text-muted-foreground" />]}
+                                        trailingIcons={[<Volume2 key="v-on" className="size-4 text-muted-foreground" />]}
+                                    />
+
+                                    <InputField
+                                        name="newsletter"
+                                        variant="checkbox"
+                                        label="Newsletter opt-in"
+                                        description="Single boolean checkbox."
+                                        single
+                                    />
+
+                                    <InputField
+                                        name="gdpr_consent"
+                                        variant="checkbox"
+                                        label="GDPR Tri-state Consent"
+                                        description="Checkbox supporting True, False, and undefined (none)."
+                                        single
+                                        tristate
+                                    />
+                                </div>
+                            )}
+
+                            {activeTab === "advanced" && (
+                                <div className="space-y-5">
+                                    <h3 className="text-sm font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Advanced Selectors</h3>
+
+                                    <InputField
+                                        name="age"
+                                        label="Age (Numeric)"
+                                        description="InputNumber supporting locale fraction controls and vertically stacked buttons."
+                                        variant="number"
+                                        min={0}
+                                        max={120}
+                                        step={1}
+                                        showButtons
+                                    />
+
+                                    <InputField
+                                        name="color"
+                                        label="Swatch Color Picker"
+                                        description="HEX color picker with visible palette toggle."
+                                        variant="color"
+                                        showPreview
+                                    />
+
+                                    <InputField
+                                        name="birthdate"
+                                        label="Birthdate"
+                                        description="Shadcn Popover Calendar picker."
+                                        variant="date"
+                                    />
+
+                                    <InputField
+                                        name="countries"
+                                        variant="multi-select"
+                                        label="Target Regions"
+                                        description="Searchable multiselect dropdown option."
+                                        options={[
+                                            { label: "Nigeria", value: "ng" },
+                                            { label: "Ghana", value: "gh" },
+                                            { label: "Kenya", value: "ke" },
+                                            { label: "Tanzania", value: "tz" }
+                                        ]}
+                                        showSelectAll
+                                        clearable
+                                        searchable
+                                    />
+
+                                    <InputField
+                                        name="regions"
+                                        label="Locations (TreeSelect)"
+                                        description="Hierarchical dropdown with collapsible parent-nodes."
+                                        variant="treeselect"
+                                        value={regions}
+                                        onValue={(next) => {
+                                            setRegions(next);
+                                            forceUpdate();
+                                        }}
+                                        options={regionOptions}
+                                        searchable
+                                        clearable
+                                        expandAll
+                                        leafOnly
+                                        icon={<Globe2 className="size-4 text-muted-foreground" />}
+                                    />
+
+                                    <InputField
+                                        name="icon_picker"
+                                        label="Icon Picker (Virtualized Grid)"
+                                        description="Uses custom VirtualScrollGrid with custom ScrollArea layout scrollbars to display thousands of icons."
+                                        variant="icon"
+                                    />
+
+                                    <InputField
+                                        name="lister_select"
+                                        label="Lister User Select (Virtualized List)"
+                                        description="Uses custom VirtualScroll component for high-performance virtual selection of remote options."
+                                        variant="lister"
+                                        host={dummyListerHost}
+                                        def={userListerDef}
+                                        mode="multiple"
+                                    />
+
+                                    <InputField
+                                        name="large_select"
+                                        variant="select"
+                                        label="Large Select List (Virtualized)"
+                                        description="A select dropdown with 2,000 dynamically generated options showing the custom ScrollArea virtual scroller."
+                                        options={largeSelectOptions}
+                                        searchable
+                                        clearable
+                                        virtualScroll
+                                    />
+                                </div>
+                            )}
+
+                            {/* Sticky footer action button in non-dashboard views */}
+                            {activeTab !== "dashboard" && (
+                                <div className="pt-4 mt-auto border-t border-neutral-200/50 dark:border-neutral-800/50 flex justify-end">
+                                    <button
+                                        type="submit"
+                                        className="bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:hover:bg-neutral-100 text-white dark:text-neutral-900 text-sm font-semibold px-6 py-2.5 rounded-2xl flex items-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer"
+                                    >
+                                        <Play className="size-3.5 fill-current" />
+                                        Submit Form
+                                    </button>
+                                </div>
+                            )}
+                        </Form>
+
+                    </div>
+                </main>
+
+                {/* 3. Live State Inspector Card */}
+                <aside className="flex flex-col gap-6">
+                    
+                    {/* Console & Quick Actions */}
+                    <div className="bg-white dark:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800/60 rounded-3xl p-5 shadow-sm space-y-4">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider flex items-center gap-2">
+                                <Sparkles className="size-3.5 text-indigo-500" />
+                                Controls
+                            </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <button
+                                onClick={handleValidate}
+                                className="bg-neutral-50 hover:bg-neutral-100 dark:bg-neutral-950 dark:hover:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800/60 text-xs font-medium py-2 rounded-xl transition-all active:scale-95 cursor-pointer"
+                            >
+                                Validate Form
+                            </button>
+                            <button
+                                onClick={handleReset}
+                                className="bg-neutral-50 hover:bg-neutral-100 dark:bg-neutral-950 dark:hover:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800/60 text-xs font-medium py-2 rounded-xl transition-all active:scale-95 cursor-pointer"
+                            >
+                                Reset Form
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Metadata & Status Card */}
+                    <div className="bg-white dark:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800/60 rounded-3xl p-5 shadow-sm space-y-4">
+                        <span className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider flex items-center gap-2">
+                            <FileJson className="size-3.5 text-emerald-500" />
+                            Live State Inspector
+                        </span>
+
+                        {/* Status badges */}
+                        <div className="flex flex-wrap gap-2 pt-1">
+                            <span className={cn(
+                                "text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1.5",
+                                isDirty 
+                                    ? "bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400" 
+                                    : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400"
+                            )}>
+                                <span className={cn("size-1.5 rounded-full", isDirty ? "bg-amber-500" : "bg-neutral-400")} />
+                                {isDirty ? "DIRTY" : "PRISTINE"}
+                            </span>
+
+                            <span className={cn(
+                                "text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1.5",
+                                Object.keys(fieldErrors).length > 0
+                                    ? "bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400"
+                                    : "bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400"
+                            )}>
+                                {Object.keys(fieldErrors).length > 0 ? (
+                                    <>
+                                        <AlertCircle className="size-3 shrink-0" />
+                                        INVALID ({Object.keys(fieldErrors).length})
+                                    </>
+                                ) : (
+                                    <>
+                                        <CheckCircle className="size-3 shrink-0" />
+                                        VALID
+                                    </>
+                                )}
+                            </span>
+
+                            <span className="text-[10px] font-bold bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 px-2 py-0.5 rounded-full">
+                                FIELDS: {registeredFields.length}
+                            </span>
+                        </div>
+
+                        {/* Values JSON */}
+                        <div className="space-y-1.5">
+                            <div className="flex items-center justify-between">
+                                <span className="text-[11px] font-semibold text-neutral-400">Current Values</span>
+                            </div>
+                            <pre className="bg-neutral-50 dark:bg-neutral-950 border border-neutral-200/50 dark:border-neutral-800/50 rounded-2xl p-4 text-xs overflow-x-auto max-h-[300px] select-text text-neutral-700 dark:text-neutral-300">
+                                {JSON.stringify(currentValues, null, 2)}
+                            </pre>
+                        </div>
+
+                        {/* Error Log */}
+                        {Object.keys(fieldErrors).length > 0 && (
+                            <div className="space-y-1.5">
+                                <span className="text-[11px] font-semibold text-rose-500">Active Errors</span>
+                                <div className="bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200/50 dark:border-rose-900/30 rounded-2xl p-4 space-y-2 max-h-[200px] overflow-y-auto">
+                                    {Object.entries(fieldErrors).map(([key, msg]) => (
+                                        <div key={key} className="text-xs text-rose-600 dark:text-rose-400 flex items-start gap-2">
+                                            <span className="font-semibold">{key}:</span>
+                                            <span>{msg as string}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Console logs */}
+                        <div className="space-y-1.5">
+                            <span className="text-[11px] font-semibold text-neutral-400">Activity Log</span>
+                            <div className="bg-neutral-50 dark:bg-neutral-950 border border-neutral-200/50 dark:border-neutral-800/50 rounded-2xl p-3 text-[10px] h-[120px] overflow-y-auto space-y-1">
+                                {outputLog.length === 0 ? (
+                                    <div className="text-neutral-400 italic text-center py-8">No actions logged yet</div>
+                                ) : (
+                                    outputLog.map((log, idx) => (
+                                        <div key={idx} className="text-neutral-500 dark:text-neutral-400 break-words leading-tight">{log}</div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                </aside>
+
+            </div>
         </div>
-    );
-}
-
-const ListerSample = () => {
-    return "";
-    return (
-        <>
-            <InputField
-                variant="lister"
-                label="User (Single Select)"
-                description="Select a user via Lister"
-                host={dummyListerHost}
-                def={userListerDef}
-                mode="single"
-            />
-            <InputField
-                variant="lister"
-                label="Users (Multi Select)"
-                description="Select multiple users via Lister"
-                host={dummyListerHost}
-                def={userListerDef}
-                mode="multiple"
-            />
-        </>
     );
 };

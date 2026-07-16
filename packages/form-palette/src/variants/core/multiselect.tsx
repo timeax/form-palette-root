@@ -6,7 +6,7 @@ import type { VariantModule } from "@/schema/variant";
 import {
    ShadcnMultiSelectVariant,
    type ShadcnMultiSelectVariantProps,
-} from "@/presets/shadcn-variants/multiselect";
+} from "@/presets/shadcn/variants/multiselect";
 
 export type MultiSelectValue = (string | number)[] | undefined;
 

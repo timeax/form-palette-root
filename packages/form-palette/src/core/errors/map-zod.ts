@@ -27,9 +27,12 @@ export function mapZodError(error: $ZodError): ZodErrorMapResult {
 
         const first = path[0];
 
-        if (typeof first === "string" && first.length > 0) {
-            const existing = fieldErrors[first];
-            fieldErrors[first] = existing ? `${existing}\n${message}` : message;
+        if ((typeof first === "string" || typeof first === "number") && String(first).length > 0) {
+            const fullPath = path
+                .filter((p) => typeof p === "string" || typeof p === "number")
+                .join(".");
+            const existing = fieldErrors[fullPath];
+            fieldErrors[fullPath] = existing ? `${existing}\n${message}` : message;
         } else {
             uncaught.push(message);
         }

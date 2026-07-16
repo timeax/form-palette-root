@@ -2,12 +2,12 @@
 
 import { SelectPrimitive } from "@/variants/helpers/selection-summary";
 import React from "react";
-import { ShadcnTreeSelectVariantProps } from "@/presets/shadcn-variants/treeselect";
+import { ShadcnTreeSelectVariantProps } from "@/presets/shadcn/variants/treeselect";
 import {
     NormalizedTreeItem,
     TreeKey,
     TreeSelectOption,
-} from "@/presets/shadcn-variants/tree-select-types";
+} from "@/presets/shadcn/variants/tree-select-types";
 
 /* ──────────────────────────────────────────────────────────────
  * Types

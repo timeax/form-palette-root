@@ -1,6 +1,6 @@
-import type { CustomFileLoader, FileItem } from "@/presets/shadcn-variants/file";
-import { PasswordDefinitionMap } from "@/presets/shadcn-variants/password";
-import { PhoneCountry } from "@/presets/shadcn-variants/phone";
+import type { CustomFileLoader, FileItem } from "@/presets/shadcn/variants/file";
+import { PasswordDefinitionMap } from "@/presets/shadcn/variants/password";
+import { PhoneCountry } from "@/presets/shadcn/variants/phone";
 
 type IconGroup = {
     id: string; // stable key for selection/filtering

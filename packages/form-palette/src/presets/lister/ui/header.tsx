@@ -2,7 +2,7 @@ import { ListerRuntime } from "@/presets/lister/runtime/session";
 import { ListerSessionState } from "@/presets/lister";
 import { GripVertical, RefreshCw, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/presets/ui/button";
+import { Button } from "@/presets/shadcn/ui/button";
 
 export const Header: React.FC<{
     draggable: boolean;

@@ -1,5 +1,5 @@
 import { VariantModule } from "@/schema/variant";
-import { ShadcnEditorVariant } from "@/presets/shadcn-variants/editor";
+import { ShadcnEditorVariant } from "@/presets/shadcn/variants/editor";
 
 export const shadcnEditorVariant: VariantModule<"editor"> = {
     variant: "editor",

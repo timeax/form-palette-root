@@ -2,7 +2,7 @@
 
 import type { VariantModuleFor } from "@/schema/variant";
 import type { FieldLayoutConfig } from "@/schema/input-field";
-import ShadcnToggleVariant from "@/presets/shadcn-variants/toggle";
+import ShadcnToggleVariant from "@/presets/shadcn/variants/toggle";
 
 export const toggleLayoutDefaults: FieldLayoutConfig = {
    // Render label + control in a single row

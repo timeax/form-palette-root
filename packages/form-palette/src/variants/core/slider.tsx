@@ -1,8 +1,8 @@
 // src/variants/core/slider.ts
 
 import type { ValidateResult } from "@/schema/input-field";
-import type { ShadcnSliderVariantProps } from "@/presets/shadcn-variants/slider";
-import { ShadcnSliderVariant } from "@/presets/shadcn-variants/slider";
+import type { ShadcnSliderVariantProps } from "@/presets/shadcn/variants/slider";
+import { ShadcnSliderVariant } from "@/presets/shadcn/variants/slider";
 import { VariantModule } from "@/schema/variant";
 
 /**
