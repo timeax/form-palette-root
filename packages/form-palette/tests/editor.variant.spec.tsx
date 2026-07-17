@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import * as React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, waitFor } from "@testing-library/react";
 
 vi.mock("@toast-ui/editor", () => {
@@ -63,6 +63,11 @@ const editorMock = (ToastEditorModule as any).__mock as {
 };
 
 describe("editor variant theme support", () => {
+   beforeEach(() => {
+      editorMock.ctorCalls.length = 0;
+      editorMock.instances.length = 0;
+   });
+
    it("uses dark theme in auto mode under dark ancestor", async () => {
       const { container } = render(
          <div className="dark">
@@ -156,6 +161,9 @@ describe("editor variant theme support", () => {
       const ctor = editorMock.ctorCalls[editorMock.ctorCalls.length - 1];
       const firstInstance = editorMock.instances[editorMock.instances.length - 1];
       firstInstance.setHTML("next-value");
+      
+      // Wait for editor ref setup microtasks to complete (resets syncingRef.current)
+      await Promise.resolve();
       ctor.events.change();
 
       await waitFor(() => {

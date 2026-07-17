@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import * as React from "react";
 import { describe, it, expect, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";

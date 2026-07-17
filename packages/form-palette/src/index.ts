@@ -46,3 +46,10 @@ export { Input } from '@/presets/shadcn/ui/input';
 export * from "@/adapters";
 
 export { registerPaletteUtil, getPaletteUtil } from "@/lib/register-global";
+
+// ─────────────────────────────────────────────────────────────
+// Theming
+// ─────────────────────────────────────────────────────────────
+
+export { ThemeProvider, PaletteThemeProvider, usePaletteTheme } from "@/theme/theme-context";
+export type { FormPaletteTheme } from "@/theme/theme-context";

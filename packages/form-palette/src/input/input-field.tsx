@@ -30,6 +30,7 @@ import { ChangeDetail } from "@/variants/shared";
 import { buildLayoutGraph, type HelperSlot } from "@/input/input-layout-graph";
 import { cn } from "@/lib/utils";
 import { useOptionalField } from "@/core";
+import { usePaletteTheme } from "@/theme/theme-context";
 
 /**
  * Normalise a ValidateResult into an array of error messages.
@@ -78,6 +79,7 @@ function renderHelperSlot(
     root: "label" | "input",
     slot: HelperSlot,
     classes: any,
+    styles?: any,
 ): React.ReactNode {
     const placement: SlotPlacement = slot.placement;
 
@@ -90,6 +92,7 @@ function renderHelperSlot(
                         "text-xs text-muted-foreground",
                         classes?.sublabel,
                     )}
+                    style={styles?.sublabel}
                     data-slot={`sublabel-${placement}`}
                 >
                     {slot.content}
@@ -104,6 +107,7 @@ function renderHelperSlot(
                         "text-xs text-muted-foreground",
                         classes?.description,
                     )}
+                    style={styles?.description}
                     data-slot={`description-${placement}`}
                 >
                     {slot.content}
@@ -118,6 +122,7 @@ function renderHelperSlot(
                         "text-xs text-muted-foreground",
                         classes?.helpText,
                     )}
+                    style={styles?.helpText}
                     data-slot={`helptext-${placement}`}
                 >
                     {slot.content}
@@ -129,6 +134,7 @@ function renderHelperSlot(
                 <FieldError
                     key={`error-${placement}-${root}`}
                     className={cn("text-xs text-destructive", classes?.error)}
+                    style={styles?.error}
                     data-slot={`error-${placement}`}
                 >
                     {slot.content}
@@ -140,6 +146,7 @@ function renderHelperSlot(
                 <div
                     key={`tags-${placement}-${root}`}
                     className={cn("flex items-center gap-1", classes?.tags)}
+                    style={styles?.tags || styles?.tag}
                     data-slot={`tags-${placement}`}
                 >
                     {slot.content}
@@ -156,36 +163,62 @@ export function getClasses(
         className?: string;
         classes?: Partial<InputFieldClassNames>;
     },
+    themeClasses?: Partial<InputFieldClassNames>,
+    variantThemeClasses?: Partial<InputFieldClassNames>,
 ): InputFieldClassNames {
     const legacy = props.classes ?? {};
 
     return {
-        root: cn(legacy.root, props.className) || undefined,
+        root: cn(themeClasses?.root, variantThemeClasses?.root, legacy.root, props.className) || undefined,
 
-        labelRow: cn(legacy.labelRow, props.labelRowClassName) || undefined,
-        inlineRow: cn(legacy.inlineRow, props.inlineRowClassName) || undefined,
+        labelRow: cn(themeClasses?.labelRow, variantThemeClasses?.labelRow, legacy.labelRow, props.labelRowClassName) || undefined,
+        inlineRow: cn(themeClasses?.inlineRow, variantThemeClasses?.inlineRow, legacy.inlineRow, props.inlineRowClassName) || undefined,
 
-        label: cn(legacy.label, props.labelClassName) || undefined,
-        sublabel: cn(legacy.sublabel, props.sublabelClassName) || undefined,
+        label: cn(themeClasses?.label, variantThemeClasses?.label, legacy.label, props.labelClassName) || undefined,
+        sublabel: cn(themeClasses?.sublabel, variantThemeClasses?.sublabel, legacy.sublabel, props.sublabelClassName) || undefined,
         description:
-            cn(legacy.description, props.descriptionClassName) || undefined,
-        helpText: cn(legacy.helpText, props.helpTextClassName) || undefined,
-        error: cn(legacy.error, props.errorClassName) || undefined,
+            cn(themeClasses?.description, variantThemeClasses?.description, legacy.description, props.descriptionClassName) || undefined,
+        helpText: cn(themeClasses?.helpText, variantThemeClasses?.helpText, legacy.helpText, props.helpTextClassName) || undefined,
+        error: cn(themeClasses?.error, variantThemeClasses?.error, legacy.error, props.errorClassName) || undefined,
 
-        group: cn(legacy.group, props.groupClassName) || undefined,
-        content: cn(legacy.content, props.contentClassName) || undefined,
-        variant: cn(legacy.variant, props.variantClassName) || undefined,
+        group: cn(themeClasses?.group, variantThemeClasses?.group, legacy.group, props.groupClassName) || undefined,
+        content: cn(themeClasses?.content, variantThemeClasses?.content, legacy.content, props.contentClassName) || undefined,
+        variant: cn(themeClasses?.variant, variantThemeClasses?.variant, legacy.variant, props.variantClassName) || undefined,
 
         inlineInputColumn:
-            cn(legacy.inlineInputColumn, props.inlineInputColumnClassName) ||
+            cn(themeClasses?.inlineInputColumn, variantThemeClasses?.inlineInputColumn, legacy.inlineInputColumn, props.inlineInputColumnClassName) ||
             undefined,
         inlineLabelColumn:
-            cn(legacy.inlineLabelColumn, props.inlineLabelColumnClassName) ||
+            cn(themeClasses?.inlineLabelColumn, variantThemeClasses?.inlineLabelColumn, legacy.inlineLabelColumn, props.inlineLabelColumnClassName) ||
             undefined,
 
-        required: cn(legacy.required, props.requiredClassName) || undefined,
-        tag: cn(legacy.tag, props.tagClassName) || undefined,
+        required: cn(themeClasses?.required, variantThemeClasses?.required, legacy.required, props.requiredClassName) || undefined,
+        tag: cn(themeClasses?.tag, variantThemeClasses?.tag, legacy.tag, props.tagClassName) || undefined,
     };
+}
+
+function mergeStyles(
+    propsStyles?: Partial<Record<keyof InputFieldClassNames, React.CSSProperties>>,
+    themeStyles?: Partial<Record<keyof InputFieldClassNames, React.CSSProperties>>,
+    variantThemeStyles?: Partial<Record<keyof InputFieldClassNames, React.CSSProperties>>,
+): Partial<Record<keyof InputFieldClassNames, React.CSSProperties>> {
+    const keys: Array<keyof InputFieldClassNames> = [
+        "root", "labelRow", "inlineRow", "label", "sublabel", "description",
+        "helpText", "error", "group", "content", "variant",
+        "inlineInputColumn", "inlineLabelColumn", "required", "tag"
+    ];
+    const result: Partial<Record<keyof InputFieldClassNames, React.CSSProperties>> = {};
+    for (const key of keys) {
+        const s = {
+            ...themeStyles?.[key],
+            ...variantThemeStyles?.[key],
+            ...propsStyles?.[key],
+        };
+        if (Object.keys(s).length > 0) {
+            result[key] = s;
+        }
+    }
+    return result;
 }
 
 /**
@@ -202,6 +235,17 @@ export function getClasses(
 export function InputField<K extends VariantKey = VariantKey>(
     props: InputFieldProps<K>,
 ) {
+    const theme = usePaletteTheme();
+
+    const mergedProps = {
+        ...theme.defaultProps,
+        ...(props.variant ? theme.variants?.[props.variant]?.defaultProps : undefined),
+        ...props,
+    } as InputFieldProps & {
+        className?: string;
+        style?: React.CSSProperties;
+    };
+
     const {
         variant,
         onSubmit,
@@ -254,10 +298,7 @@ export function InputField<K extends VariantKey = VariantKey>(
 
         // Everything else → forwarded to variant
         ...rest
-    } = props as InputFieldProps & {
-        className?: string;
-        style?: React.CSSProperties;
-    };
+    } = mergedProps;
 
     const module = getVariant(variant);
 
@@ -273,7 +314,13 @@ export function InputField<K extends VariantKey = VariantKey>(
         return null;
     }
 
-    const classes = getClasses(props);
+    const themeClasses = theme.classes;
+    const themeVariantClasses = variant ? theme.variants?.[variant]?.classes : undefined;
+    const classes = getClasses(mergedProps, themeClasses, themeVariantClasses);
+
+    const themeStyles = theme.styles;
+    const themeVariantStyles = variant ? theme.variants?.[variant]?.styles : undefined;
+    const mergedStyles = mergeStyles(mergedProps.styles, themeStyles, themeVariantStyles);
 
     type TValue = VariantValueFor<K>;
 
@@ -310,7 +357,7 @@ export function InputField<K extends VariantKey = VariantKey>(
         return resolveLayoutForField(
             defaultsLayout,
             overrides,
-            props,
+            mergedProps,
             module.resolveLayout as any,
         );
     }, [
@@ -323,7 +370,7 @@ export function InputField<K extends VariantKey = VariantKey>(
         tagPlacement,
         inline,
         fullWidth,
-        props,
+        mergedProps,
     ]);
 
     const effectiveSize =
@@ -583,18 +630,18 @@ export function InputField<K extends VariantKey = VariantKey>(
         : cn("w-full", classes?.content);
 
     const inlineInputColumn = (
-        <div className={inlineInputColClass}>
+        <div className={inlineInputColClass} style={mergedStyles.inlineInputColumn}>
             {/* Above input (input root) */}
             {graph
                 .getSlotsFor("input", "above")
                 .render((slots) =>
                     slots.map((slot) =>
-                        renderHelperSlot("input", slot, classes),
+                        renderHelperSlot("input", slot, classes, mergedStyles),
                     ),
                 )}
 
-            <FieldGroup className={inlineFieldGroupClass}>
-                <FieldContent className={inlineFieldContentClass}>
+            <FieldGroup className={inlineFieldGroupClass} style={mergedStyles.group}>
+                <FieldContent className={inlineFieldContentClass} style={mergedStyles.content}>
                     <Variant
                         {...(rest as any)}
                         name={autoOff ? undefined : name}
@@ -608,6 +655,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                         size={effectiveSize}
                         density={effectiveDensity}
                         className={mergedVariantClass}
+                        style={{ ...mergedStyles.variant, ...(rest as any).style }}
                     />
                 </FieldContent>
             </FieldGroup>
@@ -617,7 +665,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                 .getSlotsFor("input", "below")
                 .render((slots) =>
                     slots.map((slot) =>
-                        renderHelperSlot("input", slot, classes),
+                        renderHelperSlot("input", slot, classes, mergedStyles),
                     ),
                 )}
         </div>
@@ -625,13 +673,13 @@ export function InputField<K extends VariantKey = VariantKey>(
 
     const inlineLabelColumn =
         inlineLabelSide === "hidden" || !hasAnyLabelBlockContent ? null : (
-            <div className={cn("flex flex-col gap-0", inlineLabelColClass)}>
+            <div className={cn("flex flex-col gap-0", inlineLabelColClass)} style={mergedStyles.inlineLabelColumn}>
                 {/* Above label (label root) */}
                 {graph
                     .getSlotsFor("label", "above")
                     .render((slots) =>
                         slots.map((slot) =>
-                            renderHelperSlot("label", slot, classes),
+                            renderHelperSlot("label", slot, classes, mergedStyles),
                         ),
                     )}
 
@@ -641,13 +689,14 @@ export function InputField<K extends VariantKey = VariantKey>(
                             "flex items-baseline justify-between gap-1",
                             classes?.labelRow,
                         )}
+                        style={mergedStyles.labelRow}
                         data-slot="label-row"
                     >
                         {/* Left-of-label helpers (label root) */}
                         {graph.getSlotsFor("label", "left").render((slots) => (
                             <div className="flex items-baseline gap-1">
                                 {slots.map((slot) =>
-                                    renderHelperSlot("label", slot, classes),
+                                    renderHelperSlot("label", slot, classes, mergedStyles),
                                 )}
                             </div>
                         ))}
@@ -659,6 +708,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                                     "text-sm font-medium text-foreground",
                                     classes?.label,
                                 )}
+                                style={mergedStyles.label}
                             >
                                 <FieldTitle>
                                     {label}{" "}
@@ -668,6 +718,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                                                 "text-destructive",
                                                 classes?.required,
                                             )}
+                                            style={mergedStyles.required}
                                         >
                                             *
                                         </span>
@@ -682,7 +733,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                         {graph.getSlotsFor("label", "right").render((slots) => (
                             <div className="flex items-baseline gap-1">
                                 {slots.map((slot) =>
-                                    renderHelperSlot("label", slot, classes),
+                                    renderHelperSlot("label", slot, classes, mergedStyles),
                                 )}
                             </div>
                         ))}
@@ -694,7 +745,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                     .getSlotsFor("label", "below")
                     .render((slots) =>
                         slots.map((slot) =>
-                            renderHelperSlot("label", slot, classes),
+                            renderHelperSlot("label", slot, classes, mergedStyles),
                         ),
                     )}
             </div>
@@ -731,7 +782,7 @@ export function InputField<K extends VariantKey = VariantKey>(
         <UiField
             className={rootClassName}
             ref={ref as any}
-            style={style}
+            style={{ ...mergedStyles.root, ...style }}
             data-variant={String(variant)}
             data-label-placement={lp ?? undefined}
             data-sublabel-placement={sp ?? undefined}
@@ -744,7 +795,7 @@ export function InputField<K extends VariantKey = VariantKey>(
         >
             {isInline ? (
                 // INLINE MODE: label + control on the same row
-                <div className={inlineRowClassName} data-slot="inline-row">
+                <div className={inlineRowClassName} style={mergedStyles.inlineRow} data-slot="inline-row">
                     {inlineLabelSide === "right" ? (
                         <>
                             {inlineInputColumn}
@@ -773,6 +824,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                                             "label",
                                             slot,
                                             classes,
+                                            mergedStyles,
                                         ),
                                     ),
                                 )}
@@ -783,6 +835,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                                         "flex items-baseline justify-between gap-1",
                                         classes?.labelRow,
                                     )}
+                                    style={mergedStyles.labelRow}
                                     data-slot="label-row"
                                 >
                                     {/* Left-of-label helpers (label root) */}
@@ -795,6 +848,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                                                         "label",
                                                         slot,
                                                         classes,
+                                                        mergedStyles,
                                                     ),
                                                 )}
                                             </div>
@@ -807,6 +861,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                                                 "text-sm font-medium text-foreground",
                                                 classes?.label,
                                             )}
+                                            style={mergedStyles.label}
                                         >
                                             <FieldTitle>
                                                 {label}{" "}
@@ -816,6 +871,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                                                             "text-destructive",
                                                             classes?.required,
                                                         )}
+                                                        style={mergedStyles.required}
                                                     >
                                                         *
                                                     </span>
@@ -836,6 +892,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                                                         "label",
                                                         slot,
                                                         classes,
+                                                        mergedStyles,
                                                     ),
                                                 )}
                                             </div>
@@ -852,6 +909,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                                             "label",
                                             slot,
                                             classes,
+                                            mergedStyles,
                                         ),
                                     ),
                                 )}
@@ -864,13 +922,14 @@ export function InputField<K extends VariantKey = VariantKey>(
                             .getSlotsFor("input", "above")
                             .render((slots) =>
                                 slots.map((slot) =>
-                                    renderHelperSlot("input", slot, classes),
+                                    renderHelperSlot("input", slot, classes, mergedStyles),
                                 ),
                             )}
 
-                        <FieldGroup className={stackedGroupClassName}>
+                        <FieldGroup className={stackedGroupClassName} style={mergedStyles.group}>
                             <FieldContent
                                 className={cn("w-full", classes?.content)}
+                                style={mergedStyles.content}
                             >
                                 <Variant
                                     {...(rest as any)}
@@ -885,6 +944,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                                     size={effectiveSize}
                                     density={effectiveDensity}
                                     className={mergedVariantClass}
+                                    style={{ ...mergedStyles.variant, ...(rest as any).style }}
                                 />
                             </FieldContent>
                         </FieldGroup>
@@ -894,7 +954,7 @@ export function InputField<K extends VariantKey = VariantKey>(
                             .getSlotsFor("input", "below")
                             .render((slots) =>
                                 slots.map((slot) =>
-                                    renderHelperSlot("input", slot, classes),
+                                    renderHelperSlot("input", slot, classes, mergedStyles),
                                 ),
                             )}
                     </Element>

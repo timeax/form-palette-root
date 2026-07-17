@@ -164,6 +164,11 @@ export interface SelectBaseProps extends Pick<
     className?: string;
 
     /**
+     * Inline styles for the variant.
+     */
+    style?: React.CSSProperties;
+
+    /**
      * Extra classes for the SelectTrigger.
      */
     triggerClassName?: string;
@@ -436,6 +441,7 @@ export const ShadcnSelectVariant = React.forwardRef<
         placeholder,
 
         className,
+        style,
         triggerClassName,
         contentClassName,
 
@@ -732,7 +738,9 @@ export const ShadcnSelectVariant = React.forwardRef<
                     ? "border-none shadow-none focus:ring-0 focus:outline-none"
                     : "",
                 triggerClassName,
+                !joinControls && className,
             )}
+            style={!joinControls ? style : undefined}
         >
             <div className="flex w-full items-center justify-between gap-2">
                 {/* Left side: leading icons + label */}
@@ -1029,7 +1037,6 @@ export const ShadcnSelectVariant = React.forwardRef<
                 className={cn(
                     "w-full",
                     disabled && "opacity-50 cursor-not-allowed",
-                    className,
                 )}
                 aria-disabled={disabled || undefined}
                 aria-invalid={error ? "true" : undefined}
@@ -1062,6 +1069,7 @@ export const ShadcnSelectVariant = React.forwardRef<
             >
                 <div
                     className={groupClassName}
+                    style={style}
                     data-slot="select-group"
                     data-disabled={disabled ? "true" : "false"}
                 >
@@ -1107,7 +1115,6 @@ export const ShadcnSelectVariant = React.forwardRef<
             className={cn(
                 "flex items-stretch w-full",
                 disabled && "opacity-50 cursor-not-allowed",
-                className,
             )}
             aria-disabled={disabled || undefined}
             aria-invalid={error ? "true" : undefined}

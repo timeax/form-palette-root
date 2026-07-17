@@ -1,7 +1,7 @@
 //@ts-nocheck
 
 import * as React from "react";
-import { Form, InputField } from "@timeax/form-palette";
+import { Form, InputField, ThemeProvider, FormPaletteTheme } from "@timeax/form-palette";
 import {
     Check,
     Globe2,
@@ -170,10 +170,88 @@ const PillToggle = React.forwardRef<HTMLButtonElement, PillToggleProps>(
     },
 );
 
+const themePresets: Record<string, FormPaletteTheme> = {
+    default: {},
+    ocean: {
+        classes: {
+            root: "border-blue-200/50 bg-blue-50/5 dark:bg-blue-950/5 p-4 rounded-2xl border",
+            label: "text-blue-600 dark:text-blue-400 font-semibold tracking-wide",
+            required: "text-blue-500"
+        },
+        styles: {
+            root: {
+                transition: "all 0.3s ease",
+            }
+        },
+        variants: {
+            text: { classes: { variant: "border-blue-300 dark:border-blue-800 bg-blue-50/20 dark:bg-blue-900/10 focus-within:border-blue-500 focus-within:ring-blue-500/20" } },
+            number: { classes: { variant: "border-blue-300 dark:border-blue-800 bg-blue-50/20 dark:bg-blue-900/10 focus-within:border-blue-500 focus-within:ring-blue-500/20" } },
+            select: { classes: { variant: "border-blue-300 dark:border-blue-800 bg-blue-50/20 dark:bg-blue-900/10 focus-within:border-blue-500 focus-within:ring-blue-500/20" } },
+            date: { classes: { variant: "border-blue-300 dark:border-blue-800 bg-blue-50/20 dark:bg-blue-900/10 focus-within:border-blue-500 focus-within:ring-blue-500/20" } },
+            color: { classes: { variant: "border-blue-300 dark:border-blue-800 bg-blue-50/20 dark:bg-blue-900/10 focus-within:border-blue-500 focus-within:ring-blue-500/20" } }
+        }
+    },
+    cyberpunk: {
+        classes: {
+            root: "border-purple-500/50 bg-purple-950/10 p-3 rounded-none border-2 shadow-[0_0_8px_rgba(168,85,247,0.15)]",
+            label: "text-purple-400 font-mono text-[11px] uppercase tracking-widest",
+            required: "text-pink-500"
+        },
+        styles: {
+            root: {
+                fontFamily: "monospace",
+            }
+        },
+        variants: {
+            text: { classes: { variant: "border-purple-500 bg-neutral-950/80 focus-within:border-pink-500 focus-within:ring-pink-500/20 text-green-400 font-mono rounded-none" } },
+            number: { classes: { variant: "border-purple-500 bg-neutral-950/80 focus-within:border-pink-500 focus-within:ring-pink-500/20 text-green-400 font-mono rounded-none" } },
+            select: { classes: { variant: "border-purple-500 bg-neutral-950/80 focus-within:border-pink-500 focus-within:ring-pink-500/20 text-green-400 font-mono rounded-none" } },
+            date: { classes: { variant: "border-purple-500 bg-neutral-950/80 focus-within:border-pink-500 focus-within:ring-pink-500/20 text-green-400 font-mono rounded-none" } },
+            color: { classes: { variant: "border-purple-500 bg-neutral-950/80 focus-within:border-pink-500 focus-within:ring-pink-500/20 text-green-400 font-mono rounded-none" } },
+            checkbox: { classes: { variant: "border-purple-500 text-purple-500 focus-within:ring-pink-500/20 rounded-none" } }
+        }
+    },
+    sunset: {
+        classes: {
+            root: "border-amber-500/30 bg-amber-50/5 dark:bg-amber-950/5 p-5 rounded-3xl border-2 border-dashed",
+            label: "text-amber-700 dark:text-amber-300 font-semibold",
+            required: "text-red-500"
+        },
+        variants: {
+            text: { classes: { variant: "border-amber-200 dark:border-amber-900 bg-amber-50/40 dark:bg-amber-950/20 focus-within:border-orange-500 focus-within:ring-orange-500/20 rounded-2xl" } },
+            number: { classes: { variant: "border-amber-200 dark:border-amber-900 bg-amber-50/40 dark:bg-amber-950/20 focus-within:border-orange-500 focus-within:ring-orange-500/20 rounded-2xl" } },
+            select: { classes: { variant: "border-amber-200 dark:border-amber-900 bg-amber-50/40 dark:bg-amber-950/20 focus-within:border-orange-500 focus-within:ring-orange-500/20 rounded-2xl" } },
+            date: { classes: { variant: "border-amber-200 dark:border-amber-900 bg-amber-50/40 dark:bg-amber-950/20 focus-within:border-orange-500 focus-within:ring-orange-500/20 rounded-2xl" } },
+            color: { classes: { variant: "border-amber-200 dark:border-amber-900 bg-amber-50/40 dark:bg-amber-950/20 focus-within:border-orange-500 focus-within:ring-orange-500/20 rounded-2xl" } }
+        }
+    },
+    chunky: {
+        classes: {
+            root: "p-6 bg-emerald-50/5 dark:bg-emerald-950/5 rounded-[28px] border-2 border-emerald-500/20 shadow-md",
+            label: "text-emerald-700 dark:text-emerald-300 font-extrabold text-base tracking-wide px-1",
+            required: "text-emerald-500"
+        },
+        styles: {
+            root: {
+                gap: "10px",
+            }
+        },
+        variants: {
+            text: { classes: { variant: "rounded-[20px] px-6 h-14 text-lg border-2 border-emerald-200 bg-emerald-50/10 focus-within:border-emerald-500 focus-within:ring-emerald-500/20 focus-within:ring-[4px]" } },
+            number: { classes: { variant: "rounded-[20px] px-6 h-14 text-lg border-2 border-emerald-200 bg-emerald-50/10 focus-within:border-emerald-500 focus-within:ring-emerald-500/20 focus-within:ring-[4px]" } },
+            select: { classes: { variant: "rounded-[20px] px-6 h-14 text-lg border-2 border-emerald-200 bg-emerald-50/10 focus-within:border-emerald-500 focus-within:ring-emerald-500/20 focus-within:ring-[4px]" } },
+            date: { classes: { variant: "rounded-[20px] px-6 h-14 text-lg border-2 border-emerald-200 bg-emerald-50/10 focus-within:border-emerald-500 focus-within:ring-emerald-500/20 focus-within:ring-[4px]" } },
+            color: { classes: { variant: "rounded-[20px] px-6 h-14 text-lg border-2 border-emerald-200 bg-emerald-50/10 focus-within:border-emerald-500 focus-within:ring-emerald-500/20 focus-within:ring-[4px]" } },
+            checkbox: { classes: { variant: "rounded-lg border-2 border-emerald-300 text-emerald-600 focus-within:ring-emerald-500/20 p-0.5" } }
+        }
+    }
+};
+
 export const App: React.FC = () => {
     const formRef = React.useRef<any>(null);
-    const [activeTab, setActiveTab] = React.useState<"dashboard" | "text" | "choice" | "advanced">("dashboard");
+    const [activeTab, setActiveTab] = React.useState<string>("dashboard");
     const [darkMode, setDarkMode] = React.useState<boolean>(false);
+    const [themePreset, setThemePreset] = React.useState<"default" | "ocean" | "cyberpunk" | "sunset" | "chunky">("default");
     const [tick, setTick] = React.useState<number>(0);
     const [outputLog, setOutputLog] = React.useState<string[]>([]);
     
@@ -246,6 +324,7 @@ export const App: React.FC = () => {
         { id: "text", label: "Text & Fields", icon: <Type className="size-4" /> },
         { id: "choice", label: "Choices & Inputs", icon: <ToggleLeft className="size-4" /> },
         { id: "advanced", label: "Advanced Controls", icon: <Layers className="size-4" /> },
+        { id: "theme", label: "Theme Showcase", icon: <Sparkles className="size-4 text-amber-500" /> },
     ] as const;
 
     return (
@@ -547,6 +626,95 @@ export const App: React.FC = () => {
                                         clearable
                                         virtualScroll
                                     />
+                                </div>
+                            )}
+
+                            {activeTab === "theme" && (
+                                <div className="space-y-6">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
+                                        <div>
+                                            <h4 className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Interactive Theme Preset</h4>
+                                            <p className="text-xs text-neutral-500">Choose a style theme and watch the inputs morph in real-time.</p>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            {(["default", "ocean", "cyberpunk", "sunset", "chunky"] as const).map(preset => (
+                                                <button
+                                                    key={preset}
+                                                    type="button"
+                                                    onClick={() => setThemePreset(preset)}
+                                                    className={cn(
+                                                        "text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer capitalize",
+                                                        themePreset === preset
+                                                            ? "bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 border-neutral-900 dark:border-white shadow-sm"
+                                                            : "bg-background text-neutral-500 border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800"
+                                                    )}
+                                                >
+                                                    {preset}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <ThemeProvider theme={themePresets[themePreset]}>
+                                        <div className="space-y-6">
+                                            <InputField
+                                                name="theme_text"
+                                                variant="text"
+                                                label="Global Username"
+                                                sublabel="Must be alpha-numeric"
+                                                description="Watch the labels, borders, background, and asterisk styling follow the active theme."
+                                                helpText="Your username will be public"
+                                                required
+                                            />
+
+                                            <InputField
+                                                name="theme_number"
+                                                variant="number"
+                                                label="Select Quantity"
+                                                description="Check padding, size adjustments, and layout changes."
+                                                showButtons
+                                                required
+                                            />
+
+                                            <InputField
+                                                name="theme_select"
+                                                variant="select"
+                                                label="Target Industry"
+                                                description="Dropdown selectors nested within custom styled wrapping boxes."
+                                                options={[
+                                                    { label: "Software Development", value: "dev" },
+                                                    { label: "Design & UX", value: "design" },
+                                                    { label: "Product Management", value: "pm" }
+                                                ]}
+                                                clearable
+                                            />
+
+                                            <InputField
+                                                name="theme_checkbox"
+                                                variant="checkbox"
+                                                label="GDPR Consent Checkbox"
+                                                description="Tick this box to agree to the themed terms and conditions."
+                                                single
+                                                required
+                                            />
+
+                                            <InputField
+                                                name="theme_date"
+                                                variant="date"
+                                                label="Select Target Date"
+                                                description="Check the Calendar styling overlay."
+                                                required
+                                            />
+
+                                            <InputField
+                                                name="theme_color"
+                                                variant="color"
+                                                label="Accenting Color"
+                                                description="Visual color swatch palette selector."
+                                                showPreview
+                                            />
+                                        </div>
+                                    </ThemeProvider>
                                 </div>
                             )}
 

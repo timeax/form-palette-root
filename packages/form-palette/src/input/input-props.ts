@@ -104,6 +104,11 @@ export interface InputFieldBaseProps<TValue = unknown> {
     inline?: boolean;
     fullWidth?: boolean;
 
+    /**
+     * Inline style overrides for specific elements of the field layout.
+     */
+    styles?: Partial<Record<keyof InputFieldClassNames, React.CSSProperties>>;
+
     // ─────────────────────────────────────────────
     // Validation hooks
     // ─────────────────────────────────────────────
