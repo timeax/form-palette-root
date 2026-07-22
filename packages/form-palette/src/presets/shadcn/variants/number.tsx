@@ -30,6 +30,29 @@ export type ShadcnNumberVariantProps =
        * - 'stacked': vertical +/- stack on the right
        */
       buttonLayout?: "inline" | "stacked";
+
+      /**
+       * Extra classes applied to ALL step buttons (both increment and decrement).
+       *
+       * This is merged with each button's own base and layout classes.
+       * Use this to set colors, hover states, etc. uniformly across both buttons.
+       *
+       * Example:
+       *   buttonClassName="text-emerald-600 border-emerald-200 hover:bg-emerald-50/60"
+       */
+      buttonClassName?: string;
+
+      /**
+       * Extra classes applied only to the INCREMENT (+/↑) button.
+       * Merged on top of `buttonClassName`.
+       */
+      incrementButtonClassName?: string;
+
+      /**
+       * Extra classes applied only to the DECREMENT (-/↓) button.
+       * Merged on top of `buttonClassName`.
+       */
+      decrementButtonClassName?: string;
    };
 
 
@@ -40,6 +63,9 @@ export const ShadcnNumberVariant = React.forwardRef<
    const {
       showButtons,
       buttonLayout = "stacked",
+      buttonClassName,
+      incrementButtonClassName,
+      decrementButtonClassName,
       disabled, // Extract disabled to style buttons
       ...rest
    } = props;
@@ -116,7 +142,7 @@ export const ShadcnNumberVariant = React.forwardRef<
                tabIndex={-1} // Prevent tabbing to buttons
                disabled={disabled}
                onClick={(e) => handleStep(-1, e)}
-               className={cn(btnBase, "border-r border-input px-3")}
+               className={cn(btnBase, "border-r border-input px-3", buttonClassName, decrementButtonClassName)}
                aria-label="Decrease value"
             >
                <Minus className="h-4 w-4" />
@@ -129,7 +155,7 @@ export const ShadcnNumberVariant = React.forwardRef<
                tabIndex={-1}
                disabled={disabled}
                onClick={(e) => handleStep(1, e)}
-               className={cn(btnBase, "border-l border-input px-3")}
+               className={cn(btnBase, "border-l border-input px-3", buttonClassName, incrementButtonClassName)}
                aria-label="Increase value"
             >
                <Plus className="h-4 w-4" />
@@ -144,7 +170,7 @@ export const ShadcnNumberVariant = React.forwardRef<
                   tabIndex={-1}
                   disabled={disabled}
                   onClick={(e) => handleStep(1, e)}
-                  className={cn(btnBase, "h-1/2 px-2 border-b border-input")}
+                  className={cn(btnBase, "h-1/2 px-2 border-b border-input", buttonClassName, incrementButtonClassName)}
                   aria-label="Increase value"
                >
                   <ChevronUp className="h-3 w-3" />
@@ -154,7 +180,7 @@ export const ShadcnNumberVariant = React.forwardRef<
                   tabIndex={-1}
                   disabled={disabled}
                   onClick={(e) => handleStep(-1, e)}
-                  className={cn(btnBase, "h-1/2 px-2")}
+                  className={cn(btnBase, "h-1/2 px-2", buttonClassName, decrementButtonClassName)}
                   aria-label="Decrease value"
                >
                   <ChevronDown className="h-3 w-3" />

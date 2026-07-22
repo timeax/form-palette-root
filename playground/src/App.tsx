@@ -179,16 +179,35 @@ const themePresets: Record<string, FormPaletteTheme> = {
             required: "text-blue-500"
         },
         styles: {
-            root: {
-                transition: "all 0.3s ease",
-            }
+            root: { transition: "all 0.3s ease" }
         },
         variants: {
             text: { classes: { variant: "border-blue-300 dark:border-blue-800 bg-blue-50/20 dark:bg-blue-900/10 focus-within:border-blue-500 focus-within:ring-blue-500/20" } },
-            number: { classes: { variant: "border-blue-300 dark:border-blue-800 bg-blue-50/20 dark:bg-blue-900/10 focus-within:border-blue-500 focus-within:ring-blue-500/20" } },
-            select: { classes: { variant: "border-blue-300 dark:border-blue-800 bg-blue-50/20 dark:bg-blue-900/10 focus-within:border-blue-500 focus-within:ring-blue-500/20" } },
-            date: { classes: { variant: "border-blue-300 dark:border-blue-800 bg-blue-50/20 dark:bg-blue-900/10 focus-within:border-blue-500 focus-within:ring-blue-500/20" } },
-            color: { classes: { variant: "border-blue-300 dark:border-blue-800 bg-blue-50/20 dark:bg-blue-900/10 focus-within:border-blue-500 focus-within:ring-blue-500/20" } }
+            number: {
+                classes: { variant: "border-blue-300 dark:border-blue-800 bg-blue-50/20 dark:bg-blue-900/10 focus-within:border-blue-500 focus-within:ring-blue-500/20" },
+                defaultProps: { buttonClassName: "text-blue-500 border-blue-200 dark:border-blue-800 hover:bg-blue-50/50 dark:hover:bg-blue-900/30" } as any,
+            },
+            select: {
+                classes: { variant: "border-blue-300 dark:border-blue-800 bg-blue-50/20 dark:bg-blue-900/10 focus-within:border-blue-500 focus-within:ring-blue-500/20" },
+                defaultProps: { itemClassName: "data-[highlighted]:bg-blue-50 data-[highlighted]:text-blue-700 dark:data-[highlighted]:bg-blue-900/30 dark:data-[highlighted]:text-blue-300" } as any,
+            },
+            date: {
+                classes: { variant: "border-blue-300 dark:border-blue-800 bg-blue-50/20 dark:bg-blue-900/10 focus-within:border-blue-500 focus-within:ring-blue-500/20" },
+                defaultProps: {
+                    calendarPopoverClassName: "border border-blue-200 dark:border-blue-800 shadow-lg shadow-blue-100/50",
+                    calendarButtonClassName: "text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30",
+                    clearButtonClassName: "text-blue-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30",
+                } as any,
+            },
+            color: {
+                classes: { variant: "border-blue-300 dark:border-blue-800 bg-blue-50/20 dark:bg-blue-900/10 focus-within:border-blue-500 focus-within:ring-blue-500/20" },
+                defaultProps: { previewButtonClassName: "border-blue-200 dark:border-blue-800" } as any,
+            },
+            checkbox: {
+                defaultProps: {
+                    checkboxClassName: "border-2 border-blue-300 dark:border-blue-700 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500",
+                } as any,
+            },
         }
     },
     cyberpunk: {
@@ -197,18 +216,38 @@ const themePresets: Record<string, FormPaletteTheme> = {
             label: "text-purple-400 font-mono text-[11px] uppercase tracking-widest",
             required: "text-pink-500"
         },
-        styles: {
-            root: {
-                fontFamily: "monospace",
-            }
-        },
+        styles: { root: { fontFamily: "monospace" } },
         variants: {
             text: { classes: { variant: "border-purple-500 bg-neutral-950/80 focus-within:border-pink-500 focus-within:ring-pink-500/20 text-green-400 font-mono rounded-none" } },
-            number: { classes: { variant: "border-purple-500 bg-neutral-950/80 focus-within:border-pink-500 focus-within:ring-pink-500/20 text-green-400 font-mono rounded-none" } },
-            select: { classes: { variant: "border-purple-500 bg-neutral-950/80 focus-within:border-pink-500 focus-within:ring-pink-500/20 text-green-400 font-mono rounded-none" } },
-            date: { classes: { variant: "border-purple-500 bg-neutral-950/80 focus-within:border-pink-500 focus-within:ring-pink-500/20 text-green-400 font-mono rounded-none" } },
-            color: { classes: { variant: "border-purple-500 bg-neutral-950/80 focus-within:border-pink-500 focus-within:ring-pink-500/20 text-green-400 font-mono rounded-none" } },
-            checkbox: { classes: { variant: "border-purple-500 text-purple-500 focus-within:ring-pink-500/20 rounded-none" } }
+            number: {
+                classes: { variant: "border-purple-500 bg-neutral-950/80 focus-within:border-pink-500 focus-within:ring-pink-500/20 text-green-400 font-mono rounded-none" },
+                defaultProps: { buttonClassName: "text-purple-400 border-purple-500 hover:bg-purple-900/40 hover:text-pink-400" } as any,
+            },
+            select: {
+                classes: { variant: "border-purple-500 bg-neutral-950/80 focus-within:border-pink-500 focus-within:ring-pink-500/20 text-green-400 font-mono rounded-none" },
+                defaultProps: {
+                    contentClassName: "bg-neutral-950 border border-purple-500 rounded-none font-mono",
+                    itemClassName: "text-green-400 data-[highlighted]:bg-purple-900/50 data-[highlighted]:text-pink-400 rounded-none",
+                } as any,
+            },
+            date: {
+                classes: { variant: "border-purple-500 bg-neutral-950/80 focus-within:border-pink-500 focus-within:ring-pink-500/20 text-green-400 font-mono rounded-none" },
+                defaultProps: {
+                    calendarPopoverClassName: "border border-purple-500 bg-neutral-950 rounded-none shadow-[0_0_12px_rgba(168,85,247,0.3)]",
+                    calendarButtonClassName: "text-purple-400 hover:bg-purple-900/40 hover:text-pink-400",
+                    clearButtonClassName: "text-purple-400 hover:text-pink-400 hover:bg-purple-900/40",
+                } as any,
+            },
+            color: {
+                classes: { variant: "border-purple-500 bg-neutral-950/80 focus-within:border-pink-500 focus-within:ring-pink-500/20 text-green-400 font-mono rounded-none" },
+                defaultProps: { previewButtonClassName: "border-purple-500 rounded-none", previewSwatchClassName: "rounded-none" } as any,
+            },
+            checkbox: {
+                defaultProps: {
+                    checkboxClassName: "rounded-none border-2 border-purple-500 data-[state=checked]:bg-purple-600 data-[state=checked]:border-pink-500",
+                    labelClassName: "text-purple-300 font-mono",
+                } as any,
+            },
         }
     },
     sunset: {
@@ -219,10 +258,35 @@ const themePresets: Record<string, FormPaletteTheme> = {
         },
         variants: {
             text: { classes: { variant: "border-amber-200 dark:border-amber-900 bg-amber-50/40 dark:bg-amber-950/20 focus-within:border-orange-500 focus-within:ring-orange-500/20 rounded-2xl" } },
-            number: { classes: { variant: "border-amber-200 dark:border-amber-900 bg-amber-50/40 dark:bg-amber-950/20 focus-within:border-orange-500 focus-within:ring-orange-500/20 rounded-2xl" } },
-            select: { classes: { variant: "border-amber-200 dark:border-amber-900 bg-amber-50/40 dark:bg-amber-950/20 focus-within:border-orange-500 focus-within:ring-orange-500/20 rounded-2xl" } },
-            date: { classes: { variant: "border-amber-200 dark:border-amber-900 bg-amber-50/40 dark:bg-amber-950/20 focus-within:border-orange-500 focus-within:ring-orange-500/20 rounded-2xl" } },
-            color: { classes: { variant: "border-amber-200 dark:border-amber-900 bg-amber-50/40 dark:bg-amber-950/20 focus-within:border-orange-500 focus-within:ring-orange-500/20 rounded-2xl" } }
+            number: {
+                classes: { variant: "border-amber-200 dark:border-amber-900 bg-amber-50/40 dark:bg-amber-950/20 focus-within:border-orange-500 focus-within:ring-orange-500/20 rounded-2xl" },
+                defaultProps: { buttonClassName: "text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800 hover:bg-amber-50/60" } as any,
+            },
+            select: {
+                classes: { variant: "border-amber-200 dark:border-amber-900 bg-amber-50/40 dark:bg-amber-950/20 focus-within:border-orange-500 focus-within:ring-orange-500/20 rounded-2xl" },
+                defaultProps: {
+                    contentClassName: "rounded-2xl border border-amber-200 dark:border-amber-800",
+                    itemClassName: "rounded-xl data-[highlighted]:bg-amber-50 data-[highlighted]:text-amber-800 dark:data-[highlighted]:bg-amber-900/30",
+                } as any,
+            },
+            date: {
+                classes: { variant: "border-amber-200 dark:border-amber-900 bg-amber-50/40 dark:bg-amber-950/20 focus-within:border-orange-500 focus-within:ring-orange-500/20 rounded-2xl" },
+                defaultProps: {
+                    calendarPopoverClassName: "rounded-2xl border border-amber-200 dark:border-amber-800 shadow-lg shadow-amber-100/60",
+                    calendarButtonClassName: "text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/30 hover:text-amber-700",
+                    clearButtonClassName: "text-orange-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20",
+                } as any,
+            },
+            color: {
+                classes: { variant: "border-amber-200 dark:border-amber-900 bg-amber-50/40 dark:bg-amber-950/20 focus-within:border-orange-500 focus-within:ring-orange-500/20 rounded-2xl" },
+                defaultProps: { previewButtonClassName: "border-amber-200 dark:border-amber-800 rounded-xl", previewSwatchClassName: "rounded-lg" } as any,
+            },
+            checkbox: {
+                defaultProps: {
+                    checkboxClassName: "rounded-full border-2 border-amber-400 dark:border-amber-600 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500",
+                    labelClassName: "text-amber-800 dark:text-amber-200",
+                } as any,
+            },
         }
     },
     chunky: {
@@ -231,18 +295,52 @@ const themePresets: Record<string, FormPaletteTheme> = {
             label: "text-emerald-700 dark:text-emerald-300 font-extrabold text-base tracking-wide px-1",
             required: "text-emerald-500"
         },
-        styles: {
-            root: {
-                gap: "10px",
-            }
-        },
+        styles: { root: { gap: "10px" } },
         variants: {
-            text: { classes: { variant: "rounded-[20px] px-6 h-14 text-lg border-2 border-emerald-200 bg-emerald-50/10 focus-within:border-emerald-500 focus-within:ring-emerald-500/20 focus-within:ring-[4px]" } },
-            number: { classes: { variant: "rounded-[20px] px-6 h-14 text-lg border-2 border-emerald-200 bg-emerald-50/10 focus-within:border-emerald-500 focus-within:ring-emerald-500/20 focus-within:ring-[4px]" } },
-            select: { classes: { variant: "rounded-[20px] px-6 h-14 text-lg border-2 border-emerald-200 bg-emerald-50/10 focus-within:border-emerald-500 focus-within:ring-emerald-500/20 focus-within:ring-[4px]" } },
-            date: { classes: { variant: "rounded-[20px] px-6 h-14 text-lg border-2 border-emerald-200 bg-emerald-50/10 focus-within:border-emerald-500 focus-within:ring-emerald-500/20 focus-within:ring-[4px]" } },
-            color: { classes: { variant: "rounded-[20px] px-6 h-14 text-lg border-2 border-emerald-200 bg-emerald-50/10 focus-within:border-emerald-500 focus-within:ring-emerald-500/20 focus-within:ring-[4px]" } },
-            checkbox: { classes: { variant: "rounded-lg border-2 border-emerald-300 text-emerald-600 focus-within:ring-emerald-500/20 p-0.5" } }
+            text: {
+                // className targets <input> box; px/py are numeric additive offsets on top of size-derived base
+                classes: { variant: "rounded-[20px] border-2 border-emerald-200 bg-emerald-50/10 focus-within:border-emerald-500 focus-within:ring-emerald-500/20 focus-within:ring-[4px]" },
+                defaultProps: { px: 8, py: 8, size: "lg" } as any,
+            },
+            number: {
+                classes: { variant: "rounded-[20px] border-2 border-emerald-200 bg-emerald-50/10 focus-within:border-emerald-500 focus-within:ring-emerald-500/20 focus-within:ring-[4px]" },
+                defaultProps: {
+                    px: 8, py: 8, size: "lg",
+                    buttonClassName: "text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-50/60",
+                } as any,
+            },
+            select: {
+                classes: { variant: "rounded-[20px] border-2 border-emerald-200 bg-emerald-50/10 focus-within:border-emerald-500 focus-within:ring-emerald-500/20 focus-within:ring-[4px]" },
+                defaultProps: {
+                    size: "lg",
+                    contentClassName: "rounded-2xl border border-emerald-200 dark:border-emerald-800",
+                    itemClassName: "rounded-xl data-[highlighted]:bg-emerald-50 data-[highlighted]:text-emerald-800 dark:data-[highlighted]:bg-emerald-900/30",
+                } as any,
+            },
+            date: {
+                classes: { variant: "rounded-[20px] border-2 border-emerald-200 bg-emerald-50/10 focus-within:border-emerald-500 focus-within:ring-emerald-500/20 focus-within:ring-[4px]" },
+                defaultProps: {
+                    px: 8, py: 8, size: "lg",
+                    calendarPopoverClassName: "rounded-2xl border border-emerald-200 dark:border-emerald-800 shadow-lg shadow-emerald-100/60",
+                    calendarButtonClassName: "text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700",
+                    clearButtonClassName: "text-emerald-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20",
+                } as any,
+            },
+            color: {
+                classes: { variant: "rounded-[20px] border-2 border-emerald-200 bg-emerald-50/10 focus-within:border-emerald-500 focus-within:ring-emerald-500/20 focus-within:ring-[4px]" },
+                defaultProps: {
+                    px: 8, py: 8, size: "lg",
+                    previewButtonClassName: "border-emerald-200 dark:border-emerald-800 rounded-xl",
+                    previewSwatchClassName: "rounded-lg",
+                } as any,
+            },
+            checkbox: {
+                // No classes.variant — className maps to the outer group wrapper, not the tick box
+                defaultProps: {
+                    checkboxClassName: "border-2 border-emerald-400 dark:border-emerald-600 rounded-md h-5 w-5 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500",
+                    optionLabelClassName: "font-semibold",
+                } as any,
+            },
         }
     }
 };

@@ -258,6 +258,18 @@ export interface ShadcnCheckboxUiProps<TItem, TValue> {
     descriptionClassName?: string;
 
     /**
+     * Extra classes applied directly to the <Checkbox> tick-box element itself.
+     *
+     * Use this to style the actual checkbox indicator: border color, border radius,
+     * background, size, etc.
+     *
+     * Example:
+     *   checkboxClassName="border-2 border-emerald-400 rounded-md h-5 w-5
+     *     data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
+     */
+    checkboxClassName?: string;
+
+    /**
      * Single-mode inline label (if you want variant-level text).
      * Usually you'll rely on InputField's label instead.
      */
@@ -540,6 +552,7 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
         labelClassName,
         optionLabelClassName,
         descriptionClassName,
+        checkboxClassName,
 
         className, // alias for groupClassName
 
@@ -667,7 +680,7 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
                     tristate={effectiveTristate}
                     disabled={disabled}
                     onCheckedChange={handleSingleChange}
-                    className="mt-0.5"
+                    className={cn("mt-0.5", checkboxClassName)}
                 />
 
                 {(labelText || descriptionText) && (
@@ -921,7 +934,7 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
                                 effectiveTristate,
                             )
                         }
-                        className="mt-1"
+                        className={cn("mt-1", checkboxClassName)}
                     />
                 );
 

@@ -3,6 +3,7 @@ import { Calendar as CalendarIcon, X as XIcon } from "lucide-react";
 
 import type { VariantBaseProps, ChangeDetail } from "@/variants/shared";
 import type { ShadcnTextVariantProps } from "@/presets/shadcn/variants/text";
+import { cn } from "@/lib/utils";
 import { Input } from "@/presets/shadcn/ui/input";
 import { Popover, PopoverTrigger, PopoverContent } from "@/presets/shadcn/ui/popover";
 import { Calendar } from "@/presets/shadcn/ui/calendar";
@@ -131,6 +132,37 @@ export interface DateVariantProps {
     * - false for time-only kinds ("time", "hour", "monthYear", "year")
     */
    showCalendar?: boolean;
+
+   /**
+    * Extra classes applied to the <PopoverContent> element (the calendar dropdown container).
+    *
+    * Example:
+    *   calendarPopoverClassName="rounded-xl border border-emerald-200 shadow-xl"
+    */
+   calendarPopoverClassName?: string;
+
+   /**
+    * Extra classes applied to the <Calendar> component inside the popover.
+    *
+    * Use this to style the calendar grid, day cells, navigation, etc.
+    */
+   calendarClassName?: string;
+
+   /**
+    * Extra classes applied to the clear (X) button.
+    *
+    * Example:
+    *   clearButtonClassName="text-red-400 hover:text-red-600"
+    */
+   clearButtonClassName?: string;
+
+   /**
+    * Extra classes applied to the calendar icon toggle button.
+    *
+    * Example:
+    *   calendarButtonClassName="text-blue-500 hover:bg-blue-50"
+    */
+   calendarButtonClassName?: string;
 }
 
 /**
@@ -418,6 +450,10 @@ export const ShadcnDateVariant = React.forwardRef<
 
       //@ts-ignore text UI bits (size, density, className, icons, etc.)
       className,
+      calendarPopoverClassName,
+      calendarClassName,
+      clearButtonClassName,
+      calendarButtonClassName,
       ...restTextProps
    } = props;
 
@@ -695,7 +731,10 @@ export const ShadcnDateVariant = React.forwardRef<
             <button
                type="button"
                onClick={handleClear}
-               className="inline-flex h-6 w-6 items-center justify-center rounded-full text-xs text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+               className={cn(
+                  "inline-flex h-6 w-6 items-center justify-center rounded-full text-xs text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+                  clearButtonClassName,
+               )}
                aria-label="Clear date"
                data-slot="date-clear"
             >
@@ -707,7 +746,10 @@ export const ShadcnDateVariant = React.forwardRef<
             <button
                type="button"
                onClick={() => handleOpenChange(!currentOpen)}
-               className="inline-flex h-6 w-6 items-center justify-center rounded-full text-xs text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+               className={cn(
+                  "inline-flex h-6 w-6 items-center justify-center rounded-full text-xs text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+                  calendarButtonClassName,
+               )}
                aria-label="Open calendar"
                data-slot="date-toggle"
             >
@@ -754,7 +796,7 @@ export const ShadcnDateVariant = React.forwardRef<
          </PopoverTrigger>
          <PopoverContent
             align="start"
-            className="w-auto p-0"
+            className={cn("w-auto p-0", calendarPopoverClassName)}
             data-slot="date-popover"
          >
             <div className="flex flex-col gap-2 p-2">
@@ -768,6 +810,7 @@ export const ShadcnDateVariant = React.forwardRef<
                      fromDate={minDate}
                      toDate={maxDate}
                      initialFocus
+                     className={calendarClassName}
                   />
                )}
 

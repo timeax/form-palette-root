@@ -179,6 +179,16 @@ export interface SelectBaseProps extends Pick<
     contentClassName?: string;
 
     /**
+     * Extra classes applied to each <SelectItem> option row.
+     *
+     * Use this to style option hover, focus, padding, font, etc.
+     *
+     * Example:
+     *   itemClassName="data-[highlighted]:bg-emerald-50 data-[highlighted]:text-emerald-700"
+     */
+    itemClassName?: string;
+
+    /**
      * Custom renderer for each option row.
      */
     renderOption?: (ctx: {
@@ -444,6 +454,7 @@ export const ShadcnSelectVariant = React.forwardRef<
         style,
         triggerClassName,
         contentClassName,
+        itemClassName,
 
         renderOption,
         renderValue,
@@ -850,6 +861,7 @@ export const ShadcnSelectVariant = React.forwardRef<
                                     key={item.key}
                                     value={String(item.value)}
                                     disabled={item.disabled}
+                                    className={itemClassName}
                                 >
                                     <div className="flex items-start gap-2">
                                         {item.icon && (
@@ -938,6 +950,7 @@ export const ShadcnSelectVariant = React.forwardRef<
                                     key={item.key}
                                     value={String(item.value)}
                                     disabled={item.disabled}
+                                    className={itemClassName}
                                 >
                                     <div className="flex items-start gap-2">
                                         {item.icon && (
