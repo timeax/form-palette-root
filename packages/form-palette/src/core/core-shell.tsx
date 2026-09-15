@@ -98,7 +98,7 @@ export function CoreShell<
 
         const content = (
             <div
-                className={cn('flex flex-col', contentClassName)}
+                className={cn('flex flex-col min-w-0', contentClassName)}
                 style={gap !== undefined ? { gap } : undefined}
             >
                 {children}

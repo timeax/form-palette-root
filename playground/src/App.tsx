@@ -64,6 +64,12 @@ const largeSelectOptions = Array.from({ length: 2000 }, (_, i) => ({
     description: `This is the description for option number ${i + 1}`,
 }));
 
+const longOptions = [
+    { value: "coinmarketcap", label: "CoinMarketCap Post Likes [Max: 50K] [Start Time: 0 - 1 Hr] [Refund: No] [Type: Real Accounts] [Speed: 10K/Day] [Refill: 30 Days Guaranteed] [Quality: Ultra High Quality Accounts with Profiling]" },
+    { value: "coingecko", label: "CoinGecko Search Clicks [Max: 10K] [Start Time: 0 - 2 Hr] [Refund: Yes] [Source: Global Users] [Stability: High] [Notes: Updates every 24 hours relative to API updates]" },
+    { value: "etherscan", label: "Etherscan Address Watch Alerts [Max: 100K] [Start Time: Immediate] [Refund: No] [Delivery: Automated Webhook Dispatch] [Encryption: SHA-256 Secured Logs]" }
+];
+
 const regionOptions: TreeSelectOption[] = [
     {
         label: "Africa",
@@ -480,8 +486,8 @@ export const App: React.FC = () => {
                 </aside>
 
                 {/* 2. Active Preview Canvas */}
-                <main className="flex flex-col gap-6">
-                    <div className="bg-white dark:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800/60 rounded-3xl p-6 shadow-sm flex-1 flex flex-col">
+                <main className="flex flex-col gap-6 min-w-0">
+                    <div className="bg-white dark:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800/60 rounded-3xl p-6 shadow-sm flex-1 flex flex-col min-w-0">
                         
                         <Form 
                             formRef={formRef} 
@@ -723,6 +729,16 @@ export const App: React.FC = () => {
                                         searchable
                                         clearable
                                         virtualScroll
+                                    />
+
+                                    <InputField
+                                        name="overflow_select"
+                                        variant="select"
+                                        label="Select Overflow/Truncation Demo"
+                                        description="Demonstrates text truncation (ellipsis) and proper layout constraints for very long option labels."
+                                        options={longOptions}
+                                        searchable
+                                        clearable
                                     />
                                 </div>
                             )}

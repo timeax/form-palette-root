@@ -5,6 +5,7 @@ import * as React from "react";
 import { useCore } from "@/core/hooks/use-core";
 import { ErrorStrip } from "@/core/errors/error-strip";
 import type { CoreContext, Dict } from "@/schema/core";
+import { cn } from "@/lib/utils";
 
 export interface CoreRootProps
     extends React.FormHTMLAttributes<HTMLFormElement> {
@@ -64,7 +65,7 @@ export function CoreRoot(props: CoreRootProps) {
     const { onSubmit: _ignored, ...passThrough } = rest;
 
     return (
-        <form onSubmit={handleSubmit} {...passThrough}>
+        <form onSubmit={handleSubmit} className={cn("w-full min-w-0", rest.className)} {...passThrough}>
             {!noErrorStrip && <ErrorStrip className={'mb-2'} form={form} />}
             {children}
         </form>

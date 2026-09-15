@@ -626,7 +626,7 @@ export const ShadcnSelectVariant = React.forwardRef<
             placeholder,
         })
     ) : selectedItem ? (
-        <span className="truncate flex items-center gap-2">
+        <span className="min-w-0 flex items-center gap-2">
             {selectedItem.icon && (
                 <span className="shrink-0">{selectedItem.icon}</span>
             )}
@@ -753,7 +753,7 @@ export const ShadcnSelectVariant = React.forwardRef<
             )}
             style={!joinControls ? style : undefined}
         >
-            <div className="flex w-full items-center justify-between gap-2">
+            <div className="flex w-full min-w-0 items-center justify-between gap-2">
                 {/* Left side: leading icons + label */}
                 <div className="flex min-w-0 items-center gap-2">
                     {hasLeadingIcons && (
@@ -1048,7 +1048,7 @@ export const ShadcnSelectVariant = React.forwardRef<
             <div
                 data-slot="select-field"
                 className={cn(
-                    "w-full",
+                    "w-full min-w-0",
                     disabled && "opacity-50 cursor-not-allowed",
                 )}
                 aria-disabled={disabled || undefined}
