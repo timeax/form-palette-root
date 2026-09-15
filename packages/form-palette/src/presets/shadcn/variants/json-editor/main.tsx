@@ -255,11 +255,11 @@ function PrimitiveField(props: {
             readOnly={readOnly}
             {...(resolved.props ?? {})}
             value={val as any}
-            onValue={(next: any, detail?: ChangeDetail<any>) => {
+            onChange={(event: { value: any; detail?: ChangeDetail<any> }) => {
                 if (disabled || readOnly) return;
 
-                const nextRoot = setAtPath(root, path, next) as JsonObject;
-                onRoot(nextRoot, detail);
+                const nextRoot = setAtPath(root, path, event.value) as JsonObject;
+                onRoot(nextRoot, event.detail);
 
                 callbacks?.onEdit?.(nextRoot, metaForPath("edit", route, path));
             }}
