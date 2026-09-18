@@ -43,7 +43,8 @@
             "types": "./dist/extra.d.ts",
             "import": "./dist/extra.mjs",
             "require": "./dist/extra.cjs"
-        }
+        },
+       "./styles.css": "./dist/styles.css"
     },
     "sideEffects": false,
     "scripts": {
