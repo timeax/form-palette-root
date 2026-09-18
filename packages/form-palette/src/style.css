@@ -1,0 +1,17 @@
+@import "@toast-ui/editor/dist/toastui-editor.css";
+@import "@toast-ui/editor/dist/theme/toastui-editor-dark.css";
+
+:root {
+   --surface-input: #ffffff69;
+   --surface-input-foreground: #18181b;
+}
+
+.dark {
+   --surface-input: #18181b;
+   --surface-input-foreground: #fafafa;
+}
+
+@theme inline {
+   --color-surface-input: var(--surface-input);
+   --color-surface-input-foreground: var(--surface-input-foreground);
+}

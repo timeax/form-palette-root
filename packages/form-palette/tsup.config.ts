@@ -15,6 +15,7 @@ export default defineConfig({
     target: "es2019",
     treeshake: true,
     splitting: false,
+    onSuccess: "node scripts/copy-styles.mjs",
     platform: "browser",
     external: [
         "react",
