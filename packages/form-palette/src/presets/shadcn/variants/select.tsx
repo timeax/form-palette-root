@@ -639,7 +639,7 @@ export const ShadcnSelectVariant = React.forwardRef<
     );
 
     const baseBoxClasses = cn(
-        "border-input w-full min-w-0 rounded-md border bg-transparent shadow-xs",
+        "border-input w-full min-w-0 rounded-md border bg-surfaces-input shadow-xs",
         "transition-[color,box-shadow] outline-none",
         "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
         "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
