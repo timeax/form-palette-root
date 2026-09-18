@@ -2,8 +2,6 @@
 
 import * as React from "react";
 import Editor from "@toast-ui/editor";
-import "@toast-ui/editor/dist/toastui-editor.css";
-import "@toast-ui/editor/dist/theme/toastui-editor-dark.css";
 import { cn } from "@/lib/utils";
 import type { ChangeDetail, VariantBaseProps, } from "@/variants/shared";
 
