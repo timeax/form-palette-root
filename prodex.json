@@ -1,49 +1,51 @@
 {
-    "version": 3.1,
+    "version": 5,
     "$schema": "https://raw.githubusercontent.com/emxhive/prodex/main/schema/prodex.schema.json",
     "output": {
         "dir": "prodex",
         "versioned": true,
-        "prefix": "combined",
         "format": "md"
     },
-    "entry": {
-        "files": [],
-        "ui": {
-            "roots": ["app", "routes", "resources/js/**"],
-            "scanDepth": 2,
-            "priority": ["**/routes/web.php", "**/app.*"]
-        }
+    "exclude": [
+        "node_modules/**",
+        "@shadcn/**",
+        "**/components/ui/**"
+    ],
+    "aliases": {
+        "@": "./packages/form-palette/src",
+        "@inertiajs": ".scaffold",
+        "@toast-ui": "packages/form-palette/src/presets/shadcn-variants"
     },
-    "resolve": {
-        "include": ["**/*.d.ts"],
-        "aliases": {
-            "@": "./packages/form-palette/src",
-            "@inertiajs": ".scaffold",
-            "@toast-ui": "packages/form-palette/src/presets/shadcn-variants"
-        },
-        "exclude": ["node_modules/**", "@shadcn/**", "**/components/ui/**"],
-        "depth": 10,
-        "limit": 200
-    },
-    "shortcuts": {
+    "depth": 10,
+    "maxFiles": 200,
+    "scopes": {
         "core": {
-            "include": ["./packages/form-palette/src/core/**"]
+            "include": [
+                "./packages/form-palette/src/core/**"
+            ]
         },
         "core-provider": {
-            "files": ["packages/form-palette/src/index.ts"],
-            "include": ["./packages/form-palette/src/adapters/**"],
-            "exclude": ["./packages/form-palette/src/presets/**"]
+            "entry": [
+                "packages/form-palette/src/index.ts"
+            ],
+            "include": [
+                "./packages/form-palette/src/adapters/**"
+            ],
+            "exclude": [
+                "./packages/form-palette/src/presets/**"
+            ]
         },
         "variants": {
-            "files": [],
+            "entry": [],
             "include": [
                 "./packages/form-palette/src/presets/shadcn-variants/**",
                 "./packages/form-palette/src/presets/ui/**"
             ]
         },
         "lister-and-json": {
-            "files": ["packages/form-palette/src/extra.ts"],
+            "entry": [
+                "packages/form-palette/src/extra.ts"
+            ],
             "exclude": [
                 "./packages/form-palette/src/core/**",
                 "./packages/form-palette/src/adapters/**",
@@ -51,11 +53,18 @@
                 "./packages/form-palette/src/presets/ui/**"
             ]
         },
-
         "lister": {
-            "files": [""],
-            "include": ["packages/form-palette/src/presets/lister/**"],
-            "prefix": "lister"
+            "name": "lister",
+            "entry": [],
+            "include": [
+                "packages/form-palette/src/presets/lister/**"
+            ]
+        },
+        "default": {
+            "include": [
+                "**/*.d.ts"
+            ],
+            "name": "combined"
         }
     }
 }

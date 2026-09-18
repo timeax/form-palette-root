@@ -280,7 +280,7 @@ function SectionCard(props: {
     const { title, tag, right, children } = props;
 
     return (
-        <div className="rounded-lg border bg-background/50">
+        <div className="rounded-md border bg-background/50">
             <div className="flex items-center justify-between gap-3 px-4 py-3">
                 <div className="min-w-0">
                     <div className="flex items-center gap-2 min-w-0">
@@ -383,7 +383,7 @@ export function JsonEditorMain(props: JsonEditorMainProps) {
                 className={cn("flex min-h-0 flex-col gap-4", contentClassName)}
             >
                 {!isPlainObject(pageValue) ? (
-                    <div className="rounded-lg border bg-muted/20 p-4 text-sm text-muted-foreground">
+                    <div className="rounded-md border bg-muted/20 p-4 text-sm text-muted-foreground">
                         This page is not an object.
                     </div>
                 ) : null}

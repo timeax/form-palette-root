@@ -594,7 +594,7 @@ export const ShadcnTreeSelectVariant = React.forwardRef<
         triggerPaddingClasses,
         hasControls && extendBoxToControls
             ? "border-none shadow-none focus:outline-none bg-transparent text-left"
-            : "border-input rounded-md border bg-background shadow-xs focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 aria-invalid:border-destructive"
+            : "border-input rounded-md border bg-surfaces-input shadow-xs focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 aria-invalid:border-destructive"
     );
 
     const DefaultTriggerButton = (
@@ -980,7 +980,7 @@ export const ShadcnTreeSelectVariant = React.forwardRef<
             >
                 <div
                     className={cn(
-                        "flex items-center w-full rounded-md border border-input bg-background shadow-xs focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 ring-offset-background",
+                        "flex items-center w-full rounded-md border border-input bg-surfaces-input shadow-xs focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 ring-offset-background",
                         isDisabled && "opacity-50 cursor-not-allowed bg-muted"
                     )}
                 >

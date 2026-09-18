@@ -390,7 +390,7 @@ export function ShadcnEditorVariant(props: ShadcnEditorVariantProps) {
             data-theme={effectiveTheme}
             data-editor-theme={effectiveTheme}
             className={cn(
-                "rounded-md border border-input bg-background overflow-hidden",
+                "rounded-md border border-input bg-surfaces-input overflow-hidden",
                 effectiveReadOnly && "opacity-60 pointer-events-none",
                 className
             )}

@@ -234,6 +234,13 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
         opts.filters,
     );
 
+    const queryRef = React.useRef(query);
+    const filtersRef = React.useRef(filters);
+    const searchTargetRef =
+        React.useRef<ListerSearchTarget | undefined>(
+            searchTarget,
+        );
+
     // ✅ NEW: runtime inflight (per hook instance)
     const inflight = React.useMemo(
         () => createInFlight(debounceMs),
@@ -295,7 +302,8 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
     const selectedCacheRef = React.useRef<Map<DataKey, TItem>>(new Map());
 
     // avoid effect double-fetch
-    const didMountRef = React.useRef(false);
+    const didSearchMountRef = React.useRef(false);
+    const didFilterMountRef = React.useRef(false);
 
     // prevent mode switch immediate-fetch from also triggering debounce fetch
     const skipNextModeEffectRef = React.useRef(false);
@@ -336,22 +344,40 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
             searchTarget?: ListerSearchTarget;
             search?: ListerSearchPayload;
         }): Promise<TItem[]> => {
-            if (!enabled) return dataRef.current;
+            if (!enabled) {
+                return dataRef.current;
+            }
 
-            const q = override?.query ?? query;
-            const f = override?.filters ?? filters;
-            const t = override?.searchTarget ?? searchTarget;
+            const q =
+                override?.query ??
+                queryRef.current;
+
+            const f =
+                override?.filters ??
+                filtersRef.current;
+
+            const target =
+                override?.searchTarget ??
+                searchTargetRef.current;
 
             const requestId = createRequestId();
-            const inflightKey = inflightKeyRef.current as any;
-            const { signal } = inflight.begin(inflightKey, requestId);
+            const inflightKey =
+                inflightKeyRef.current as any;
+
+            const { signal } = inflight.begin(
+                inflightKey,
+                requestId,
+            );
 
             setLoading(true);
             setError(undefined);
 
             try {
-                const payload: ListerSearchPayload | undefined =
-                    override?.search ?? buildSearchPayloadFromTarget(t);
+                const payload:
+                    | ListerSearchPayload
+                    | undefined =
+                    override?.search ??
+                    buildSearchPayloadFromTarget(target);
 
                 const built =
                     opts.buildRequest?.({
@@ -360,14 +386,17 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
                         cursor: null,
                     }) ?? {};
 
-                // Compatibility: default query key is "search"
-                const baseParams = built.params ?? {
-                    ...(f ?? ({} as any)),
-                    search: q,
-                };
+                const baseParams =
+                    built.params ?? {
+                        ...(f ?? ({} as any)),
+                        search: q,
+                    };
 
                 const params = payload
-                    ? { ...baseParams, ...payload }
+                    ? {
+                        ...baseParams,
+                        ...payload,
+                    }
                     : baseParams;
 
                 const body = built.body ?? {};
@@ -375,60 +404,94 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
 
                 const resBody = await http({
                     endpoint: opts.endpoint,
-                    method: (opts.method ?? "GET") as any,
+                    method:
+                        (opts.method ?? "GET") as any,
                     params,
                     body,
                     headers,
                     signal,
                     requestId,
                 });
-                //---
+
                 setRes(resBody);
 
-                const list = extractArray<TItem>(resBody, opts.selector as any);
+                const list = extractArray<TItem>(
+                    resBody,
+                    opts.selector as any,
+                );
 
-                // ✅ last-request-wins
-                if (!inflight.isLatest(inflightKey, requestId)) return list;
+                /*
+                 * Another request became the latest one
+                 * while this request was running.
+                 */
+                if (
+                    !inflight.isLatest(
+                        inflightKey,
+                        requestId,
+                    )
+                ) {
+                    return list;
+                }
 
                 commitSelectedCache(list);
 
-                if (selectionMode !== "none" && selectionPrune === "missing") {
-                    const nextIds = new Set<DataKey>();
+                if (
+                    selectionMode !== "none" &&
+                    selectionPrune === "missing"
+                ) {
+                    const nextIds =
+                        new Set<DataKey>();
+
                     for (const item of list) {
-                        const k = getItemKey(item);
-                        if (k != null) nextIds.add(k);
+                        const key = getItemKey(item);
+
+                        if (key != null) {
+                            nextIds.add(key);
+                        }
                     }
-                    setSelectedIdsArr((prev) =>
-                        prev.filter((x) => nextIds.has(x)),
+
+                    setSelectedIdsArr((previous) =>
+                        previous.filter((id) =>
+                            nextIds.has(id),
+                        ),
                     );
                 }
 
                 setData(list);
                 setLoading(false);
+
                 return list;
-            } catch (e: any) {
-                const inflightKey = inflightKeyRef.current as any;
+            } catch (error: any) {
+                const inflightKey =
+                    inflightKeyRef.current as any;
 
-                // ✅ last-request-wins
-                if (!inflight.isLatest(inflightKey, requestId)) {
+                /*
+                 * Ignore errors belonging to an obsolete
+                 * request.
+                 */
+                if (
+                    !inflight.isLatest(
+                        inflightKey,
+                        requestId,
+                    )
+                ) {
                     return dataRef.current;
                 }
 
-                if (isAbortError(e)) {
+                if (isAbortError(error)) {
                     setLoading(false);
+
                     return dataRef.current;
                 }
 
-                setError(e);
+                setError(error);
                 setLoading(false);
+
                 return dataRef.current;
             }
         },
         [
             enabled,
-            query,
-            filters,
-            searchTarget,
             inflight,
             http,
             opts.endpoint,
@@ -441,7 +504,7 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
             getItemKey,
         ],
     );
-
+    
     const refresh = React.useCallback(async () => {
         return fetchImpl();
     }, [fetchImpl]);
@@ -450,7 +513,10 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
         setData(newData);
     }, []);
 
-    const setQuery = React.useCallback((q: string) => _setQuery(q), []);
+    const setQuery = React.useCallback((q: string) => {
+        queryRef.current = q;
+        _setQuery(q);
+    }, []);
 
     /**
      * Mode switch semantics:
@@ -481,24 +547,41 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
         [fetchImpl, inflight],
     );
 
-    const setSearchTarget = React.useCallback((t: ListerSearchTarget) => {
-        _setSearchTarget(t);
-        // debounced fetch handled by effect
-    }, []);
-
-    const setFilters = React.useCallback(
-        (next: TFilters | undefined) => _setFilters(next),
+    const setSearchTarget = React.useCallback(
+        (target: ListerSearchTarget) => {
+            searchTargetRef.current = target;
+            _setSearchTarget(target);
+        },
         [],
     );
 
-    const patchFilters = React.useCallback((patch: Partial<TFilters>) => {
-        _setFilters((prev) => ({
-            ...(prev ?? ({} as any)),
-            ...(patch as any),
-        }));
-    }, []);
+    const setFilters = React.useCallback(
+        (next: TFilters | undefined) => {
+            filtersRef.current = next;
+            _setFilters(next);
+        },
+        [],
+    );
+    const patchFilters = React.useCallback(
+        (patch: Partial<TFilters>) => {
+            _setFilters((previous) => {
+                const next = {
+                    ...(previous ?? ({} as TFilters)),
+                    ...patch,
+                } as TFilters;
 
-    const clearFilters = React.useCallback(() => _setFilters(undefined), []);
+                filtersRef.current = next;
+
+                return next;
+            });
+        },
+        [],
+    );
+
+    const clearFilters = React.useCallback(() => {
+        filtersRef.current = undefined;
+        _setFilters(undefined);
+    }, []);
 
     const fetchOnMount = opts.fetchOnMount ?? !opts.initial;
 
@@ -515,12 +598,17 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
     React.useEffect(() => {
         if (!enabled) return;
 
-        if (!didMountRef.current) {
-            didMountRef.current = true;
+        if (!didSearchMountRef.current) {
+            didSearchMountRef.current = true;
             return;
         }
 
-        if (searchMode !== "remote" && searchMode !== "hybrid") return;
+        if (
+            searchMode !== "remote" &&
+            searchMode !== "hybrid"
+        ) {
+            return;
+        }
 
         if (skipNextModeEffectRef.current) {
             skipNextModeEffectRef.current = false;
@@ -529,16 +617,25 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
 
         const key = inflightKeyRef.current as any;
 
-        // ✅ runtime debounce scheduler
-        inflight.schedule(key, createRequestId(), () => {
-            void fetchImpl();
-        });
+        inflight.schedule(
+            key,
+            createRequestId(),
+            () => {
+                void fetchImpl();
+            },
+        );
 
         return () => {
-            // cancel pending debounce only (and abort any in-flight)
             inflight.abort(key);
         };
-    }, [enabled, fetchImpl, inflight, query, searchMode, searchTarget]);
+    }, [
+        enabled,
+        fetchImpl,
+        inflight,
+        query,
+        searchMode,
+        searchTarget,
+    ]);
 
     /**
      * Filter changes:
@@ -548,12 +645,27 @@ export function useData<TItem = any, TFilters = Record<string, any>>(
     React.useEffect(() => {
         if (!enabled) return;
         if (opts.autoFetchOnFilterChange === false) return;
-        if (!didMountRef.current) return;
 
-        if (searchMode !== "remote" && searchMode !== "hybrid") return;
+        if (!didFilterMountRef.current) {
+            didFilterMountRef.current = true;
+            return;
+        }
+
+        if (
+            searchMode !== "remote" &&
+            searchMode !== "hybrid"
+        ) {
+            return;
+        }
 
         void fetchImpl();
-    }, [enabled, fetchImpl, filters, opts.autoFetchOnFilterChange, searchMode]);
+    }, [
+        enabled,
+        fetchImpl,
+        filters,
+        opts.autoFetchOnFilterChange,
+        searchMode,
+    ]);
 
     /**
      * Visible list (local/hybrid):

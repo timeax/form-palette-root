@@ -993,7 +993,7 @@ export const ShadcnFileVariant = React.forwardRef<
                     onDragLeave={() => setDragOver(false)}
                     onDrop={onDrop}
                     className={cn(
-                        "group relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed text-center transition-all duration-200",
+                        "group relative flex cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed text-center transition-all duration-200",
                         den.dropPad,
                         den.dropGap,
                         dragOver
@@ -1365,7 +1365,7 @@ export const ShadcnFileVariant = React.forwardRef<
                             <div
                                 key={item.id}
                                 className={cn(
-                                    "group relative flex items-center gap-3 rounded-lg border bg-card pr-3 transition-all hover:bg-muted/30",
+                                    "group relative flex items-center gap-3 rounded-md border bg-card pr-3 transition-all hover:bg-muted/30",
                                     density === "compact"
                                         ? "p-2"
                                         : density === "loose"

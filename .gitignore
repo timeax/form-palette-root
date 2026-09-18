@@ -130,3 +130,5 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+prodex.v3_1.backup.json
+/prodex

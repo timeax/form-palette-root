@@ -174,7 +174,7 @@ export const SelectionSummary: React.FC<SelectionSummaryProps> = ({
                      </span>
                      <button
                         type="button"
-                        className="p-1 rounded hover:bg-muted"
+                        className="p-1 rounded-sm hover:bg-muted"
                         onClick={() => setMoreOpen(false)}
                      >
                         <X className="h-3 w-3" />
@@ -186,7 +186,7 @@ export const SelectionSummary: React.FC<SelectionSummaryProps> = ({
                         <div
                            key={item.key}
                            className={cn(
-                              "flex items-center justify-between gap-2 rounded px-2 py-1",
+                              "flex items-center justify-between gap-2 rounded-sm px-2 py-1",
                               "bg-muted/40"
                            )}
                         >
@@ -194,7 +194,7 @@ export const SelectionSummary: React.FC<SelectionSummaryProps> = ({
                            {onRemoveValue && (
                               <button
                                  type="button"
-                                 className="flex h-4 w-4 shrink-0 items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground"
+                                 className="flex h-4 w-4 shrink-0 items-center justify-center rounded-sm hover:bg-muted text-muted-foreground hover:text-foreground"
                                  onClick={(e) => {
                                     e.stopPropagation();
                                     handleRemove(item);

@@ -494,7 +494,7 @@ export const ShadcnChipsVariant = React.forwardRef<
 
    const baseChipClasses = textareaMode
       ? "inline-flex min-w-0 gap-1 items-center justify-between rounded-md bg-muted px-2 py-2 text-muted-foreground"
-      : "inline-flex max-w-full items-center gap-1 rounded bg-muted px-2 py-0.5 text-muted-foreground hover:bg-muted/80";
+      : "inline-flex max-w-full items-center gap-1 rounded-sm bg-muted px-2 py-0.5 text-muted-foreground hover:bg-muted/80";
 
    const baseRemoveClasses = textareaMode
       ? "cursor-pointer text-[16px] opacity-70 hover:opacity-100 mt-0.5"

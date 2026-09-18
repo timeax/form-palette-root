@@ -90,8 +90,7 @@ function Checkbox({
       checked={internalChecked}
       onCheckedChange={handleCheckedChange}
       className={cn(
-        "peer size-4 shrink-0 rounded-[4px] border border-input shadow-xs outline-none transition-shadow",
-        "dark:bg-input/30",
+        "peer size-4 shrink-0 rounded-sm border border-input bg-surfaces-input shadow-xs outline-none transition-shadow",
         // checked & indeterminate share "selected" styling
         "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary",
         "data-[state=indeterminate]:bg-primary data-[state=indeterminate]:text-primary-foreground data-[state=indeterminate]:border-primary",

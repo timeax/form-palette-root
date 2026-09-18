@@ -713,7 +713,7 @@ export const ShadcnKeyValueVariant = React.forwardRef<
             {/* Container mimicking an Input */}
             <div
                 className={cn(
-                    "relative flex w-full items-center rounded-md border border-input bg-background transition-all",
+                    "relative flex w-full items-center rounded-md border border-input bg-surfaces-input transition-all",
                     !isDisabled &&
                     "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background",
                     densityCls,

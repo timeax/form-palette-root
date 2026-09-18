@@ -1,6 +1,5 @@
-// src/presets/index.ts
-
-// Export UI primitives from the default Shadcn preset
+// Export UI primitives and shared styling from the default Shadcn preset
+export * from "./shadcn/field-styles";
 export * from "./shadcn/ui/button";
 export * from "./shadcn/ui/input";
 export * from "./shadcn/ui/textarea";

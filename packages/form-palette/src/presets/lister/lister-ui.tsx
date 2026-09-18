@@ -152,7 +152,7 @@ function ListerSessionPanel(props: {
 
     const panelClass = cn(
         "pointer-events-auto",
-        "bg-popover text-popover-foreground border shadow-md rounded-lg",
+        "bg-popover text-popover-foreground border shadow-md rounded-md",
         "w-105 max-w-[calc(100vw-16px)]",
         // ✅ IMPORTANT: give the panel a definite height
         "h-[min(560px,calc(100vh-100px))]",

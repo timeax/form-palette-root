@@ -282,7 +282,7 @@ export function SearchBar(props: {
                                                             } as any)
                                                         }
                                                         placeholder="e.g. email"
-                                                        className="h-9 w-full rounded-md border px-3 text-sm"
+                                                        className="h-9 w-full rounded-md border border-input bg-surfaces-input px-3 text-sm"
                                                     />
                                                 </div>
                                             ) : null}
@@ -314,7 +314,7 @@ export function SearchBar(props: {
                                                     </div>
                                                     <input
                                                         placeholder="type column + Enter"
-                                                        className="h-9 w-full rounded-md border px-3 text-sm"
+                                                        className="h-9 w-full rounded-md border border-input bg-surfaces-input px-3 text-sm"
                                                         onKeyDown={(e) => {
                                                             if (
                                                                 e.key !==
