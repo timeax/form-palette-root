@@ -358,14 +358,14 @@ export const App: React.FC = () => {
     const [themePreset, setThemePreset] = React.useState<"default" | "ocean" | "cyberpunk" | "sunset" | "chunky">("default");
     const [tick, setTick] = React.useState<number>(0);
     const [outputLog, setOutputLog] = React.useState<string[]>([]);
-    
+
     // Controlled states
     const [regions, setRegions] = React.useState<(string | number)[] | undefined>();
 
     const forceUpdate = () => setTick(t => t + 1);
 
     const logOutput = (msg: string) => {
-        setOutputLog(prev => [ `[${new Date().toLocaleTimeString()}] ${msg}`, ...prev.slice(0, 15) ]);
+        setOutputLog(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev.slice(0, 15)]);
     };
 
     const handleFormSubmit = (e: any) => {
@@ -433,7 +433,7 @@ export const App: React.FC = () => {
 
     return (
         <div className={cn("min-h-screen flex flex-col font-sans transition-colors duration-200", darkMode ? "dark bg-neutral-950 text-neutral-50" : "bg-neutral-50 text-neutral-900")}>
-            
+
             {/* Glossy Glassmorphism Header */}
             <header className="sticky top-0 z-40 border-b border-neutral-200/60 dark:border-neutral-800/60 bg-white/75 dark:bg-neutral-900/75 backdrop-blur-md px-6 py-4 flex items-center justify-between shadow-xs">
                 <div className="flex items-center gap-3">
@@ -464,7 +464,7 @@ export const App: React.FC = () => {
 
             {/* Main Layout Grid */}
             <div className="flex-1 max-w-8xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-[240px_1fr_400px] gap-6">
-                
+
                 {/* 1. Sidebar Navigation */}
                 <aside className="space-y-1">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-3 mb-2">Showcase Sections</p>
@@ -488,14 +488,14 @@ export const App: React.FC = () => {
                 {/* 2. Active Preview Canvas */}
                 <main className="flex flex-col gap-6 min-w-0">
                     <div className="bg-white dark:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800/60 rounded-3xl p-6 shadow-sm flex-1 flex flex-col min-w-0">
-                        
-                        <Form 
-                            formRef={formRef} 
+
+                        <Form
+                            formRef={formRef}
                             onSubmit={handleFormSubmit}
                             onChange={() => {
                                 forceUpdate();
                             }}
-                            wrapped 
+                            wrapped
                             gap={20}
                         >
                             {activeTab === "dashboard" && (
@@ -509,7 +509,7 @@ export const App: React.FC = () => {
                                             Explore registered layout variants, real-time validation feedback, schema binding, and state inspections. Toggle tabs on the left to configure fields.
                                         </p>
                                     </div>
-                                    
+
                                     <div className="grid grid-cols-2 gap-4 max-w-lg mx-auto w-full pt-4">
                                         <button
                                             type="button"
@@ -534,7 +534,7 @@ export const App: React.FC = () => {
                             {activeTab === "text" && (
                                 <div className="space-y-5">
                                     <h3 className="text-sm font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Text & Textarea Fields</h3>
-                                    
+
                                     <InputField
                                         name="email"
                                         label="Email Address"
@@ -543,7 +543,7 @@ export const App: React.FC = () => {
                                         placeholder="david@example.com"
                                         required
                                     />
-                                    
+
                                     <InputField
                                         name="phone"
                                         label="Phone Number"
@@ -554,7 +554,7 @@ export const App: React.FC = () => {
                                         placeholder="+23 48 012 345"
                                         autoClear
                                     />
-                                    
+
                                     <InputField
                                         name="password"
                                         label="Password"
@@ -740,6 +740,91 @@ export const App: React.FC = () => {
                                         searchable
                                         clearable
                                     />
+
+                                    <InputField
+                                        name="editor_basic"
+                                        label="Rich Markdown Editor"
+                                        description="Milkdown-powered Markdown editor with the default toolbar."
+                                        variant="editor"
+                                        placeholder="Write some markdown..."
+                                        height="280px"
+                                    />
+
+                                    <InputField
+                                        name="editor_prefilled"
+                                        label="Prefilled Editor"
+                                        description="Editor initialized with Markdown content."
+                                        variant="editor"
+                                        value={`# Welcome to Form Palette
+
+This editor is powered by **Milkdown**.
+
+- Markdown-first
+- Extensible
+- Theme-aware
+- Form integrated
+
+> You can edit this content directly.
+
+\`\`\`ts
+const message = "Hello from Milkdown";
+console.log(message);
+\`\`\`
+`}
+                                        height="320px"
+                                    />
+
+                                    <InputField
+                                        name="editor_minimal"
+                                        label="Minimal Editor"
+                                        description="Same editor without the toolbar."
+                                        variant="editor"
+                                        toolbar="none"
+                                        placeholder="Just start typing..."
+                                        height="220px"
+                                    />
+
+                                    <InputField
+                                        name="editor_custom_toolbar"
+                                        label="Custom Toolbar"
+                                        description="Example using a reduced custom toolbar configuration."
+                                        variant="editor"
+                                        toolbar={[
+                                            ["heading"],
+                                            ["bold", "italic", "strike"],
+                                            ["ul", "ol", "task"],
+                                            ["quote", "codeblock"],
+                                        ]}
+                                        placeholder="Try the custom toolbar..."
+                                        height="280px"
+                                    />
+
+                                    <InputField
+                                        name="editor_plain_paste"
+                                        label="Plain Text Paste"
+                                        description="Rich clipboard content is pasted as plain text only."
+                                        variant="editor"
+                                        pastePlainText
+                                        placeholder="Paste formatted content here..."
+                                        height="220px"
+                                    />
+
+                                    <InputField
+                                        name="editor_readonly"
+                                        label="Read-only Editor"
+                                        description="Demonstrates the disabled/read-only state."
+                                        variant="editor"
+                                        value={`## Read-only example
+
+This content can be displayed but not edited.
+
+- Useful for previews
+- Useful for locked content
+- Still rendered as rich Markdown
+`}
+                                        readOnly
+                                        height="220px"
+                                    />
                                 </div>
                             )}
 
@@ -851,7 +936,7 @@ export const App: React.FC = () => {
 
                 {/* 3. Live State Inspector Card */}
                 <aside className="flex flex-col gap-6">
-                    
+
                     {/* Console & Quick Actions */}
                     <div className="bg-white dark:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800/60 rounded-3xl p-5 shadow-sm space-y-4">
                         <div className="flex items-center justify-between">
@@ -887,8 +972,8 @@ export const App: React.FC = () => {
                         <div className="flex flex-wrap gap-2 pt-1">
                             <span className={cn(
                                 "text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1.5",
-                                isDirty 
-                                    ? "bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400" 
+                                isDirty
+                                    ? "bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400"
                                     : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400"
                             )}>
                                 <span className={cn("size-1.5 rounded-full", isDirty ? "bg-amber-500" : "bg-neutral-400")} />
