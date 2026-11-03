@@ -188,7 +188,6 @@ const inflightCache = new Map<string, Promise<string[]>>();
 async function fetchCollectionIcons(opts: {
     url: string;
     prefix: string;
-    signal?: AbortSignal;
 }): Promise<string[]> {
     const key = `${opts.url}::${opts.prefix}`;
 
@@ -201,7 +200,6 @@ async function fetchCollectionIcons(opts: {
     const run = (async () => {
         const res = await fetch(
             `${opts.url.replace(/\/+$/, "")}/collection?prefix=${encodeURIComponent(opts.prefix)}`,
-            { signal: opts.signal },
         );
 
         if (!res.ok) {
@@ -279,13 +277,17 @@ export function IconPickerPanel(props: IconPickerPanelProps) {
         return allowed.length ? allowed : base;
     }, [allowedGroupIds, groupsProp]);
 
-    const prefixes = React.useMemo(() => {
-        return uniq(groups.flatMap((g) => g.prefixes).filter(Boolean));
-    }, [groups]);
-
     const [selectedGroupId, setSelectedGroupId] = React.useState<
         string | undefined
     >(() => groups[0]?.id);
+    const selectedGroup = React.useMemo(
+        () => groups.find((g) => g.id === selectedGroupId),
+        [groups, selectedGroupId],
+    );
+    const prefixes = React.useMemo(
+        () => uniq(selectedGroup?.prefixes.filter(Boolean) ?? []),
+        [selectedGroup],
+    );
     const [searchQuery, setSearchQuery] = React.useState("");
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
@@ -301,41 +303,39 @@ export function IconPickerPanel(props: IconPickerPanelProps) {
     }, [groups]);
 
     React.useEffect(() => {
-        const controller = new AbortController();
         let mounted = true;
 
         const load = async () => {
             setLoading(true);
             setError(null);
+            setAllIcons([]);
 
             try {
-                const missing = prefixes.filter(
-                    (p) => !collectionCache.has(`${url}::${p}`),
-                );
-
-                await Promise.all(
-                    missing.map((prefix) =>
-                        fetchCollectionIcons({
-                            url,
-                            prefix,
-                            signal: controller.signal,
-                        }),
+                const results = await Promise.allSettled(
+                    prefixes.map((prefix) =>
+                        fetchCollectionIcons({ url, prefix }),
                     ),
                 );
 
-                const full: string[] = [];
-                for (const prefix of prefixes) {
-                    const names =
-                        collectionCache.get(`${url}::${prefix}`) ?? [];
-                    for (const n of names) full.push(`${prefix}:${n}`);
-                }
+                const full = results.flatMap((result, index) =>
+                    result.status === "fulfilled"
+                        ? result.value.map((name) => `${prefixes[index]}:${name}`)
+                        : [],
+                );
+                const failed = results.find(
+                    (result) => result.status === "rejected",
+                );
 
-                if (mounted) setAllIcons(full);
-            } catch (e: any) {
-                if (e?.name === "AbortError") return;
-                if (!mounted) return;
-                setError(e?.message ?? "Failed to load icons");
-                setAllIcons([]);
+                if (mounted) {
+                    setAllIcons(full);
+                    if (failed?.status === "rejected") {
+                        setError(
+                            failed.reason instanceof Error
+                                ? failed.reason.message
+                                : "Failed to load some icons",
+                        );
+                    }
+                }
             } finally {
                 if (mounted) setLoading(false);
             }
@@ -346,14 +346,8 @@ export function IconPickerPanel(props: IconPickerPanelProps) {
 
         return () => {
             mounted = false;
-            controller.abort();
         };
     }, [prefixes, url]);
-
-    const selectedGroup = React.useMemo(
-        () => groups.find((g) => g.id === selectedGroupId),
-        [groups, selectedGroupId],
-    );
 
     const selectedGroupPrefixes = React.useMemo(() => {
         if (!selectedGroup) return undefined; // means "no group filter"
