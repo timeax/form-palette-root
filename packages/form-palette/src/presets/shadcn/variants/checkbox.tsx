@@ -73,6 +73,8 @@ export interface CheckboxItem<TValue> {
         className?: string;
         color?: string;
         bgColor?: string;
+        variant?: "default" | "secondary" | "destructive" | "outline";
+        placement?: "right" | "inline";
         onClick?: React.MouseEventHandler<HTMLSpanElement>;
         raw: unknown;
     }>;
@@ -165,6 +167,8 @@ export interface ShadcnCheckboxUiProps<TItem, TValue> {
     optionTagClassName?: string | ((tag: unknown) => string);
     optionTagColor?: string | ((tag: unknown) => string);
     optionTagBgColor?: string | ((tag: unknown) => string);
+    optionTagPlacement?: "right" | "inline";
+    optionTagVariant?: "default" | "secondary" | "destructive" | "outline";
     optionTagOnClick?:
         | string
         | ((tag: unknown) => React.MouseEventHandler<HTMLSpanElement>);
@@ -364,6 +368,8 @@ function normalizeItems<TItem, TValue>(
     optionTagClassName?: string | ((tag: unknown) => string),
     optionTagColor?: string | ((tag: unknown) => string),
     optionTagBgColor?: string | ((tag: unknown) => string),
+    optionTagPlacement?: "right" | "inline",
+    optionTagVariant?: "default" | "secondary" | "destructive" | "outline",
     optionTagOnClick?:
         | string
         | ((tag: unknown) => React.MouseEventHandler<HTMLSpanElement>),
@@ -405,6 +411,8 @@ function normalizeItems<TItem, TValue>(
                     optionTagClassName,
                     optionTagColor,
                     optionTagBgColor,
+                    optionTagPlacement,
+                    optionTagVariant,
                     optionTagOnClick,
                 },
             );
@@ -531,6 +539,8 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
         optionTagClassName,
         optionTagColor,
         optionTagBgColor,
+        optionTagPlacement = "right",
+        optionTagVariant,
         optionTagOnClick,
         renderOption,
         single,
@@ -578,6 +588,8 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
                 optionTagClassName,
                 optionTagColor,
                 optionTagBgColor,
+                optionTagPlacement,
+                optionTagVariant,
                 optionTagOnClick,
             ),
         [
@@ -592,6 +604,8 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
             optionTagClassName,
             optionTagColor,
             optionTagBgColor,
+            optionTagPlacement,
+            optionTagVariant,
             optionTagOnClick,
         ],
     );
@@ -676,6 +690,7 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
             >
                 <Checkbox
                     id={id}
+                    name={name}
                     checked={internalState}
                     tristate={effectiveTristate}
                     disabled={disabled}
@@ -1012,8 +1027,8 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
                         >
                             {checkboxNode}
 
-                            <div className="flex min-w-0 flex-col">
-                                <span className="flex min-w-0 items-start gap-2">
+                            <div className="flex min-w-0 flex-1 flex-col">
+                                <span className="flex w-full min-w-0 items-center gap-2">
                                     <span
                                         className={cn(
                                             labelClassesBase,
@@ -1024,15 +1039,31 @@ const InnerShadcnCheckboxVariant = <TValue, TItem = CheckboxItem<TValue>>(
                                         {displayItem.label}
                                     </span>
                                     {!!displayItem.tags?.length && (
-                                        <span className="ml-auto flex shrink-0 flex-wrap gap-1">
+                                        <span
+                                            className={cn(
+                                                "flex shrink-0 items-center flex-wrap gap-1",
+                                                ((displayItem.tags[0]?.placement ?? optionTagPlacement) === "inline")
+                                                    ? ""
+                                                    : "ml-auto",
+                                            )}
+                                        >
                                             {displayItem.tags.map((tag, tagIndex) => (
                                                 <Badge
                                                     key={tagIndex}
-                                                    className={cn("text-xs", tag.className)}
+                                                    variant={
+                                                        tag.variant ??
+                                                        optionTagVariant ??
+                                                        "secondary"
+                                                    }
+                                                    className={cn(
+                                                        "text-xs font-normal",
+                                                        tag.className,
+                                                    )}
                                                     onClick={tag.onClick}
                                                     style={{
                                                         color: tag.color,
-                                                        backgroundColor: tag.bgColor,
+                                                        backgroundColor:
+                                                            tag.bgColor,
                                                     }}
                                                 >
                                                     {tag.icon && (

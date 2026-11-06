@@ -29,6 +29,8 @@ export interface ToggleOption {
         className?: string;
         color?: string;
         bgColor?: string;
+        variant?: "default" | "secondary" | "destructive" | "outline";
+        placement?: "right" | "inline";
         onClick?: React.MouseEventHandler<HTMLSpanElement>;
         raw?: unknown;
     }>;
@@ -123,6 +125,8 @@ export interface ShadcnToggleVariantProps
     optionTagClassName?: string;
     optionTagColor?: string;
     optionTagBgColor?: string;
+    optionTagPlacement?: "right" | "inline";
+    optionTagVariant?: "default" | "secondary" | "destructive" | "outline";
     optionTagOnClick?: string;
 
     /**
@@ -219,6 +223,8 @@ function normalizeOption(
         optionTagClassName,
         optionTagColor,
         optionTagBgColor,
+        optionTagPlacement = "right",
+        optionTagVariant,
         optionTagOnClick,
     }: {
         optionValue?: string;
@@ -233,6 +239,8 @@ function normalizeOption(
         optionTagClassName?: string;
         optionTagColor?: string;
         optionTagBgColor?: string;
+        optionTagPlacement?: "right" | "inline";
+        optionTagVariant?: "default" | "secondary" | "destructive" | "outline";
         optionTagOnClick?: string;
     },
     autoCap: boolean
@@ -318,6 +326,8 @@ function normalizeOption(
                               optionTagBgColor != null
                                   ? tag?.[optionTagBgColor]
                                   : tag?.bgColor,
+                          variant: tag?.variant ?? (optionTagVariant as any),
+                          placement: tag?.placement ?? (optionTagPlacement as any),
                           onClick:
                               optionTagOnClick != null
                                   ? tag?.[optionTagOnClick]
@@ -422,6 +432,8 @@ export const ShadcnToggleVariant = React.forwardRef<
         optionTagClassName,
         optionTagColor,
         optionTagBgColor,
+        optionTagPlacement = "right",
+        optionTagVariant,
         optionTagOnClick,
 
         renderOption,
@@ -454,6 +466,8 @@ export const ShadcnToggleVariant = React.forwardRef<
                         optionTagClassName,
                         optionTagColor,
                         optionTagBgColor,
+                        optionTagPlacement,
+                        optionTagVariant,
                         optionTagOnClick,
                     },
                     autoCap
@@ -473,6 +487,8 @@ export const ShadcnToggleVariant = React.forwardRef<
             optionTagClassName,
             optionTagColor,
             optionTagBgColor,
+            optionTagPlacement,
+            optionTagVariant,
             optionTagOnClick,
             autoCap,
         ]
@@ -575,34 +591,51 @@ export const ShadcnToggleVariant = React.forwardRef<
                     renderOption(opt, isSelected)
                 ) : (
                     <div className="flex flex-col items-start gap-1 truncate">
-                        <div className="flex w-full min-w-0 items-start gap-2">
-                            {opt.icon && (
-                                <span className="shrink-0">{opt.icon}</span>
-                            )}
-                            <span className="truncate">{opt.label}</span>
-                            {!!opt.tags?.length && (
-                                <span className="ml-auto flex shrink-0 flex-wrap gap-1">
-                                    {opt.tags.map((tag, tagIndex) => (
-                                        <Badge
-                                            key={tagIndex}
-                                            className={cn("text-xs", tag.className)}
-                                            onClick={tag.onClick}
-                                            style={{
-                                                color: tag.color,
-                                                backgroundColor: tag.bgColor,
-                                            }}
-                                        >
-                                            {tag.icon && (
-                                                <span className="shrink-0">
-                                                    {tag.icon}
-                                                </span>
+                        {(() => {
+                            const isInline =
+                                (opt.tags?.[0]?.placement ?? optionTagPlacement) === "inline";
+
+                            return (
+                                <div className="flex w-full min-w-0 items-center gap-2">
+                                    {opt.icon && (
+                                        <span className="shrink-0">{opt.icon}</span>
+                                    )}
+                                    <span className="truncate">{opt.label}</span>
+                                    {!!opt.tags?.length && (
+                                        <span
+                                            className={cn(
+                                                "flex shrink-0 items-center flex-wrap gap-1",
+                                                isInline ? "" : "ml-auto",
                                             )}
-                                            <span>{tag.label}</span>
-                                        </Badge>
-                                    ))}
-                                </span>
-                            )}
-                        </div>
+                                        >
+                                            {opt.tags.map((tag, tagIndex) => (
+                                                <Badge
+                                                    key={tagIndex}
+                                                    variant={
+                                                        tag.variant ??
+                                                        optionTagVariant ??
+                                                        "secondary"
+                                                    }
+                                                    className={cn("text-xs font-normal", tag.className)}
+                                                    onClick={tag.onClick}
+                                                    style={{
+                                                        color: tag.color,
+                                                        backgroundColor: tag.bgColor,
+                                                    }}
+                                                >
+                                                    {tag.icon && (
+                                                        <span className="shrink-0">
+                                                            {tag.icon}
+                                                        </span>
+                                                    )}
+                                                    <span>{tag.label}</span>
+                                                </Badge>
+                                            ))}
+                                        </span>
+                                    )}
+                                </div>
+                            );
+                        })()}
                     </div>
                 );
 

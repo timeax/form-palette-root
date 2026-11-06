@@ -29,12 +29,17 @@ export type OptionAccessorNoIndex<TItem, TValue> =
     | null
     | undefined;
 
+export type OptionTagPlacement = "right" | "inline";
+export type OptionTagVariant = "default" | "secondary" | "destructive" | "outline";
+
 export interface NormalizedOptionTag {
     label: React.ReactNode;
     icon?: React.ReactNode;
     className?: string;
     color?: string;
     bgColor?: string;
+    variant?: OptionTagVariant;
+    placement?: OptionTagPlacement;
     onClick?: React.MouseEventHandler<HTMLSpanElement>;
     raw: unknown;
 }
@@ -61,6 +66,12 @@ export interface GlobalNormalizeConfig<TItem, TValue = SelectPrimitive> {
     optionTagClassName?: OptionAccessorNoIndex<unknown, string>;
     optionTagColor?: OptionAccessorNoIndex<unknown, string>;
     optionTagBgColor?: OptionAccessorNoIndex<unknown, string>;
+    optionTagVariant?:
+        | OptionTagVariant
+        | OptionAccessorNoIndex<unknown, OptionTagVariant>;
+    optionTagPlacement?:
+        | OptionTagPlacement
+        | OptionAccessorNoIndex<TItem, OptionTagPlacement>;
     optionTagOnClick?: OptionAccessorNoIndex<
         unknown,
         React.MouseEventHandler<HTMLSpanElement>
@@ -157,6 +168,26 @@ function normalizeOptionTags<TItem, TValue>(
                 return null;
             }
 
+            const placement =
+                (tagObj?.placement as OptionTagPlacement | undefined) ??
+                (typeof config.optionTagPlacement === "function"
+                    ? (config.optionTagPlacement as Function)(raw)
+                    : typeof config.optionTagPlacement === "string" &&
+                      (config.optionTagPlacement === "right" ||
+                          config.optionTagPlacement === "inline")
+                    ? (config.optionTagPlacement as OptionTagPlacement)
+                    : typeof config.optionTagPlacement === "string"
+                    ? ((raw as any)?.[config.optionTagPlacement] as
+                          | OptionTagPlacement
+                          | undefined)
+                    : undefined);
+
+            const variant =
+                (resolveByAccessor(tag, config.optionTagVariant as any) as
+                    | OptionTagVariant
+                    | undefined) ??
+                (tagObj?.variant as OptionTagVariant | undefined);
+
             return {
                 label,
                 icon:
@@ -171,6 +202,8 @@ function normalizeOptionTags<TItem, TValue>(
                 bgColor:
                     resolveByAccessor(tag, config.optionTagBgColor) ??
                     (tagObj?.bgColor as string | undefined),
+                variant,
+                placement,
                 onClick:
                     resolveByAccessor(tag, config.optionTagOnClick) ??
                     (tagObj?.onClick as
@@ -358,6 +391,8 @@ export function globalNormalizeCheckBasedOptions<
         | "optionTagClassName"
         | "optionTagColor"
         | "optionTagBgColor"
+        | "optionTagVariant"
+        | "optionTagPlacement"
         | "optionTagOnClick"
     >,
 ) {
@@ -415,6 +450,8 @@ export function normalizeTree(
         | "optionTagClassName"
         | "optionTagColor"
         | "optionTagBgColor"
+        | "optionTagVariant"
+        | "optionTagPlacement"
         | "optionTagOnClick"
     >,
     level = 0,

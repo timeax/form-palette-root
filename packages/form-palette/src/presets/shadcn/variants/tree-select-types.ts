@@ -29,6 +29,8 @@ export type NormalizedTreeItem = {
         className?: string;
         color?: string;
         bgColor?: string;
+        variant?: "default" | "secondary" | "destructive" | "outline";
+        placement?: "right" | "inline";
         onClick?: React.MouseEventHandler<HTMLSpanElement>;
         raw: unknown;
     }>;

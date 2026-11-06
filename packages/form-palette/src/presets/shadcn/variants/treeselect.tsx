@@ -125,6 +125,8 @@ type TreeSelectBaseProps = Pick<
     optionTagClassName?: string | ((tag: unknown) => string);
     optionTagColor?: string | ((tag: unknown) => string);
     optionTagBgColor?: string | ((tag: unknown) => string);
+    optionTagPlacement?: "right" | "inline";
+    optionTagVariant?: "default" | "secondary" | "destructive" | "outline";
     optionTagOnClick?:
         | string
         | ((tag: unknown) => React.MouseEventHandler<HTMLSpanElement>);
@@ -267,6 +269,8 @@ export const ShadcnTreeSelectVariant = React.forwardRef<
         optionTagClassName,
         optionTagColor,
         optionTagBgColor,
+        optionTagPlacement = "right",
+        optionTagVariant,
         optionTagOnClick,
 
         searchable = true,
@@ -340,6 +344,8 @@ export const ShadcnTreeSelectVariant = React.forwardRef<
                 optionTagClassName,
                 optionTagColor,
                 optionTagBgColor,
+                optionTagPlacement,
+                optionTagVariant,
                 optionTagOnClick,
             }),
         [
@@ -357,6 +363,8 @@ export const ShadcnTreeSelectVariant = React.forwardRef<
             optionTagClassName,
             optionTagColor,
             optionTagBgColor,
+            optionTagPlacement,
+            optionTagVariant,
             optionTagOnClick,
         ]
     );
@@ -843,44 +851,61 @@ export const ShadcnTreeSelectVariant = React.forwardRef<
                                 )}
 
                                 {/* Label */}
-                                <div className="flex flex-col min-w-0 flex-1">
-                                    <span className="flex min-w-0 items-start gap-2">
-                                        <span className="truncate font-medium leading-none">
-                                            {item.labelNode}
-                                        </span>
-                                        {!!item.tags?.length && (
-                                            <span className="ml-auto flex shrink-0 flex-wrap gap-1">
-                                                {item.tags.map((tag, tagIndex) => (
-                                                    <Badge
-                                                        key={tagIndex}
+                                {(() => {
+                                    const isInline =
+                                        (item.tags?.[0]?.placement ?? optionTagPlacement) === "inline";
+
+                                    return (
+                                        <div className="flex flex-col min-w-0 flex-1">
+                                            <span className="flex w-full min-w-0 items-center gap-2">
+                                                <span className="truncate font-medium leading-none">
+                                                    {item.labelNode}
+                                                </span>
+                                                {!!item.tags?.length && (
+                                                    <span
                                                         className={cn(
-                                                            "text-xs",
-                                                            tag.className,
+                                                            "flex shrink-0 items-center flex-wrap gap-1",
+                                                            isInline ? "" : "ml-auto",
                                                         )}
-                                                        onClick={tag.onClick}
-                                                        style={{
-                                                            color: tag.color,
-                                                            backgroundColor:
-                                                                tag.bgColor,
-                                                        }}
                                                     >
-                                                        {tag.icon && (
-                                                            <span className="shrink-0">
-                                                                {tag.icon}
-                                                            </span>
-                                                        )}
-                                                        <span>{tag.label}</span>
-                                                    </Badge>
-                                                ))}
+                                                        {item.tags.map((tag, tagIndex) => (
+                                                            <Badge
+                                                                key={tagIndex}
+                                                                variant={
+                                                                    tag.variant ??
+                                                                    optionTagVariant ??
+                                                                    "secondary"
+                                                                }
+                                                                className={cn(
+                                                                    "text-xs font-normal",
+                                                                    tag.className,
+                                                                )}
+                                                                onClick={tag.onClick}
+                                                                style={{
+                                                                    color: tag.color,
+                                                                    backgroundColor:
+                                                                        tag.bgColor,
+                                                                }}
+                                                            >
+                                                                {tag.icon && (
+                                                                    <span className="shrink-0">
+                                                                        {tag.icon}
+                                                                    </span>
+                                                                )}
+                                                                <span>{tag.label}</span>
+                                                            </Badge>
+                                                        ))}
+                                                    </span>
+                                                )}
                                             </span>
-                                        )}
-                                    </span>
-                                    {item.description && (
-                                        <span className="text-xs text-muted-foreground truncate mt-0.5">
-                                            {item.description}
-                                        </span>
-                                    )}
-                                </div>
+                                            {item.description && (
+                                                <span className="text-xs text-muted-foreground truncate mt-0.5">
+                                                    {item.description}
+                                                </span>
+                                            )}
+                                        </div>
+                                    );
+                                })()}
 
                                 {/* Checkmark (Single Only) */}
                                 {!multiple && selected && (
