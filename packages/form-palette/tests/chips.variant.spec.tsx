@@ -6,6 +6,113 @@ import { fireEvent, render, screen } from "@testing-library/react";
 
 import { ShadcnChipsVariant } from "../src/presets/shadcn/variants/chips";
 
+describe("ShadcnChipsVariant keyboard separators", () => {
+   it.each([false, true])("commits one draft with punctuation (textareaMode=%s)", (textareaMode) => {
+      const onValue = vi.fn();
+      const onAddChips = vi.fn();
+      const comment = textareaMode ? "Looks good, ship it; thanks.\nSee you soon." : "Looks good, ship it; thanks.";
+      render(<ShadcnChipsVariant textareaMode={textareaMode} onValue={onValue} onAddChips={onAddChips} />);
+      const input = screen.getByRole<HTMLInputElement | HTMLTextAreaElement>("textbox");
+
+      fireEvent.change(input, { target: { value: `  ${comment}  ` } });
+      expect(fireEvent.keyDown(input, { key: "Enter", shiftKey: true })).toBe(true);
+      expect(fireEvent.keyDown(input, { key: "Tab" })).toBe(true);
+      fireEvent.blur(input);
+      expect(onValue).not.toHaveBeenCalled();
+
+      expect(fireEvent.keyDown(input, { key: "Enter" })).toBe(false);
+      expect(onValue).toHaveBeenCalledOnce();
+      expect(onValue).toHaveBeenCalledWith([comment], expect.objectContaining({
+         meta: { action: "add", added: [comment], chips: [comment] },
+      }));
+      expect(onAddChips).toHaveBeenCalledWith([comment], [comment]);
+      expect(input.value).toBe("");
+   });
+
+   it("matches alternatives case-insensitively with exact modifiers", () => {
+      const onValue = vi.fn();
+      const separators = ["CTRL+ENTER", "Shift+Meta+Enter", ",", ";"] as const;
+      render(<ShadcnChipsVariant textareaMode separators={separators} addOnTab onValue={onValue} />);
+      const input = screen.getByRole("textbox");
+
+      fireEvent.change(input, { target: { value: "draft" } });
+      expect(fireEvent.keyDown(input, { key: "Enter" })).toBe(true);
+      expect(fireEvent.keyDown(input, { key: "Enter", ctrlKey: true, shiftKey: true })).toBe(true);
+      expect(fireEvent.keyDown(input, { key: "Tab" })).toBe(true);
+      expect(onValue).not.toHaveBeenCalled();
+
+      for (const event of [
+         { key: "Enter", ctrlKey: true },
+         { key: "Enter", shiftKey: true, metaKey: true },
+         { key: "," },
+         { key: ";" },
+      ]) {
+         fireEvent.change(input, { target: { value: "draft" } });
+         expect(fireEvent.keyDown(input, event)).toBe(false);
+         expect(onValue).toHaveBeenLastCalledWith(["draft"], expect.anything());
+      }
+      expect(onValue).toHaveBeenCalledTimes(4);
+   });
+
+   it("accepts a single shortcut and leaves composition events alone", () => {
+      const onValue = vi.fn();
+      render(<ShadcnChipsVariant separators="Alt+Enter" value={["existing"]} onValue={onValue} />);
+      const input = screen.getByRole("textbox");
+
+      expect(fireEvent.keyDown(input, { key: "Backspace", isComposing: true })).toBe(true);
+      fireEvent.change(input, { target: { value: "new" } });
+      expect(fireEvent.keyDown(input, { key: "Enter", altKey: true, isComposing: true })).toBe(true);
+      expect(onValue).not.toHaveBeenCalled();
+      expect(fireEvent.keyDown(input, { key: "Enter", altKey: true })).toBe(false);
+      expect(onValue).toHaveBeenCalledWith(["existing", "new"], expect.anything());
+   });
+
+   it("lets callers disable keyboard commits and opt into committing on blur", () => {
+      const onValue = vi.fn();
+      render(<ShadcnChipsVariant separators={[]} addOnBlur addOnEnter addOnTab onValue={onValue} />);
+      const input = screen.getByRole("textbox");
+
+      fireEvent.change(input, { target: { value: "one, two; three" } });
+      expect(fireEvent.keyDown(input, { key: "Enter" })).toBe(true);
+      expect(fireEvent.keyDown(input, { key: "Tab" })).toBe(true);
+      expect(onValue).not.toHaveBeenCalled();
+      fireEvent.blur(input);
+      expect(onValue).toHaveBeenCalledWith(["one, two; three"], expect.anything());
+   });
+
+   it("honors legacy Enter and Tab options when separators is omitted", () => {
+      const onValue = vi.fn();
+      render(<ShadcnChipsVariant addOnEnter={false} addOnTab onValue={onValue} />);
+      const input = screen.getByRole("textbox");
+
+      expect(fireEvent.keyDown(input, { key: "Tab" })).toBe(true);
+      fireEvent.change(input, { target: { value: "draft" } });
+      expect(fireEvent.keyDown(input, { key: "Enter" })).toBe(true);
+      expect(onValue).not.toHaveBeenCalled();
+      expect(fireEvent.keyDown(input, { key: "Tab" })).toBe(false);
+      expect(onValue).toHaveBeenCalledWith(["draft"], expect.anything());
+   });
+
+   it("still respects duplicate and chip count limits", () => {
+      const onValue = vi.fn();
+      const { rerender } = render(<ShadcnChipsVariant value={["existing"]} onValue={onValue} />);
+      const input = screen.getByRole<HTMLInputElement>("textbox");
+
+      fireEvent.change(input, { target: { value: "existing" } });
+      fireEvent.keyDown(input, { key: "Enter" });
+      expect(onValue).not.toHaveBeenCalled();
+      expect(input.value).toBe("existing");
+
+      rerender(<ShadcnChipsVariant allowDuplicates maxChips={1} value={["existing"]} onValue={onValue} />);
+      fireEvent.keyDown(input, { key: "Enter" });
+      expect(onValue).not.toHaveBeenCalled();
+
+      rerender(<ShadcnChipsVariant allowDuplicates maxChips={2} value={["existing"]} onValue={onValue} />);
+      fireEvent.keyDown(input, { key: "Enter" });
+      expect(onValue).toHaveBeenCalledWith(["existing", "existing"], expect.anything());
+   });
+});
+
 describe("ShadcnChipsVariant runtime safety", () => {
    it("does not crash when value is a non-array shape", () => {
       const onValue = vi.fn();

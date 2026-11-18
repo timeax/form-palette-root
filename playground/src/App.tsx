@@ -578,11 +578,28 @@ export const App: React.FC = () => {
                                     <InputField
                                         name="tags"
                                         label="Skills/Tags"
-                                        description="Chip creator. Press Enter or comma to create chips."
+                                        description="Press Enter or comma to create a chip."
                                         variant="chips"
+                                        separators={["Enter", ","]}
                                         placeholder="React, Typescript, Tailwind"
                                         clearable
                                     />
+
+                                    <div className="max-w-sm">
+                                        <InputField
+                                            name="comment_chips"
+                                            label="Comments (Textarea Chips)"
+                                            description="Press Enter to add a comment or Shift+Enter for a new line."
+                                            variant="chips"
+                                            textareaMode
+                                            defaultValue={[
+                                                "Please review the responsive layout at a few different widths before the next release.",
+                                                "Looks good on mobile",
+                                                "Ready for review",
+                                            ]}
+                                            clearable
+                                        />
+                                    </div>
                                 </div>
                             )}
 

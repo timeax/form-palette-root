@@ -14,12 +14,9 @@ type ChipsValue = string[] | undefined;
 type BaseProps = VariantBaseProps<ChipsValue>;
 
 /**
- * How we split text into chips when committing.
+ * A key or shortcut that commits the current draft, or a list of alternatives.
  */
-export type ChipsSeparator =
-   | string
-   | RegExp
-   | (string | RegExp)[];
+export type ChipsSeparator = string | readonly string[];
 
 /**
  * Placement of chips relative to the entry control.
@@ -54,31 +51,27 @@ export interface ChipsVariantProps {
    placeholder?: string;
 
    /**
-    * Separators used to split raw input into chips.
-    *
-    * - string  → split on that string
-    * - RegExp  → split with regex
-    * - array   → try each in order
-    *
-    * Default: [",", ";"]
+    * Keys or shortcuts that commit the draft as one chip, e.g. "Enter" or
+    * ["Enter", "Ctrl+Enter", ","]. An empty array disables keyboard commits.
+    * Default: "Enter"
     */
    separators?: ChipsSeparator;
 
    /**
-    * When true, pressing Enter commits the current input as chips.
-    * Default: true
+    * @deprecated Use `separators` to configure Enter. Only applies when
+    * `separators` is omitted. Defaults to true.
     */
    addOnEnter?: boolean;
 
    /**
-    * When true, pressing Tab commits the current input as chips.
-    * Default: true
+    * @deprecated Include "Tab" in `separators`. Only applies when
+    * `separators` is omitted. Defaults to false.
     */
    addOnTab?: boolean;
 
    /**
-    * When true, blurring the field commits any remaining input as chips.
-    * Default: true
+    * When true, blurring the field commits the draft as one chip.
+    * Default: false
     */
    addOnBlur?: boolean;
 
@@ -209,32 +202,21 @@ export type ShadcnChipsVariantProps = TextUiProps &
 // Helpers
 // ─────────────────────────────────────────────
 
-function normalizeSeparators(sep?: ChipsSeparator): (string | RegExp)[] {
-   if (!sep) return [",", ";"];
-   if (Array.isArray(sep)) return sep;
-   return [sep];
-}
+function matchesSeparator(event: React.KeyboardEvent, separators: readonly string[]): boolean {
+   const key = event.key === " " ? "space" : event.key.toLowerCase();
+   const modifiers = [
+      event.altKey && "alt",
+      event.ctrlKey && "ctrl",
+      event.metaKey && "meta",
+      event.shiftKey && "shift",
+   ].filter(Boolean).join("+");
 
-function splitIntoTokens(raw: string, sep?: ChipsSeparator): string[] {
-   const separators = normalizeSeparators(sep);
-   let acc: string[] = [raw];
-
-   for (const s of separators) {
-      const next: string[] = [];
-      for (const chunk of acc) {
-         if (!chunk) continue;
-         if (typeof s === "string") {
-            next.push(...chunk.split(s));
-         } else {
-            next.push(...chunk.split(s));
-         }
-      }
-      acc = next;
-   }
-
-   return acc
-      .map((t) => t.trim())
-      .filter((t) => t.length > 0);
+   return separators.some((separator) => {
+      if (typeof separator !== "string") return false;
+      // Keep a trailing + as the key itself, as in "Ctrl++".
+      const parts = separator.trim().toLowerCase().split(/\s*\+\s*(?=.)/);
+      return parts.pop() === key && parts.sort().join("+") === modifiers;
+   });
 }
 
 // ─────────────────────────────────────────────
@@ -255,8 +237,8 @@ export const ShadcnChipsVariant = React.forwardRef<
       placeholder,
       separators,
       addOnEnter = true,
-      addOnTab = true,
-      addOnBlur = true,
+      addOnTab = false,
+      addOnBlur = false,
       allowDuplicates = false,
       maxChips,
       backspaceRemovesLast = true,
@@ -306,6 +288,15 @@ export const ShadcnChipsVariant = React.forwardRef<
    const hasChips = chips.length > 0;
 
    const [inputText, setInputText] = React.useState("");
+   const draft = inputText.trim();
+   const keyboardSeparators = React.useMemo(() => {
+      if (typeof separators === "string") return [separators];
+      if (separators !== undefined) return Array.isArray(separators) ? separators : [];
+
+      return [addOnEnter && "Enter", addOnTab && "Tab"].filter(
+         (key): key is string => typeof key === "string",
+      );
+   }, [separators, addOnEnter, addOnTab]);
 
    // ─────────────────────────────────────────────
    // Value emit
@@ -330,31 +321,17 @@ export const ShadcnChipsVariant = React.forwardRef<
       [onValue],
    );
 
-   const commitFromRaw = React.useCallback(
-      (raw: string) => {
-         const tokens = splitIntoTokens(raw, separators);
-         if (!tokens.length) return;
+   const commitDraft = React.useCallback(() => {
+      if (!draft) return;
+      if (!allowDuplicates && chips.includes(draft)) return;
+      if (typeof maxChips === "number" && chips.length >= maxChips) return;
 
-         let next = [...chips];
-         const added: string[] = [];
-
-         for (const token of tokens) {
-            if (!allowDuplicates && next.includes(token)) continue;
-            if (typeof maxChips === "number" && next.length >= maxChips) {
-               break;
-            }
-            next.push(token);
-            added.push(token);
-         }
-
-         if (!added.length) return;
-
-         emitChange(next, { action: "add", added });
-         onAddChips?.(added, next);
-         setInputText("");
-      },
-      [chips, separators, allowDuplicates, maxChips, emitChange, onAddChips],
-   );
+      const added = [draft];
+      const next = [...chips, draft];
+      emitChange(next, { action: "add", added });
+      onAddChips?.(added, next);
+      setInputText("");
+   }, [draft, chips, allowDuplicates, maxChips, emitChange, onAddChips]);
 
    const handleRemoveAt = React.useCallback(
       (index: number) => {
@@ -402,19 +379,14 @@ export const ShadcnChipsVariant = React.forwardRef<
             | React.KeyboardEvent<HTMLInputElement>
             | React.KeyboardEvent<HTMLTextAreaElement>,
       ) => {
+         if (event.nativeEvent.isComposing) return;
+
          const key = event.key;
-
-         if (key === "Enter" && addOnEnter) {
-            event.preventDefault();
-            if (inputText.trim().length) {
-               commitFromRaw(inputText);
+         if (matchesSeparator(event, keyboardSeparators)) {
+            if (draft || key === "Enter") {
+               event.preventDefault();
+               commitDraft();
             }
-            return;
-         }
-
-         if (key === "Tab" && addOnTab && inputText.trim().length) {
-            event.preventDefault();
-            commitFromRaw(inputText);
             return;
          }
 
@@ -432,11 +404,11 @@ export const ShadcnChipsVariant = React.forwardRef<
       },
       [
          inputText,
-         addOnEnter,
-         addOnTab,
+         draft,
+         keyboardSeparators,
          backspaceRemovesLast,
          chips.length,
-         commitFromRaw,
+         commitDraft,
          handleRemoveAt,
       ],
    );
@@ -446,8 +418,8 @@ export const ShadcnChipsVariant = React.forwardRef<
             | React.FocusEvent<HTMLInputElement>
             | React.FocusEvent<HTMLTextAreaElement>,
       ) => {
-         if (addOnBlur && inputText.trim().length) {
-            commitFromRaw(inputText);
+         if (addOnBlur) {
+            commitDraft();
          }
 
          // Forward to host onBlur if provided in restTextProps
@@ -457,7 +429,7 @@ export const ShadcnChipsVariant = React.forwardRef<
             | undefined;
          hostOnBlur?.(event);
       },
-      [addOnBlur, inputText, commitFromRaw, restTextProps],
+      [addOnBlur, commitDraft, restTextProps],
    );
 
    const effectivePlaceholder =
@@ -493,11 +465,11 @@ export const ShadcnChipsVariant = React.forwardRef<
          : undefined;
 
    const baseChipClasses = textareaMode
-      ? "inline-flex min-w-0 gap-1 items-center justify-between rounded-md bg-muted px-2 py-2 text-muted-foreground"
+      ? "inline-flex min-w-0 max-w-full gap-1 items-center justify-between rounded-md bg-muted px-2 py-2 text-muted-foreground"
       : "inline-flex max-w-full items-center gap-1 rounded-sm bg-muted px-2 py-0.5 text-muted-foreground hover:bg-muted/80";
 
    const baseRemoveClasses = textareaMode
-      ? "cursor-pointer text-[16px] opacity-70 hover:opacity-100 mt-0.5"
+      ? "shrink-0 cursor-pointer text-[16px] opacity-70 hover:opacity-100 mt-0.5"
       : "cursor-pointer text-[16px] opacity-70 hover:opacity-100";
 
    const chipNodes = visibleChips.map((chip, index) => {
@@ -658,7 +630,7 @@ export const ShadcnChipsVariant = React.forwardRef<
                <div
                   data-slot="chips-upper"
                   className={cn(
-                     "flex items-center gap-1 text-xs flex-wrap",
+                     "flex min-w-0 flex-wrap items-center gap-1 text-xs",
                      chipsClassName,
                   )}
                >
@@ -681,7 +653,7 @@ export const ShadcnChipsVariant = React.forwardRef<
             chipsBelowBlock = (
                <div
                   className={cn(
-                     "mt-2 flex items-center gap-2 text-xs",
+                     "mt-2 flex flex-wrap items-center gap-2 text-xs",
                      chipsClassName,
                   )}
                   data-slot="chips-list-below"

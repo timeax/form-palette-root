@@ -9,6 +9,9 @@ export default defineConfig({
     },
     outDir: "dist",
     format: ["esm", "cjs"],
+    outExtension({ format }) {
+        return { js: format === "cjs" ? ".cjs" : ".mjs" };
+    },
     dts: true,
     sourcemap: true,
     clean: true,

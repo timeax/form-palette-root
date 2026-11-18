@@ -1079,10 +1079,10 @@ export function SelectExample() {
 | Prop                   | Description                                                              |                               |
 |------------------------|--------------------------------------------------------------------------|-------------------------------|
 | `placeholder`          | Placeholder shown when there are no chips and input is empty.            |                               |
-| `separators`           | Separators used to split raw input into chips. Default: `[",", ";"]`.    |                               |
-| `addOnEnter`           | Commit chips on **Enter**. Default: `true`.                              |                               |
-| `addOnTab`             | Commit chips on **Tab**. Default: `true`.                                |                               |
-| `addOnBlur`            | Commit chips on **blur**. Default: `true`.                               |                               |
+| `separators`           | Key or list of shortcuts that commit a chip. Default: `"Enter"`. Use `[]` to disable keyboard commits. | |
+| `addOnEnter`           | Deprecated. Enables plain Enter when `separators` is omitted. Default: `true`. | |
+| `addOnTab`             | Deprecated. Enables plain Tab when `separators` is omitted. Default: `false`. | |
+| `addOnBlur`            | Commit the draft when the field loses focus. Default: `false`. | |
 | `allowDuplicates`      | When `false`, duplicate chips are ignored. Default: `false`.             |                               |
 | `maxChips`             | Maximum number of chips allowed (`undefined` â†’ unlimited).             |                               |
 | `backspaceRemovesLast` | Remove last chip on Backspace when input is empty. Default: `true`.      |                               |
@@ -1105,6 +1105,15 @@ export function SelectExample() {
 
 > **Also supports** most `ShadcnTextVariantProps` (size, density, icons, etc.).
 
+Each commit creates one chip from the draft, with surrounding whitespace trimmed.
+Punctuation in the draft stays in the chip, including pasted punctuation. Shortcuts are case-insensitive
+and require the specified modifiers exactly. Use `Ctrl`, `Shift`, `Alt`, and `Meta`
+with `+`. With the default Enter shortcut, Shift+Enter inserts a newline in textarea mode.
+
+In older versions, `separators` split text at commit time. A punctuation value such as
+`","` now commits the draft when you press that key. Regex separators have been
+removed. Add `"Tab"` to `separators` or enable `addOnBlur` to opt into those commits.
+
 **Sample usage**
 
 ```tsx
@@ -1113,7 +1122,7 @@ export function SelectExample() {
         label="Tags"
         variant="chips"
         placeholder="Add tagsâ€¦"
-        separators={[",", ";"]}
+        separators={["Enter", ",", ";"]}
         maxChips={10}
         clearable
 />
@@ -1124,8 +1133,7 @@ export function SelectExample() {
         variant="chips"
         textareaMode
         placement="below"
-        addOnEnter
-        addOnBlur
+        separators={["Ctrl+Enter", "Meta+Enter"]}
 />
 
 // Controlled usage: read/write chips from `e.value` (not e.target.value)
